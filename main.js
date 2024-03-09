@@ -37,9 +37,9 @@ const osmTile = new TileLayer({
 // WMS Layer
 const wmsLayer = new TileLayer({
   source: new TileWMS({
-    url: 'http://sg.geodatenzentrum.de/wms_dlm250_inspire',
+    url:  'https://www.umweltkarten-niedersachsen.de/arcgis/services/Hydro_wms/MapServer/WMSServer',
     params: {
-      'LAYERS': 'HY.Network.WatercourseLink',
+      'LAYERS': 'Gewässernetz_1._Ordnung29778',
       'FORMAT': 'image/png',
       'TRANSPARENT': true,
     },
