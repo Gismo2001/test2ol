@@ -1,4 +1,5 @@
 @import "node_modules/ol/ol.css";
+@import "node_modules/ol-ext/dist/ol-ext.css";
 
 html, body {
   margin: 0;
@@ -9,4 +10,9 @@ html, body {
   top: 0;
   bottom: 0;
   width: 100%;
+}
+
+.layerswitcher-toggler {
+  width: 10px;  /* Ändere die Breite nach Bedarf */
+  height: 10px; /* Ändere die Höhe nach Bedarf */
 }
