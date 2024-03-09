@@ -25,8 +25,24 @@ import { Attribution, defaults as defaultControls } from 'ol/control';
 import { Vector as VectorSource } from 'ol/source';
 import { Fill, Stroke, Style, Circle } from 'ol/style';
 import { bbox as loadingstrategyBbox } from 'ol/loadingstrategy';
+import Icon from 'ol/style/Icon';
 
-import { bwBruAndereStyle, bwBruNlwknStyle } from './myStyleJs'
+//import { bwBruAndereStyle, bwBruNlwknStyle } from './myStyleJs'
+
+const bwBruAndereStyle = new Style({
+  image: new Icon({
+    src: './data/bru_andere.svg',
+    scale: 0.9,
+  }),
+});
+
+const bwBruNlwknStyle = new Style({
+  image: new Icon({
+    src: './data/bru_nlwkn.svg',
+    scale: 0.9,
+  }),
+});
+
 
 const attribution = new Attribution({
   collapsible: true,
@@ -50,8 +66,8 @@ const osmTile = new TileLayer({
   source: new OSM({url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',  ], }),
 });
 
-// WMS Layer
-const wmsLayer = new TileLayer({
+// WMS gew 1. Ordnung
+const wmsHydErstOrdLayer = new TileLayer({
   source: new TileWMS({
     url:  'https://www.umweltkarten-niedersachsen.de/arcgis/services/Hydro_wms/MapServer/WMSServer',
     params: {
@@ -62,6 +78,19 @@ const wmsLayer = new TileLayer({
   }),
   opacity: 1,
 });
+// WMS UESG
+const  wmsUesgLayer = new TileLayer({
+  source: new TileWMS({
+    url:  'https://www.umweltkarten-niedersachsen.de/arcgis/services/HWSchutz_wms/MapServer/WMSServer',
+    params: {
+      'LAYERS': 'Überschwemmungsgebiete_Verordnungsfläechen_Niedersachsen11182',
+      'FORMAT': 'image/png',
+      'TRANSPARENT': true,
+    },
+  }),
+  opacity: .5,
+});
+
 /// Gew Layer
 const gewLayer = new Vector({
   source: new VectorSource({
@@ -104,7 +133,8 @@ const bwBruAndereLayer = new VectorLayer({
 });
 
 map.addLayer(osmTile)
-map.addLayer(wmsLayer);
+map.addLayer(wmsUesgLayer);
+map.addLayer(wmsHydErstOrdLayer);
 map.addLayer(gewLayer);
 map.addLayer(bwBruNlwknLayer);
 map.addLayer(bwBruAndereLayer);

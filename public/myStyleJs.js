@@ -1,5 +1,5 @@
-import Style from 'ol/style/Style';
-import Icon from 'ol/style/Icon';
+import Style from './ol/style/Style';
+import Icon from './ol/style/Icon';
 
 const bwBruAndereStyle = new Style({
     image: new Icon({
