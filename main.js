@@ -22,7 +22,8 @@ import { Vector as VectorLayer } from 'ol/layer';
 import { GeoJSON } from 'ol/format';
 import { fromLonLat } from 'ol/proj';
 import OSM from 'ol/source/OSM';
-import { Attribution, defaults as defaultControls } from 'ol/control';
+import { Attribution, defaults as defaultControls } from 'ol/control.js';
+import { ZoomToExtent } from 'ol/control.js';
 import { Vector as VectorSource } from 'ol/source';
 import { Fill, Stroke, Style, Circle } from 'ol/style';
 import { bbox as loadingstrategyBbox } from 'ol/loadingstrategy';
@@ -60,8 +61,8 @@ const mapView = new View({
 const map = new Map({
   target: 'map',
   view: mapView,
-  //controls: defaultControls().extend([]), // Falls erforderlich
-  controls: defaultControls({ attribution: false }).extend([attribution]),
+  controls: defaultControls().extend([ attribution, new ZoomToExtent({extent: [727361,  6839277, 858148, 6990951, ], }), ]),
+  
 });
 
 const switcher = new LayerSwitcher;
@@ -70,10 +71,9 @@ map.addControl(switcher)
 const osmTile = new TileLayer({
   title: 'osm',
   type: 'base',
-  source: new OSM({url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',  ], }),
+  source: new OSM({url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png', }),
 });
 
-;
 // WMS UESG
 const  wmsUesgLayer = new TileLayer({
   title: "ÜSG",
@@ -107,6 +107,7 @@ const  wmsNSGLayer = new TileLayer({
   opacity: .5,
 });
 
+
 const gnAtlas2023 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -117,6 +118,117 @@ const gnAtlas2023 = new TileLayer({
   opacity: 1,
   visible: true,
 });
+
+const gnAtlas2020 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "9", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2020",
+  opacity: 1,
+  visible: false,
+});
+
+const gnAtlas2017 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "8", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2017",
+  opacity: 1,
+  visible: false,
+});
+
+const gnAtlas2014 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "7", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2014",
+  opacity: 1,
+  visible: false,
+});
+
+const gnAtlas2012 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "6", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2012",
+  opacity: 1,
+  visible: false,
+});
+
+const gnAtlas2010 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "5", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2010",
+  opacity: 1,
+  visible: false,
+});
+
+const gnAtlas2009 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "4", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2009",
+  opacity: 1,
+  visible: false,
+});
+
+const gnAtlas2002 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "3", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2002",
+  opacity: 1,
+  visible: false,
+});
+
+const gnAtlas1970 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "2", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "1970",
+  opacity: 1,
+  visible: false,
+});
+
+const gnAtlas1957 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "1", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "1957",
+  opacity: 1,
+  visible: false,
+});
+
+const gnAtlas1937 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "0", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "1937",
+  opacity: 1,
+  visible: false,
+});
+
 
 
 /// Gew Layer
@@ -180,7 +292,7 @@ const GNAtlasGroup = new Group({
   visible: false,
   fold: true,
   fold: 'close',
-  layers: [ gnAtlas2023 ]
+  layers: [ gnAtlas2023, gnAtlas2020, gnAtlas2017, gnAtlas2014, gnAtlas2012, gnAtlas2010, gnAtlas2009, gnAtlas2002, gnAtlas1970, gnAtlas1957, gnAtlas1937]
 });
   
 const BwGroup = new Group({
