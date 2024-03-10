@@ -1,22 +1,9 @@
-/* var layer_HYNetworkWatercourseLink_0 = L.WMS.layer("http://sg.geodatenzentrum.de/wms_dlm250_inspire", "HY.Network.WatercourseLink", {
-  pane: 'pane_HYNetworkWatercourseLink_0',
-  format: 'image/png',
-  uppercase: true,
-  transparent: true,
-  continuousWorld : true,
-  tiled: true,
-  info_format: 'text/html',
-  opacity: 1,
-  identify: false,
-  attribution: '',
-}); */
-
 import './style.css';
 //import { bwBruAndereStyle, bwBruNlwknStyle } from './myStyleJs';
-
-import { Map, View } from 'ol';
-import TileLayer from 'ol/layer/Tile';
-import TileWMS from 'ol/source/TileWMS';
+import Map from 'ol/Map.js';
+import View from 'ol/View.js';
+import TileLayer from 'ol/layer/Tile.js';
+import TileWMS from 'ol/source/TileWMS.js';
 import { Vector } from 'ol/layer';
 import { Vector as VectorLayer } from 'ol/layer';
 import { GeoJSON } from 'ol/format';
@@ -34,6 +21,12 @@ import Icon from 'ol/style/Icon';
 import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
 import Group from 'ol/layer/Group';
 
+
+const attribution = new Attribution({
+  collapsible: true,
+});
+
+
 const bwBruAndereStyle = new Style({
   image: new Icon({
     src: './data/bru_andere.svg',  // Hier wird der Pfad relativ zur HTML-Datei angenommen
@@ -41,7 +34,6 @@ const bwBruAndereStyle = new Style({
     visible: false,
   }),
 });
-
 const bwBruNlwknStyle = new Style({
   image: new Icon({
     src: './data/bru_nlwkn.svg',  // Hier wird der Pfad relativ zur HTML-Datei angenommen
@@ -49,15 +41,10 @@ const bwBruNlwknStyle = new Style({
   }),
 });
 
-const attribution = new Attribution({
-  collapsible: true,
-});
-
 const mapView = new View({
   center: fromLonLat([7.35, 52.7]),
   zoom: 9,
 });
-
 const map = new Map({
   target: 'map',
   view: mapView,
@@ -65,8 +52,10 @@ const map = new Map({
   
 });
 
+
 const switcher = new LayerSwitcher;
 map.addControl(switcher)
+
 
 const osmTile = new TileLayer({
   title: 'osm',
@@ -74,7 +63,7 @@ const osmTile = new TileLayer({
   source: new OSM({url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png', }),
 });
 
-// WMS UESG
+
 const  wmsUesgLayer = new TileLayer({
   title: "ÜSG",
   name: "ÜSG",
@@ -84,14 +73,14 @@ const  wmsUesgLayer = new TileLayer({
       'LAYERS': 'Überschwemmungsgebiete_Verordnungsfläechen_Niedersachsen11182',
       'FORMAT': 'image/png',
       'TRANSPARENT': true,
+      'TILED': true,
     },
   }),
-  visible: false,
+  visible: true,
   opacity: .5,
-  
 });
 
-// WMS NSG
+
 const  wmsNSGLayer = new TileLayer({
   title: "NSG",
   name: "NSG",
@@ -101,12 +90,13 @@ const  wmsNSGLayer = new TileLayer({
       'LAYERS': 'Naturschutzgebiet',
       'FORMAT': 'image/png',
       'TRANSPARENT': true,
+      'TILED': true,
     },
   }),
-  visible: false,
+  visible: true,
   opacity: .5,
+  TILED: true
 });
-
 
 const gnAtlas2023 = new TileLayer({
   source: new TileWMS(({
@@ -118,7 +108,6 @@ const gnAtlas2023 = new TileLayer({
   opacity: 1,
   visible: true,
 });
-
 const gnAtlas2020 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -129,7 +118,6 @@ const gnAtlas2020 = new TileLayer({
   opacity: 1,
   visible: false,
 });
-
 const gnAtlas2017 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -140,7 +128,6 @@ const gnAtlas2017 = new TileLayer({
   opacity: 1,
   visible: false,
 });
-
 const gnAtlas2014 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -151,7 +138,6 @@ const gnAtlas2014 = new TileLayer({
   opacity: 1,
   visible: false,
 });
-
 const gnAtlas2012 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -162,7 +148,6 @@ const gnAtlas2012 = new TileLayer({
   opacity: 1,
   visible: false,
 });
-
 const gnAtlas2010 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -173,7 +158,6 @@ const gnAtlas2010 = new TileLayer({
   opacity: 1,
   visible: false,
 });
-
 const gnAtlas2009 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -184,7 +168,6 @@ const gnAtlas2009 = new TileLayer({
   opacity: 1,
   visible: false,
 });
-
 const gnAtlas2002 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -195,7 +178,6 @@ const gnAtlas2002 = new TileLayer({
   opacity: 1,
   visible: false,
 });
-
 const gnAtlas1970 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -206,7 +188,6 @@ const gnAtlas1970 = new TileLayer({
   opacity: 1,
   visible: false,
 });
-
 const gnAtlas1957 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -217,7 +198,6 @@ const gnAtlas1957 = new TileLayer({
   opacity: 1,
   visible: false,
 });
-
 const gnAtlas1937 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -231,7 +211,6 @@ const gnAtlas1937 = new TileLayer({
 
 
 
-/// Gew Layer
 const gewLayer = new Vector({
   source: new VectorSource({
     format: new GeoJSON(),
@@ -245,8 +224,6 @@ const gewLayer = new Vector({
     stroke: new Stroke({ color: 'blue', width: 2 }),
   }),
 });
-
-// Vektor-Layer mit dem neuen Stil
 const bwBruNlwknLayer = new VectorLayer({
   source: new VectorSource({
     format: new GeoJSON(),
@@ -258,8 +235,6 @@ const bwBruNlwknLayer = new VectorLayer({
   style: bwBruNlwknStyle, // Verwendung des neuen Stils
   visible: true,
 });
-
-// Vektor-Layer mit dem neuen Stil
 const bwBruAndereLayer = new VectorLayer({
   source: new VectorSource({
     format: new GeoJSON(),
@@ -271,6 +246,7 @@ const bwBruAndereLayer = new VectorLayer({
   style: bwBruAndereStyle, // Verwendung des neuen Stils
   visible: false,
 });
+
 
 const BaseGroup = new Group({
   title: "Base",
@@ -284,9 +260,9 @@ const wmsLayerGroup = new Group({
   visible: false,
   fold: true,
   fold: 'close',
-  layers: [wmsUesgLayer, wmsNSGLayer]
+  layers: [wmsUesgLayer, wmsNSGLayer ]
 });
-  
+
 const GNAtlasGroup = new Group({
   title: "GN-DOP's",
   visible: false,
@@ -294,7 +270,7 @@ const GNAtlasGroup = new Group({
   fold: 'close',
   layers: [ gnAtlas2023, gnAtlas2020, gnAtlas2017, gnAtlas2014, gnAtlas2012, gnAtlas2010, gnAtlas2009, gnAtlas2002, gnAtlas1970, gnAtlas1957, gnAtlas1937]
 });
-  
+
 const BwGroup = new Group({
   title: "Bauw.",
   fold: true,
@@ -310,3 +286,82 @@ map.addLayer(BwGroup);
 
 
 
+map.on('singleclick', function (evt) {
+  const viewResolution = /** @type {number} */ (mapView.getResolution());
+
+  // ÜSG Layer
+  const urlUesg = wmsUesgLayer.getSource().getFeatureInfoUrl(
+    evt.coordinate,
+    viewResolution,
+    'EPSG:3857',
+    {'INFO_FORMAT': 'text/html'},
+  );
+
+  if (urlUesg) {
+    fetch(urlUesg)
+      .then((response) => response.text())
+      .then((html) => {
+        if (html.trim() !== '') {
+          createAndShowInfoDiv(html, 'ÜSG Layer');
+        }
+      });
+  }
+
+  // NSG Layer
+  const urlNsg = wmsNSGLayer.getSource().getFeatureInfoUrl(
+    evt.coordinate,
+    viewResolution,
+    'EPSG:3857',
+    {'INFO_FORMAT': 'text/html'},
+  );
+
+  if (urlNsg) {
+    fetch(urlNsg)
+      .then((response) => response.text())
+      .then((html) => {
+        if (html.trim() !== '') {
+          createAndShowInfoDiv(html, 'NSG Layer');
+        }
+      });
+  }
+});
+
+function createAndShowInfoDiv(html, layerName) {
+  const existingInfoDiv = document.getElementById('info');
+  if (existingInfoDiv) {
+    // Lösche das vorhandene div-Element, wenn es bereits existiert
+    existingInfoDiv.remove();
+  }
+
+  const infoDiv = document.createElement('div');
+  infoDiv.id = 'info';
+  infoDiv.style.border = '1px solid black';
+  infoDiv.innerHTML = `<strong>${layerName}</strong><br>${html}`;
+
+  const closeIcon = document.createElement('span');
+  closeIcon.id = 'closeIcon';
+  closeIcon.innerHTML = '&times;';
+  closeIcon.style.position = 'absolute';
+  closeIcon.style.top = '5px';
+  closeIcon.style.right = '5px';
+  closeIcon.style.cursor = 'pointer';
+  closeIcon.style.fontSize = '20px';
+
+  closeIcon.addEventListener('click', function () {
+    infoDiv.style.display = 'none';
+  });
+
+  infoDiv.appendChild(closeIcon);
+
+  // Füge das Info-Element dem Dokument hinzu
+  document.body.appendChild(infoDiv);
+}
+
+map.on('pointermove', function (evt) {
+  if (evt.dragging) {
+    return;
+  }
+  const data = wmsUesgLayer.getData(evt.pixel);
+  const hit = data && data[3] > 0; // transparent pixels have zero for data[3]
+  map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+});

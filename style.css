@@ -5,6 +5,7 @@ html, body {
   margin: 0;
   height: 100%;
 }
+
 #map {
   position: absolute;
   top: 0;
@@ -12,7 +13,13 @@ html, body {
   width: 100%;
 }
 
-.layerswitcher-toggler {
-  width: 10px;  /* Ändere die Breite nach Bedarf */
-  height: 10px; /* Ändere die Höhe nach Bedarf */
+
+#info {
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  background-color: white; /* Ändere die Hintergrundfarbe auf weiß */
+  /* opacity: 1; */ /* Entferne oder setze die Opazität auf 1 */
+  z-index: 1000;
+  /* Weitere CSS-Stile nach Bedarf hinzufügen */
 }
