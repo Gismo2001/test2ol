@@ -39,6 +39,10 @@ body{
   left: 5px;
   z-index: 1000;
 }
+.custom-controls button {
+  font-size: 1em; /* Ändern Sie die Schriftgröße der Schaltflächen */
+}
+
 @media only screen and (max-width: 600px) {
   #map {
     width: 100%; /* Vollständige Breite des Bildschirms auf Smartphones */
