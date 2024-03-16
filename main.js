@@ -3,19 +3,20 @@ import * as LoadingStrategy from 'ol/loadingstrategy';
 import * as proj from 'ol/proj';
 import Feature from 'ol/Feature';
 
-import { Circle as CircleGeom } from 'ol/geom';
+//import { Circle as CircleGeom } from 'ol/geom';
 
 import Draw from 'ol/interaction/Draw.js';
 import Map from 'ol/Map.js';
 import Overlay from 'ol/Overlay.js';
 import View from 'ol/View.js';
 import {Circle as CircleStyle, Fill, Stroke,Style} from 'ol/style.js';
-import {LineString, Polygon, Point} from 'ol/geom.js';
+import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
 import {Attribution, defaults as defaultControls, Control} from 'ol/control.js';
+import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
 
 import { 
   getStyleForArtEin,
@@ -35,6 +36,32 @@ import {
   km500scalStyle,
   machWasMitFSK
 } from './extStyle';
+
+const arrowStyle = new Style({
+  stroke: new Stroke({
+      color: 'black',
+      width: 4,
+  }),
+});
+
+const endpointStyle = new Style({
+  geometry: function (feature) {
+      const coordinates = feature.getGeometry().getCoordinates();
+      return new Point(coordinates[coordinates.length - 1]);
+  },
+  image: new Circle({
+      radius: 6,
+      fill: new Fill({ color: 'red' }),
+      stroke: new Stroke({
+          color: 'black',
+          width: 2,
+      }),
+  }),
+});
+
+const combinedStyle = [arrowStyle, endpointStyle];
+
+
 
 window.searchAddress = function searchAddress() {
   var address = document.getElementById('addressInput').value;
@@ -65,8 +92,6 @@ window.searchAddress = function searchAddress() {
       removeTempMarker();
     });
 }
-
-
 // Event-Listener für die Enter-Taste hinzufügen
 var inputElement = document.getElementById('addressInput');
 inputElement.addEventListener('keydown', function (event) {
@@ -74,7 +99,6 @@ inputElement.addEventListener('keydown', function (event) {
     searchAddress();
   }
 });
-
 /// Marker für Positionsmarkierung zur Adresssuche
 function addTempMarker(coordinates) {
   var tempMarkerLayer = new VectorLayer({
@@ -95,9 +119,6 @@ function addTempMarker(coordinates) {
   // Fügen Sie den temporären Marker-Layer zur Karte hinzu
   map.addLayer(tempMarkerLayer);
 }
-
-
-
 function removeTempMarker() {
   // Durchlaufen Sie alle Karten-Layer und entfernen Sie alle, die als temporärer Marker markiert sind
   alert('xxmarker ');
@@ -107,7 +128,6 @@ function removeTempMarker() {
     }
   });
 }
-
 const attribution = new Attribution({
   collapsible: false,
 });
@@ -128,23 +148,36 @@ let helpTooltipElement;
 let helpTooltip;
 let measureTooltipElement;
 let measureTooltip;
-
 const mapView = new View({
   center: proj.fromLonLat([7.35, 52.7]),
   zoom: 9
 });
-  
 const map = new Map({
   target: "map",
   view: mapView,
   //controls: defaults().extent([attribution, additionalControl]),
 });
-// Vektor-Layer erstellen
+
+
 const exp_bw_sle_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_sle.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox}),
-  style: sleStyle, // Stil zuweisen
+  title: 'sle',
+  name: 'sle',
+  style: sleStyle,
+  opacity: 0.5,
+  visible: true
 });
-// exp_gew_info
+
+const exp_bw_que_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_que.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox}),
+  title: 'que',
+  name: 'que',
+  style: queStyle,
+  opacity: 0.5,
+  visible: true
+});
+
+
 const gehoelz_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Gehölz(Plan)', // Titel für den Layer-Switcher
@@ -161,7 +194,29 @@ const exp_allgm_fsk_layer = new VectorLayer({
   minResolution: 0,
   maxResolution: 4
 })
- const osmTile = new TileLayer({
+
+const exp_gew_info_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_info.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }), 
+  title: 'Gew, Info', 
+  name: 'gew_info',
+  style: combinedStyle,
+  visible: true
+});
+
+const exp_gew_umn_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_umn.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'U-Maßnahmen', 
+  name: 'gew_umn',
+  style: getStyleForArtUmn,
+  visible: true
+});
+
+const layerSwitcher = new LayerSwitcher({ });
+map.addControl(layerSwitcher);
+
+
+
+const osmTile = new TileLayer({
   title: "osm",
   type: 'base',
   source: new OSM({
@@ -370,5 +425,6 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
 });
 
 map.addLayer(osmTile);
-map.addLayer(exp_bw_sle_layer, gehoelz_vecLayer, exp_allgm_fsk_layer);
+map.addLayer( exp_bw_que_layer );
+map.addLayer( exp_bw_sle_layer );
 map.addLayer(vector); 
