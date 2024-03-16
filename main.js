@@ -55,26 +55,21 @@ let helpTooltip;
 let measureTooltipElement;
 let measureTooltip;
 
-
-
 const mapView = new View({
   center: proj.fromLonLat([7.35, 52.7]),
   zoom: 9
-  });
+});
   
 const map = new Map({
   target: "map",
   view: mapView,
   //controls: defaults().extent([attribution, additionalControl]),
 });
-
-
 // Vektor-Layer erstellen
 const exp_bw_sle_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_sle.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox}),
   style: sleStyle, // Stil zuweisen
 });
-
 // exp_gew_info
 const gehoelz_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
@@ -83,7 +78,6 @@ const gehoelz_vecLayer = new VectorLayer({
   style: gehoelz_vecStyle,
   visible: true
 });
-
 const exp_allgm_fsk_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_allgm_fsk.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'fsk',
@@ -93,7 +87,6 @@ const exp_allgm_fsk_layer = new VectorLayer({
   minResolution: 0,
   maxResolution: 4
 })
- 
 const osmTile = new TileLayer({
   title: "osm",
   type: 'base',
@@ -102,28 +95,47 @@ const osmTile = new TileLayer({
       attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   }),
 });
-
-
 const pointerMoveHandler = function (evt) {
-  if (evt.dragging) {
-     return;
-  }
-  let helpMsg = 'Click to start drawing';
-  if (sketch) {
-    const geom = sketch.getGeometry();
-    if (geom instanceof Polygon) {
-      helpMsg = 'Click to continue drawing the polygon';
-    } else if (geom instanceof LineString) {
-      helpMsg = 'Click to continue drawing the line';
+  if (evt.pointerType === 'touch') {
+    if (evt.dragging) {
+       return;
     }
-  }
+    let helpMsg = 'Click to start drawing';
+    if (sketch) {
+      const geom = sketch.getGeometry();
+      if (geom instanceof Polygon) {
+        helpMsg = 'Click to continue drawing the polygon';
+      } else if (geom instanceof LineString) {
+        helpMsg = 'Click to continue drawing the line';
+      }
+    }
 
-  if (helpTooltipElement) { // Überprüfen, ob helpTooltipElement definiert ist
+    if (helpTooltipElement) { // Überprüfen, ob helpTooltipElement definiert ist
+      helpTooltipElement.innerHTML = helpMsg; // Nur wenn helpTooltipElement definiert ist, setzen Sie innerHTML
+      helpTooltip.setPosition(evt.coordinate);
+      helpTooltipElement.classList.remove('hidden');
+    }
+  } else {
+    if (evt.dragging) {
+      return;
+    }
+    let helpMsg = 'Click to start drawing';
+    if (sketch) {
+      const geom = sketch.getGeometry();
+       if (geom instanceof Polygon) {
+         helpMsg = 'Click to continue drawing the polygon';
+      } else if (geom instanceof LineString) {
+         helpMsg = 'Click to continue drawing the line';
+      }
+    }
+    if (helpTooltipElement) { // Überprüfen, ob helpTooltipElement definiert ist
     helpTooltipElement.innerHTML = helpMsg; // Nur wenn helpTooltipElement definiert ist, setzen Sie innerHTML
     helpTooltip.setPosition(evt.coordinate);
     helpTooltipElement.classList.remove('hidden');
   }
+ }  
 };
+
 map.on('pointermove', pointerMoveHandler);
 let draw;
 const formatLength = function (line) {
@@ -281,7 +293,6 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
     return; // Beende die Funktion, um weitere Interaktionen zu verhindern
   }
 });
-
 
 map.addLayer(osmTile);
 map.addLayer(exp_bw_sle_layer, gehoelz_vecLayer, exp_allgm_fsk_layer);

@@ -1,17 +1,20 @@
 @import "node_modules/ol/ol.css";
 @import "node_modules/ol-ext/dist/ol-ext.css";
 
-
-html, body {
+*{
+  box-sizing: border-box;
   margin: 0;
-  height: 100%;
+  padding: 0;
+}
+body{
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 #map {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 100%;
+  width: 100vw;
+  height: 100vh;
 }
 
 .ol-button {
