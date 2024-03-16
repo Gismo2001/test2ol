@@ -1,4 +1,4 @@
-import {Circle as CircleStyle, Fill, RegularShape, Icon, Stroke, Style} from 'ol/style.js';
+import {Circle as CircleStyle, Fill, RegularShape, Icon, Stroke, Style, Text} from 'ol/style.js';
 //extfunc.js
 const sleStyle = new Style({
     image: new Icon({

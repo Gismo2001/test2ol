@@ -62,10 +62,7 @@ const endpointStyle = new Style({
   }),
 });
 
-
 const combinedStyle = [arrowStyle, endpointStyle];
-
-
 
 window.searchAddress = function searchAddress() {
   var address = document.getElementById('addressInput').value;
@@ -162,6 +159,56 @@ const map = new Map({
   //controls: defaults().extent([attribution, additionalControl]),
 });
 
+const gehoelz_vecLayer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'Gehölz(Plan)', // Titel für den Layer-Switcher
+  name: 'gehoelz_vec',
+  style: gehoelz_vecStyle,
+  visible: false
+});
+const exp_allgm_fsk_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_allgm_fsk.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'fsk',
+  name: 'fsk', 
+  style: getStyleForArtFSK,
+  visible: false,
+  minResolution: 0,
+  maxResolution: 4
+})
+const exp_bw_son_lin_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_son_lin.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }), 
+  title: 'Sonstig, Linien', 
+  name: 'son_lin',
+  style: son_linStyle,
+  visible: false
+});
+const exp_gew_umn_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_umn.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'U-Maßnahmen', 
+  name: 'gew_umn',
+  style: getStyleForArtUmn,
+  visible: false
+});
+const exp_gew_info_layer = new VectorLayer({
+  source: new VectorSource({
+  format: new GeoJSON(),
+  url: function (extent) {return './myLayers/exp_gew_info.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'Gew, Info', 
+  name: 'gew_info',
+  style: combinedStyle,
+  visible: false
+});
+
+const gew_layer_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gew.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'gew', // Titel für den Layer-Switcher
+  name: 'gew',
+  style: new Style({
+    fill: new Fill({ color: 'rgba(0,28, 240, 0.4)' }),
+    stroke: new Stroke({ color: 'blue', width: 2 })
+  })
+})
+
 const exp_bw_son_pun_layer = new VectorLayer({
   source: new VectorSource({
   format: new GeoJSON(),
@@ -246,45 +293,222 @@ const exp_bw_sle_layer = new VectorLayer({
   style: sleStyle,
   visible: true
 });
-const gehoelz_vecLayer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
-  title: 'Gehölz(Plan)', // Titel für den Layer-Switcher
-  name: 'gehoelz_vec',
-  style: gehoelz_vecStyle,
-  visible: false
-});
-const exp_allgm_fsk_layer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_allgm_fsk.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
-  title: 'fsk',
-  name: 'fsk', 
-  style: getStyleForArtFSK,
-  visible: false,
+
+const km10scal_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_10_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'km10scal', // Titel für den Layer-Switcher
+  style: km10scalStyle,
+  visible: true,
   minResolution: 0,
-  maxResolution: 4
-})
-const exp_bw_son_lin_layer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_son_lin.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }), 
-  title: 'Sonstig, Linien', 
-  name: 'son_lin',
-  style: son_linStyle,
-  visible: false
+  maxResolution: 1 
 });
-const exp_gew_umn_layer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_umn.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
-  title: 'U-Maßnahmen', 
-  name: 'gew_umn',
-  style: getStyleForArtUmn,
-  visible: false
+const km100scal_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_100_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'km100scal', // Titel für den Layer-Switcher
+  style: function(feature, resolution) {
+    return km100scalStyle(feature, feature.get('TextString'), resolution);
+  },
+  visible: true,
+  minResolution: 0,
+  maxResolution: 3 
 });
-const gew_layer_layer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gew.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
-  title: 'gew', // Titel für den Layer-Switcher
-  name: 'gew',
-  style: new Style({
-    fill: new Fill({ color: 'rgba(0,28, 240, 0.4)' }),
-    stroke: new Stroke({ color: 'blue', width: 2 })
-  })
-})
+const km500scal_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_500_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'km500scal', // Titel für den Layer-Switcher
+  style: function(feature, resolution) {
+    return km500scalStyle(feature, feature.get('TextString'), resolution);
+  },
+  visible: true,
+  minResolution: 0,
+  maxResolution: 10 
+});
+
+const wmsNsgLayer = new TileLayer({
+  title: "NSG",
+  name: "NSG",
+  source: new TileWMS({
+    url: 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Natur_wms/MapServer/WMSServer',
+    params: {
+      'LAYERS': 'Naturschutzgebiet',
+      'FORMAT': 'image/png',
+      'TRANSPARENT': true,
+      'TILED': true,
+    },
+  }),
+  visible: false,
+  opacity: .5,
+});
+const wmsLsgLayer = new TileLayer({
+  title: "LSG",
+  name: "LSG",
+  source: new TileWMS({
+    url: 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Natur_wms/MapServer/WMSServer',
+    params: {
+      'LAYERS': 'Landschaftsschutzgebiet',
+      'FORMAT': 'image/png',
+      'TRANSPARENT': true,
+      'TILED': true,
+    },
+  }),
+  visible: false,
+  opacity: .5,
+});
+const wmsUesgLayer = new TileLayer({
+  title: "ÜSG",
+  name: "ÜSG",
+  source: new TileWMS({
+    url:  'https://www.umweltkarten-niedersachsen.de/arcgis/services/HWSchutz_wms/MapServer/WMSServer',
+    params: {
+      'LAYERS': 'Überschwemmungsgebiete_Verordnungsfläechen_Niedersachsen11182',
+      'FORMAT': 'image/png',
+      'TRANSPARENT': true,
+      'TILED': true,
+    },
+  }),
+  visible: false,
+  opacity: .5,
+});
+const wmsWrrlFgLayer = new TileLayer({
+  title: "Fließgew.",
+  name: "Fließgew.",
+  source: new TileWMS({
+    url:  'https://www.umweltkarten-niedersachsen.de/arcgis/services/WRRL_wms/MapServer/WMSServer',
+    params: {
+      'LAYERS': 'Fliessgewaesser_WRRL',
+      'FORMAT': 'image/png',
+      'TRANSPARENT': true,
+      'TILED': true,
+    },
+  }),
+  visible: false,
+  opacity: 1,
+});
+const wmsGewWmsFgLayer = new TileLayer({
+  title: "GewWms",
+  name: "GewWms",
+  source: new TileWMS({
+    url:  'https://www.umweltkarten-niedersachsen.de/arcgis/services/Hydro_wms/MapServer/WMSServer',
+    params: {
+      'LAYERS': 'Gewässernetz',
+      'FORMAT': 'image/png',
+      'TRANSPARENT': true,
+      'TILED': true,
+    },
+  }),
+  visible: false,
+  opacity: 1,
+});
+
+const gnAtlas2023 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "10", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2023",
+  opacity: 1.000000,
+  visible: false,
+});
+const gnAtlas2020 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "9", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2020",
+  opacity: 1.000000,
+  visible: false,
+});
+const gnAtlas2017 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "8", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2017",
+  opacity: 1.000000,
+  visible: false,
+});
+const gnAtlas2014 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "7", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2014",
+  opacity: 1.000000,
+  visible: false,
+});
+const gnAtlas2012 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "6", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2012",
+  opacity: 1.000000,
+  visible: false,
+});
+const gnAtlas2010 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "5", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2010",
+  opacity: 1.000000,
+  visible: false,
+});
+const gnAtlas2009 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "4", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2009",
+  opacity: 1.000000,
+  visible: false,
+});
+const gnAtlas2002 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "3", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "2002",
+  opacity: 1.000000,
+  visible: false,
+});
+const gnAtlas1970 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "2", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "1970",
+  opacity: 1.000000,
+  visible: false,
+});
+const gnAtlas1957 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "1", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "1957",
+  opacity: 1.000000,
+  visible: false,
+});
+const gnAtlas1937 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "0", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "1937",
+  opacity: 1.000000,
+  visible: false,
+});
 
 var dop20ni_layer = new TileLayer({
   title: "DOP20 NI",
@@ -327,11 +551,8 @@ const osmTile = new TileLayer({
   }),
 });
 
-
 const layerSwitcher = new LayerSwitcher({ });
 map.addControl(layerSwitcher);
-
-
 
 const pointerMoveHandler = function (evt) {
   if (evt.pointerType === 'touch') {
@@ -373,7 +594,6 @@ const pointerMoveHandler = function (evt) {
   }
  }  
 };
-
 map.on('pointermove', pointerMoveHandler);
 let draw;
 const formatLength = function (line) {
@@ -538,22 +758,31 @@ const BwGroupP = new LayerGroup({
   fold: 'close',  
   layers: [ exp_bw_son_pun_layer, exp_bw_ein_layer, exp_bw_bru_andere_layer, exp_bw_bru_nlwkn_layer, exp_bw_que_layer, exp_bw_due_layer, exp_bw_weh_layer, exp_bw_sle_layer]
 });
-
 const BwGroupL = new LayerGroup({
   title: "Bauw.(L)",
   fold: true,
   fold: 'close',  
-  layers: [ gehoelz_vecLayer, exp_gew_umn_layer, exp_bw_son_lin_layer ]
+  layers: [ gehoelz_vecLayer, exp_gew_umn_layer, exp_bw_son_lin_layer, exp_gew_info_layer ]
 });
-
-/* const wmsLayerGroup = new LayerGroup({
+const wmsLayerGroup = new LayerGroup({
   title: "WMS-Lay",
   name: "WMS-Lay",
   fold: true,
   fold: 'close',
   layers: [ wmsLsgLayer, wmsNsgLayer, wmsUesgLayer, wmsWrrlFgLayer, wmsGewWmsFgLayer ]
-}); */
-
+});
+const GNAtlasGroup = new LayerGroup({
+  title: "GN-DOP's",
+  fold: true,
+  fold: 'close',
+  layers: [ gnAtlas2023, gnAtlas2020, gnAtlas2017, gnAtlas2014, gnAtlas2012, gnAtlas2010, gnAtlas2009, gnAtlas2002, gnAtlas1970, gnAtlas1957, gnAtlas1937]
+});
+const kmGroup = new LayerGroup({
+  title: "Station",
+  fold: true,
+  fold: 'close',
+  layers: [km10scal_layer, km100scal_layer, km500scal_layer]
+});
 const BaseGroup = new LayerGroup({
   title: "Base",
   fold: true,
@@ -562,8 +791,74 @@ const BaseGroup = new LayerGroup({
 });
 
 map.addLayer(BaseGroup);
+map.addLayer(GNAtlasGroup);
 map.addLayer (exp_allgm_fsk_layer);
 map.addLayer(gew_layer_layer);
+map.addLayer(wmsLayerGroup);
+map.addLayer(kmGroup);
 map.addLayer(BwGroupL);
 map.addLayer(BwGroupP);
 map.addLayer(vector); 
+
+map.on('singleclick', function (evt) {
+  const isWmsLayerGroupVisible = map.getLayers().getArray().some(layer => layer.get('name') === 'WMS-Lay' && layer.getVisible());
+  
+  if (isWmsLayerGroupVisible) {
+    const layersToCheck = [
+      { layer: wmsGewWmsFgLayer, name: 'GewWms' },
+      { layer: wmsWrrlFgLayer, name: 'WRRL' },
+      { layer: wmsUesgLayer, name: 'ÜSG' },
+      { layer: wmsNsgLayer, name: 'NSG' },
+      { layer: wmsLsgLayer, name: 'LSG' },
+    ];
+
+    const viewResolution = map.getView().getResolution();
+    const viewProjection = map.getView().getProjection();
+
+    layersToCheck.forEach(({ layer, name }) => {
+      if (layer.getVisible()) {
+        
+        const url = layer.getSource().getFeatureInfoUrl(evt.coordinate, viewResolution, viewProjection, {'INFO_FORMAT': 'text/html'});
+        if (url) {
+          fetch(url)
+            .then((response) => response.text())
+            .then((html) => {
+              if (html.trim() !== '') {
+                removeExistingInfoDiv();
+
+                const infoDiv = createInfoDiv(name, html);
+                document.body.appendChild(infoDiv);
+              }
+            })
+            .catch((error) => {
+              console.error('Fehler beim Abrufen der Informationen:', error);
+            });
+        }
+      }
+    });
+  } else {
+    console.log('Die wmsLayerGroup ist nicht eingeschaltet.');
+  }
+});
+
+function removeExistingInfoDiv() {
+  const existingInfoDiv = document.getElementById('info');
+  if (existingInfoDiv) { existingInfoDiv.remove(); }
+}
+
+function createInfoDiv(name, html) {
+  const infoDiv = document.createElement('div');
+  infoDiv.id = 'info';
+  infoDiv.classList.add('info-container');
+  infoDiv.innerHTML = `<strong>${name} Layer</strong><br>${html}`;
+
+  const closeIcon = document.createElement('span');
+  closeIcon.innerHTML = '&times;';
+  closeIcon.classList.add('close-icon');
+  closeIcon.addEventListener('click', function () {
+    infoDiv.style.display = 'none';
+  });
+
+  infoDiv.appendChild(closeIcon);
+  return infoDiv;
+}

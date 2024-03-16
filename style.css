@@ -40,3 +40,26 @@ body{
   z-index: 1000;
 }
 
+/* Stil für den Container der Infodiv */
+.info-container {
+  border: 1px solid black;
+  background: white;
+  opacity: 1;
+  overflow-x: auto;
+  position: absolute;
+  bottom: 150px;
+  width: 100%;
+  left: 0px;
+  z-index: 9999;
+}
+
+/* Stil für das Schließen-Symbol */
+.close-icon {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+
