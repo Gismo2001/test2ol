@@ -3,8 +3,6 @@ import * as LoadingStrategy from 'ol/loadingstrategy';
 import * as proj from 'ol/proj';
 import Feature from 'ol/Feature';
 
-//import { Circle as CircleGeom } from 'ol/geom';
-
 import Draw from 'ol/interaction/Draw.js';
 import Map from 'ol/Map.js';
 import Overlay from 'ol/Overlay.js';
@@ -13,6 +11,10 @@ import {Circle as CircleStyle, Fill, Stroke,Style} from 'ol/style.js';
 import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
+import TileWMS from 'ol/source/TileWMS.js';
+import TileImage from 'ol/source/TileImage.js';
+import XYZ from 'ol/source/XYZ.js';
+
 import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
 import {Attribution, defaults as defaultControls, Control} from 'ol/control.js';
@@ -36,6 +38,7 @@ import {
   km500scalStyle,
   machWasMitFSK
 } from './extStyle';
+import LayerGroup from 'ol/layer/Group';
 
 const arrowStyle = new Style({
   stroke: new Stroke({
@@ -49,15 +52,16 @@ const endpointStyle = new Style({
       const coordinates = feature.getGeometry().getCoordinates();
       return new Point(coordinates[coordinates.length - 1]);
   },
-  image: new Circle({
-      radius: 6,
-      fill: new Fill({ color: 'red' }),
+  image: new CircleStyle({
+      radius: 6,          // Radius des Kreises (Endpunkt)
+      fill: new Fill({ color: 'red' }), // Füllfarbe des Kreises
       stroke: new Stroke({
-          color: 'black',
-          width: 2,
+      color: 'black',    // Randfarbe des Kreises
+      width: 2,          // Breite des Randes
       }),
   }),
 });
+
 
 const combinedStyle = [arrowStyle, endpointStyle];
 
@@ -158,64 +162,162 @@ const map = new Map({
   //controls: defaults().extent([attribution, additionalControl]),
 });
 
-
-const exp_bw_sle_layer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_sle.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox}),
-  title: 'sle',
-  name: 'sle',
-  style: sleStyle,
-  opacity: 0.5,
-  visible: true
+const exp_bw_son_pun_layer = new VectorLayer({
+  source: new VectorSource({
+  format: new GeoJSON(),
+  url: function (extent) {return './myLayers/exp_bw_son_pun.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'Sonstige, Punkte', 
+  name: 'son_pun', 
+  style: son_punStyle,
+  visible: false
 });
-
+const exp_bw_ein_layer = new VectorLayer({
+  source: new VectorSource({
+  format: new GeoJSON(),
+  url: function (extent) {return './myLayers/exp_bw_ein.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'Einläufe', 
+  name: 'ein', 
+  style: getStyleForArtEin,
+  visible: false
+});
 const exp_bw_que_layer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_que.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox}),
-  title: 'que',
-  name: 'que',
+  source: new VectorSource({
+    format: new GeoJSON(),
+    url: function (extent) {
+      return './myLayers/exp_bw_que.geojson' + '?bbox=' + extent.join(',');
+    },
+    strategy: LoadingStrategy.bbox
+  }),
+  title: 'Querung', 
+  name: 'que', // Titel für den Layer-Switcher
   style: queStyle,
-  opacity: 0.5,
+  visible: false
+});
+const exp_bw_due_layer = new VectorLayer({
+  source: new VectorSource({
+    format: new GeoJSON(),
+    url: function (extent) {
+      return './myLayers/exp_bw_due.geojson' + '?bbox=' + extent.join(',');
+    },
+    strategy: LoadingStrategy.bbox
+  }),
+  title: 'Düker', // Titel für den Layer-Switcher
+  name: 'due', // Titel für den Layer-Switcher
+  style: dueStyle,
+  visible: false
+});
+const exp_bw_weh_layer = new VectorLayer({
+  source: new VectorSource({
+    format: new GeoJSON(),
+    url: function (extent) {
+      return './myLayers/exp_bw_weh.geojson' + '?bbox=' + extent.join(',');
+    },
+    strategy: LoadingStrategy.bbox
+  }),
+  title: 'Wehr', // Titel für den Layer-Switcher
+  name: 'weh', // Titel für den Layer-Switcher
+  style: wehStyle,
+  visible: false
+});
+const exp_bw_bru_nlwkn_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_bru_nlwkn.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'Brücke (NLWKN)', 
+  name: 'bru_nlwkn', // Titel für den Layer-Switcher
+  style: bru_nlwknStyle,
+  visible: false
+});
+const exp_bw_bru_andere_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_bru_andere.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'Brücke (andere)', 
+  name: 'bru_andere', 
+  style: bruAndereStyle,
+  visible: false
+});
+const exp_bw_sle_layer = new VectorLayer({
+  source: new VectorSource({
+    format: new GeoJSON(),
+    url: function (extent) {
+      return './myLayers/exp_bw_sle.geojson' + '?bbox=' + extent.join(',');
+    },
+    strategy: LoadingStrategy.bbox
+  }),
+  title: 'Schleuse', // Titel für den Layer-Switcher
+  name: 'sle', // Titel für den Layer-Switcher
+  style: sleStyle,
   visible: true
 });
-
-
 const gehoelz_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Gehölz(Plan)', // Titel für den Layer-Switcher
   name: 'gehoelz_vec',
   style: gehoelz_vecStyle,
-  visible: true
+  visible: false
 });
 const exp_allgm_fsk_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_allgm_fsk.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'fsk',
   name: 'fsk', 
   style: getStyleForArtFSK,
-  visible: true,
+  visible: false,
   minResolution: 0,
   maxResolution: 4
 })
-
-const exp_gew_info_layer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_info.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }), 
-  title: 'Gew, Info', 
-  name: 'gew_info',
-  style: combinedStyle,
-  visible: true
+const exp_bw_son_lin_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_son_lin.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }), 
+  title: 'Sonstig, Linien', 
+  name: 'son_lin',
+  style: son_linStyle,
+  visible: false
 });
-
 const exp_gew_umn_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_umn.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'U-Maßnahmen', 
   name: 'gew_umn',
   style: getStyleForArtUmn,
-  visible: true
+  visible: false
 });
+const gew_layer_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gew.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'gew', // Titel für den Layer-Switcher
+  name: 'gew',
+  style: new Style({
+    fill: new Fill({ color: 'rgba(0,28, 240, 0.4)' }),
+    stroke: new Stroke({ color: 'blue', width: 2 })
+  })
+})
 
-const layerSwitcher = new LayerSwitcher({ });
-map.addControl(layerSwitcher);
-
-
-
+var dop20ni_layer = new TileLayer({
+  title: "DOP20 NI",
+  opacity: 1.000000,
+  visible: false,
+  type: 'base',
+  source: new TileWMS({
+    url: "https://www.geobasisdaten.niedersachsen.de/doorman/noauth/wms_ni_dop",
+    attributions: 'Orthophotos Niedersachsen, LGLN',
+    params: {
+      "LAYERS": "dop20",
+      "TILED": true, // "true" sollte ohne Anführungszeichen sein
+      "VERSION": "1.3.0"
+    },
+  }),
+});
+const googleLayer = new TileLayer({
+  title: "GoogleSat",
+  type: 'base',
+  baseLayer: false,
+  visible: false,
+  source: new TileImage({url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}' })
+});
+const ESRIWorldImagery = new TileLayer({
+  title: 'ESRI',
+  type: 'base',
+  opacity: 1.000000,
+  visible: false,
+  source: new XYZ({
+      attributions: 'Powered by Esri',
+      url: 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+  })
+});
 const osmTile = new TileLayer({
   title: "osm",
   type: 'base',
@@ -224,6 +326,12 @@ const osmTile = new TileLayer({
       attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   }),
 });
+
+
+const layerSwitcher = new LayerSwitcher({ });
+map.addControl(layerSwitcher);
+
+
 
 const pointerMoveHandler = function (evt) {
   if (evt.pointerType === 'touch') {
@@ -424,7 +532,38 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
   }
 });
 
-map.addLayer(osmTile);
-map.addLayer( exp_bw_que_layer );
-map.addLayer( exp_bw_sle_layer );
+const BwGroupP = new LayerGroup({
+  title: "Bauw.(P)",
+  fold: true,
+  fold: 'close',  
+  layers: [ exp_bw_son_pun_layer, exp_bw_ein_layer, exp_bw_bru_andere_layer, exp_bw_bru_nlwkn_layer, exp_bw_que_layer, exp_bw_due_layer, exp_bw_weh_layer, exp_bw_sle_layer]
+});
+
+const BwGroupL = new LayerGroup({
+  title: "Bauw.(L)",
+  fold: true,
+  fold: 'close',  
+  layers: [ gehoelz_vecLayer, exp_gew_umn_layer, exp_bw_son_lin_layer ]
+});
+
+/* const wmsLayerGroup = new LayerGroup({
+  title: "WMS-Lay",
+  name: "WMS-Lay",
+  fold: true,
+  fold: 'close',
+  layers: [ wmsLsgLayer, wmsNsgLayer, wmsUesgLayer, wmsWrrlFgLayer, wmsGewWmsFgLayer ]
+}); */
+
+const BaseGroup = new LayerGroup({
+  title: "Base",
+  fold: true,
+  fold: 'close',
+  layers: [ESRIWorldImagery, googleLayer, dop20ni_layer, osmTile]
+});
+
+map.addLayer(BaseGroup);
+map.addLayer (exp_allgm_fsk_layer);
+map.addLayer(gew_layer_layer);
+map.addLayer(BwGroupL);
+map.addLayer(BwGroupP);
 map.addLayer(vector); 
