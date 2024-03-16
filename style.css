@@ -39,3 +39,10 @@ body{
   left: 5px;
   z-index: 1000;
 }
+@media only screen and (max-width: 600px) {
+  #map {
+    width: 100%; /* Vollständige Breite des Bildschirms auf Smartphones */
+    height: 100vh; /* Höhe auf 50% der Bildschirmhöhe begrenzen */
+  }
+
+}
