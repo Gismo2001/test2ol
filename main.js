@@ -1,5 +1,5 @@
 import GeoJSON from 'ol/format/GeoJSON.js';
-import * as Loadingstrategy from 'ol/loadingstrategy';
+import * as LoadingStrategy from 'ol/loadingstrategy';
 import * as proj from 'ol/proj';
 
 import Draw from 'ol/interaction/Draw.js';
@@ -37,8 +37,8 @@ import {
 const attribution = new Attribution({
   collapsible: false,
 });
+// Layer für Messung
 const source = new VectorSource();
-
 const vector = new VectorLayer({
   source: source,
   style: {
@@ -54,6 +54,55 @@ let helpTooltipElement;
 let helpTooltip;
 let measureTooltipElement;
 let measureTooltip;
+
+
+
+const mapView = new View({
+  center: proj.fromLonLat([7.35, 52.7]),
+  zoom: 9
+  });
+  
+const map = new Map({
+  target: "map",
+  view: mapView,
+  //controls: defaults().extent([attribution, additionalControl]),
+});
+
+
+// Vektor-Layer erstellen
+const exp_bw_sle_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_sle.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox}),
+  style: sleStyle, // Stil zuweisen
+});
+
+// exp_gew_info
+const gehoelz_vecLayer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'Gehölz(Plan)', // Titel für den Layer-Switcher
+  name: 'gehoelz_vec',
+  style: gehoelz_vecStyle,
+  visible: true
+});
+
+const exp_allgm_fsk_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_allgm_fsk.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'fsk',
+  name: 'fsk', 
+  style: getStyleForArtFSK,
+  visible: true,
+  minResolution: 0,
+  maxResolution: 4
+})
+ 
+const osmTile = new TileLayer({
+  title: "osm",
+  type: 'base',
+  source: new OSM({
+      url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
+  }),
+});
+
 
 const pointerMoveHandler = function (evt) {
   if (evt.dragging) {
@@ -75,50 +124,8 @@ const pointerMoveHandler = function (evt) {
     helpTooltipElement.classList.remove('hidden');
   }
 };
-
-const mapView = new View({
-  center: proj.fromLonLat([7.35, 52.7]),
-  zoom: 9
-  });
-  
-const map = new Map({
-  target: "map",
-  view: mapView,
-  //controls: defaults().extent([attribution, additionalControl]),
-});
-
-const osmTile = new TileLayer({
-  title: "osm",
-  type: 'base',
-  source: new OSM({
-      url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
-  }),
-});
-map.addLayer(osmTile);
-
-// exp_gew_info
-const gehoelzvecLayer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: Loadingstrategy.bbox }),
-  title: 'Gehölz(Plan)', // Titel für den Layer-Switcher
-  name: 'gehoelz_vec',
-  style: gehoelz_vecStyle,
-  visible: false
-});
-
-const exp_allgm_fsk_layer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_allgm_fsk.geojson' + '?bbox=' + extent.join(','); }, strategy: Loadingstrategy.bbox }),
-  title: 'fsk',
-  name: 'fsk', 
-  style: getStyleForArtFSK,
-  visible: false,
-  minResolution: 0,
-  maxResolution: 4
-})
-
 map.on('pointermove', pointerMoveHandler);
 let draw;
-
 const formatLength = function (line) {
   const length = getLength(line);
   let output;
@@ -158,7 +165,6 @@ const style = new Style({
     }),
   }),
 });
-
 function addInteraction(type) {
   draw = new Draw({
     source: source,
@@ -204,7 +210,6 @@ function addInteraction(type) {
     unByKey(listener);
   });
 }
-
 function createHelpTooltip() {
   if (helpTooltipElement) {
     helpTooltipElement.parentNode.removeChild(helpTooltipElement);
@@ -218,7 +223,6 @@ function createHelpTooltip() {
   });
   map.addOverlay(helpTooltip);
 }
-
 function createMeasureTooltip() {
   if (measureTooltipElement) {
     measureTooltipElement.parentNode.removeChild(measureTooltipElement);
@@ -234,7 +238,6 @@ function createMeasureTooltip() {
   });
   map.addOverlay(measureTooltip);
 }
-
 class CustomControls extends Control {
   constructor(options) {
     const element = document.createElement('div');
@@ -262,11 +265,9 @@ class CustomControls extends Control {
     });
   }
 }
-
 map.addControl(new CustomControls({
   target: 'custom-controls'
 }));
-
 map.getViewport().addEventListener('contextmenu', function(evt) {
   evt.preventDefault(); // Verhindert das Standardkontextmenü
   if (draw) {
@@ -281,10 +282,7 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
   }
 });
 
-map.addLayer(vector);
 
-
-
-
-
-map.addLayer(gehoelzvecLayer, exp_allgm_fsk_layer);
+map.addLayer(osmTile);
+map.addLayer(exp_bw_sle_layer, gehoelz_vecLayer, exp_allgm_fsk_layer);
+map.addLayer(vector); 
