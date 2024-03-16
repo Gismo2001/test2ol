@@ -16,6 +16,85 @@ body{
   width: 100vw;
   height: 100vh;
 }
+.mousePosition {
+  position: fixed;
+  bottom: 5px; /* Abstand von unten */
+  left: 50%; /* Zentrierung horizontal */
+  transform: translateX(-50%); /* Zentrierung relativ zur Mitte */
+  border:1px solid rgba(211, 189, 216);
+  border-radius: 10px;
+  padding: 5px;
+  background-color: rgba(225, 225, 225, 0.6);
+  font-family:Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 12px;
+}
+.ol-popup {
+  background-color: rgb(255, 255, 255);
+  padding: 5px;
+  padding-top: 25px;
+  position: absolute;
+  border-radius: 5px;
+  /*box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); */
+  border: 1px solid #cccccc;
+  left: 20px;  
+  top: -20px; 
+  min-width: 280px;
+ }
+ #popup-content {
+  user-select: text;
+}
+.ol-popup:after, .ol-popup:before{
+top: 10px;  
+border: solid transparent;
+content: " ";
+height: 0;
+width: 0;
+position: absolute;
+pointer-events: none;
+}
+.ol-popup:after{
+  border-top-color: white;
+  border-width: 10px;
+  left: -10px;
+  margin-left: -10px;
+  transform: rotate(90deg); /* Drehung um 90 Grad */
+}
+.ol-popup:before{
+  border-top-color: #4400ff;
+  border-width: 11px;
+  left: -10px;
+  margin-left: -11px;
+  transform: rotate(90deg); /* Drehung um 90 Grad */
+}
+.ol-popup-closer{
+  text-decoration: none;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  height: 10px;
+
+}
+.ol-popup-closer:after{
+  content: "X";
+  font-weight: bold; /* Fett formatieren */
+}
+.popup-text {
+  margin-right: 10px; /* Ändere den Abstand zum "X" nach Bedarf */
+}
+.locate {
+  top: 75px;
+  left: 8px;
+}
+.tooltip {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  position: absolute;
+  display: none;
+}
+
 
 .ol-button {
   display: block;

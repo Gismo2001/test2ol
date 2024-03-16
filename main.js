@@ -3,6 +3,7 @@ import * as LoadingStrategy from 'ol/loadingstrategy';
 import * as proj from 'ol/proj';
 import Feature from 'ol/Feature';
 
+
 import Draw from 'ol/interaction/Draw.js';
 import Map from 'ol/Map.js';
 import Overlay from 'ol/Overlay.js';
@@ -716,14 +717,14 @@ class CustomControls extends Control {
     buttonLength.innerHTML = 'L';
     buttonLength.className = 'ol-button';
     buttonLength.addEventListener('click', function() {
-      alert('doppelclick um linie abzuschließen, zum beenden rechtsclick');
+      
       addInteraction('LineString');
     });
     const buttonArea = document.createElement('button');
     buttonArea.innerHTML = 'F';
     buttonArea.className = 'ol-button';
     buttonArea.addEventListener('click', function() {
-      alert('doppelclick um linie abzuschließen, zum beenden rechtsclick');
+      
       addInteraction('Polygon');
     });
     element.appendChild(buttonLength);
@@ -841,6 +842,31 @@ map.on('singleclick', function (evt) {
   }
 });
 
+var container = document.getElementById('popup');
+var content = document.getElementById('popup-content');
+var closer = document.getElementById('popup-closer');
+
+var popup = new Overlay({
+  element: container,//document.getElementById('popup'),
+  id: '1',
+  autoPan: true,
+  autoPanAnimation: {
+  duration: 250
+  }
+});
+
+map.addOverlay(popup);
+
+closer.onclick = function()
+{
+  popup.setPosition(undefined);
+  closer.blur();
+  return false;
+};
+
+
+
+
 function removeExistingInfoDiv() {
   const existingInfoDiv = document.getElementById('info');
   if (existingInfoDiv) { existingInfoDiv.remove(); }
@@ -862,3 +888,176 @@ function createInfoDiv(name, html) {
   infoDiv.appendChild(closeIcon);
   return infoDiv;
 }
+var closer = document.getElementById('popup-closer');
+
+map.on('click', function (evt) {
+  var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+    /* Neu
+    var txtName = feature.get('name');
+    var txtPopupCloser = document.getElementById('popup-closer');
+    txtPopupCloser.innerHTML = (txtName);
+    */
+    var layname = layer.get('name');
+    var coordinates = evt.coordinates;
+    var beschreibLangValue = feature.get('beschreib_lang');
+    var beschreibLangHtml = '';
+    if (beschreibLangValue && beschreibLangValue.trim() !== '') {
+    beschreibLangHtml = '<br>' + '<u>' + "Beschreib (lang): " + '</u>' + beschreibLangValue + '</p>';
+    };
+    // Popup soll nur für bestimmte Layernamen angezeigt werden
+    if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'son_lin') {
+      console.log('Clicked on layer:', layname);
+      machWasMitFSK(feature);
+      if (feature) {
+        coordinates = feature.getGeometry().getCoordinates();
+        popup.setPosition(coordinates);
+        // HTML-Tag Foto1
+        var foto1Value = feature.get('foto1');
+        var foto1Html = '';
+        var foto2Value = feature.get('foto2');
+        var foto2Html = '';
+        var foto3Value = feature.get('foto3');
+        var foto3Html = '';
+        var foto4Value = feature.get('foto4');
+        var foto4Html = '';
+        
+        if (foto1Value && foto1Value.trim() !== '') {
+          foto1Html = '<a href="' + foto1Value + '" onclick="window.open(\'' + foto1Value + '\', \'_blank\'); return false;">Foto 1</a>';
+        } else {
+          foto1Html =   " Foto 1 ";
+        }
+        if (foto2Value && foto2Value.trim() !== '') {
+          foto2Html = '<a href="' + foto2Value + '" onclick="window.open(\'' + foto2Value + '\', \'_blank\'); return false;">Foto 2</a>';
+        } else {
+          foto2Html = " Foto 2 ";
+        }
+        if (foto3Value && foto3Value.trim() !== '') {
+          foto3Html = '<a href="' + foto3Value + '" onclick="window.open(\'' + foto3Value + '\', \'_blank\'); return false;">Foto 3</a>';
+        } else {
+          foto3Html = " Foto 3 ";
+        }
+        if (foto4Value && foto4Value.trim() !== '') {
+          foto4Html = '<a href="' + foto4Value + '" onclick="window.open(\'' + foto4Value + '\', \'_blank\'); return false;">Foto 4</a>';
+        } else {
+          foto4Html = " Foto 4 ";
+        }
+      
+        content.innerHTML =
+          '<div style="max-height: 200px; overflow-y: auto;">' +
+          '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
+          '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
+          '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
+           '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
+           '<p>' + beschreibLangHtml + '</p>' +
+          '</div>';
+      
+        
+      } else {
+        popup.setPosition(undefined);
+      }
+    }
+    // Führen Sie Aktionen für den Layernamen 'gew_info' durch
+    if (layname === 'gew_info') {
+      coordinates = evt.coordinate; 
+      popup.setPosition(coordinates);
+      content.innerHTML =
+      '<div style="max-height: 300px; overflow-y: auto;">' +
+      '<p>Name: ' + feature.get('IDUabschn') + '<br>' +
+      '<p><a href="' + feature.get('link1') + '" onclick="window.open(\'' + feature.get('link1') + '\', \'_blank\'); return false;">Link 1</a> ' +
+      '<a href="' + feature.get('link2') + '" onclick="window.open(\'' + feature.get('link2') + '\', \'_blank\'); return false;">Link 2</a> ' +
+      '<a href="' + feature.get('foto1') + '" onclick="window.open(\'' + feature.get('foto1') + '\', \'_blank\'); return false;">Foto 1</a> ' +
+      '<a href="' + feature.get('foto2') + '" onclick="window.open(\'' + feature.get('foto2') + '\', \'_blank\'); return false;">Foto 2</a><br>' +
+      '<p><a href="' + feature.get('BSB') + '" onclick="window.open(\'' + feature.get('BSB') + '\', \'_blank\'); return false;">BSB  </a>' +
+      '<a href="' + feature.get('MNB') + '" onclick="window.open(\'' + feature.get('MNB') + '\', \'_blank\'); return false;">MNB</a><br> ' +
+      'Kat: ' + feature.get('Kat') + '</a>' +
+      ', KTR: ' + feature.get('REFID_KTR') + '</a>' +
+      '<br>' + "von " + feature.get('Bez_Anfang') + " bis " + feature.get('Bez_Ende')  + '</p>' +
+      '</div>';
+    }
+    // Führen Sie Aktionen für den Layernamen 'gew_umn' durch
+    if (layname === 'gew_umn') {
+      coordinates = evt.coordinate; 
+      popup.setPosition(coordinates);
+      content.innerHTML =
+      
+      '<div style="max-height: 300px; overflow-y: auto;">' +
+      '<p>ID: ' + feature.get('Massn_ID') + '<br>' +
+      '<p>Bez (Art): ' + feature.get('UMnArtBez') + '<br>' +
+      '<p>Bez (Gruppe): ' + feature.get('UMNGrBez') + '<br>' +
+      '</div>';
+    }
+    // Führen Sie Aktionen für den Layernamen 'son_lin' durch
+    if (layname === 'son_lin') {
+      coordinates = evt.coordinate; 
+      popup.setPosition(coordinates);
+      content.innerHTML =
+      '<div style="max-height: 300px; overflow-y: auto;">' +
+      '<p>Name: ' + feature.get('name') +  ' (' + feature.get('KTR') +')' + '<br>' +
+      '<p><a href="' + feature.get('foto1') + '" onclick="window.open(\'' + feature.get('foto1') + '\', \'_blank\'); return false;">Foto 1</a> ' +
+      '<a href="' + feature.get('foto2') + '" onclick="window.open(\'' + feature.get('foto2') + '\', \'_blank\'); return false;">Foto 2</a> ' +
+      '<a href="' + feature.get('foto3') + '" onclick="window.open(\'' + feature.get('foto3') + '\', \'_blank\'); return false;">Foto 3</a> ' +
+      '<a href="' + feature.get('foto4') + '" onclick="window.open(\'' + feature.get('foto4') + '\', \'_blank\'); return false;">Foto 4</a></p>' +
+      '<br>' + "Beschreib kurz = " + feature.get('beschreib') + '</p>' +
+      beschreibLangHtml +
+      '</div>';
+    }
+    // Führen Sie Aktionen für den Layernamen 'gehoelz_vecLayer' durch
+    if (layname === 'gehoelz_vec') {
+      coordinates = evt.coordinate; 
+      popup.setPosition(coordinates);
+      content.innerHTML =
+      '<div style="max-height: 300px; overflow-y: auto;">' +
+      '<p>Gehölzentwicklung' + '<br>' +
+      '<br>' + "Bemerk: " + feature.get('UMn_Bemerk') + '</p>' +
+      '</div>';
+    }
+    // Führen Sie Aktionen für den Layernamen 'fsk' durch
+    if (layname === 'fsk') {
+      if (feature.get('Art') === 'o' || feature.get('Art') === 'l') {
+        coordinates = evt.coordinate; // Define coordinates for 'fsk'
+        popup.setPosition(coordinates);
+        content.innerHTML =
+          '<div style="max-height: 300px; overflow-y: auto;">' +
+          '<p><strong>gemark Flur Flurstück:</strong><br>' + feature.get('Suche') + '</p>' +
+          'FSK: ' + feature.get('fsk') + '</p>' +
+          'FSK(ASL): ' + feature.get('FSK_ASL') + '</p>' +
+          '<p>' + 'Eig.(öffentl.): ' + feature.get('Eig1') + '</p>' +
+          '</div>';
+      } else {
+        coordinates = evt.coordinate; // Define coordinates for 'fsk'
+        popup.setPosition(coordinates);
+        content.innerHTML =
+          '<div style="max-height: 300px; overflow-y: auto;">' +
+          '<p><strong>gemark Flur Flurstück:</strong><br>' + feature.get('Suche') + '</p>' +
+          'FSK: ' + feature.get('fsk') + '</p>' +
+          '<p>' + 'Art (p=privat): ' + feature.get('Art') + '</p>' +
+           '<p>' + 'Eig.(privat): ' + feature.get('Eig1') + '</p>' +
+          '</div>';
+      }
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+  var popup = document.getElementById('popup');
+  var popupCloser = document.getElementById('popup-closer');
+  var container = document.createElement('div');
+  var link = document.createElement('a');
+  link.textContent = 'Weitere Infos';
+
+  link.href = '#'; // Verhindert, dass der Link die Seite neu lädt
+  link.addEventListener('click', function(event) {
+    event.preventDefault(); // Verhindert die Standardaktion des Links
+    var newWindow = window.open('', '_blank');
+    newWindow.document.body.innerHTML = '<p>Hallo neue Welt</p>';
+  });
+  
+  container.appendChild(link);
+  container.appendChild(popupCloser);
+  popup.appendChild(container);
+});
+
+document.getElementById('popup-closer').onclick = function () {
+  popup.setPosition(undefined);
+  return false;
+};
