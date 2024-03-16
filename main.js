@@ -1,13 +1,16 @@
 import GeoJSON from 'ol/format/GeoJSON.js';
 import * as LoadingStrategy from 'ol/loadingstrategy';
 import * as proj from 'ol/proj';
+import Feature from 'ol/Feature';
+
+import { Circle as CircleGeom } from 'ol/geom';
 
 import Draw from 'ol/interaction/Draw.js';
 import Map from 'ol/Map.js';
 import Overlay from 'ol/Overlay.js';
 import View from 'ol/View.js';
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
-import {LineString, Polygon} from 'ol/geom.js';
+import {Circle as CircleStyle, Fill, Stroke,Style} from 'ol/style.js';
+import {LineString, Polygon, Point} from 'ol/geom.js';
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import {getArea, getLength} from 'ol/sphere.js';
@@ -33,6 +36,77 @@ import {
   machWasMitFSK
 } from './extStyle';
 
+window.searchAddress = function searchAddress() {
+  var address = document.getElementById('addressInput').value;
+  // Direktes Setzen des API-Schlüssels, falls process.env.API_KEY nicht definiert ist
+  var apiKey = 'c592a3d99b8d43878cf7d727d44187ce';
+
+  var apiUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(address)}&key=${apiKey}`;
+
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      if (data.results.length > 0) {
+        var location = data.results[0].geometry;
+        // Karte auf die gefundenen Koordinaten zentrieren
+        map.getView().setCenter(proj.fromLonLat([location.lng, location.lat]));
+        map.getView().setZoom(17); // Zoom-Level anpassen
+
+        // Temporären Marker hinzufügen
+        console.log (location.lng, location.lat);
+        addTempMarker([location.lng, location.lat]);
+      } else {
+        // Adresse nicht gefunden, Meldung ausgeben
+        alert('Adresse nicht gefunden');
+      }
+    })
+    .catch(error => {
+      console.error('Geokodierung-Fehler:', error);
+      removeTempMarker();
+    });
+}
+
+
+// Event-Listener für die Enter-Taste hinzufügen
+var inputElement = document.getElementById('addressInput');
+inputElement.addEventListener('keydown', function (event) {
+  if (event.key === 'Enter') {
+    searchAddress();
+  }
+});
+
+/// Marker für Positionsmarkierung zur Adresssuche
+function addTempMarker(coordinates) {
+  var tempMarkerLayer = new VectorLayer({
+    source: new VectorSource({
+      features: [new Feature({
+        geometry: new Point(coordinates),
+      })]
+    }),
+    style: new Style({
+      image: new CircleGeom({
+        radius: 20, // Radius des Kreises
+        fill: new Fill({ color: 'red' }), // Ändern Sie die Füllfarbe des Kreises auf Rot
+        stroke: new Stroke({ color: 'black', width: 2 }) // Randfarbe und -breite des Kreises bleiben unverändert
+      })
+    })
+  });
+
+  // Fügen Sie den temporären Marker-Layer zur Karte hinzu
+  map.addLayer(tempMarkerLayer);
+}
+
+
+
+function removeTempMarker() {
+  // Durchlaufen Sie alle Karten-Layer und entfernen Sie alle, die als temporärer Marker markiert sind
+  alert('xxmarker ');
+  map.getLayers().getArray().forEach(function (layer) {
+    if (layer.get('tempMarker')) {
+      map.removeLayer(layer);
+    }
+  });
+}
 
 const attribution = new Attribution({
   collapsible: false,
@@ -87,7 +161,7 @@ const exp_allgm_fsk_layer = new VectorLayer({
   minResolution: 0,
   maxResolution: 4
 })
-const osmTile = new TileLayer({
+ const osmTile = new TileLayer({
   title: "osm",
   type: 'base',
   source: new OSM({
@@ -95,6 +169,7 @@ const osmTile = new TileLayer({
       attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   }),
 });
+
 const pointerMoveHandler = function (evt) {
   if (evt.pointerType === 'touch') {
     if (evt.dragging) {
