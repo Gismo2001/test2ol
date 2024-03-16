@@ -1,367 +1,290 @@
-import './style.css';
-//import { bwBruAndereStyle, bwBruNlwknStyle } from './myStyleJs';
-import Map from 'ol/Map.js';
-import View from 'ol/View.js';
-import TileLayer from 'ol/layer/Tile.js';
-import TileWMS from 'ol/source/TileWMS.js';
-import { Vector } from 'ol/layer';
-import { Vector as VectorLayer } from 'ol/layer';
-import { GeoJSON } from 'ol/format';
-import { fromLonLat } from 'ol/proj';
-import OSM from 'ol/source/OSM';
-import { Attribution, defaults as defaultControls } from 'ol/control.js';
-import { ZoomToExtent } from 'ol/control.js';
-import { Vector as VectorSource } from 'ol/source';
-import { Fill, Stroke, Style, Circle } from 'ol/style';
-import { bbox as loadingstrategyBbox } from 'ol/loadingstrategy';
-import Icon from 'ol/style/Icon';
-//import Style from 'ol/style/Style';
+import GeoJSON from 'ol/format/GeoJSON.js';
+import * as Loadingstrategy from 'ol/loadingstrategy';
+import * as proj from 'ol/proj';
 
-// Import the layer switcher control
-import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
-import Group from 'ol/layer/Group';
+import Draw from 'ol/interaction/Draw.js';
+import Map from 'ol/Map.js';
+import Overlay from 'ol/Overlay.js';
+import View from 'ol/View.js';
+import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
+import {LineString, Polygon} from 'ol/geom.js';
+import {OSM, Vector as VectorSource} from 'ol/source.js';
+import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
+import {getArea, getLength} from 'ol/sphere.js';
+import {unByKey} from 'ol/Observable.js';
+import {Attribution, defaults as defaultControls, Control} from 'ol/control.js';
+
+import { 
+  getStyleForArtEin,
+  gehoelz_vecStyle, 
+  sleStyle, 
+  wehStyle, 
+  bru_nlwknStyle, 
+  bruAndereStyle,
+  dueStyle, 
+  queStyle, 
+  getStyleForArtFSK, 
+  getStyleForArtUmn,
+  son_linStyle, 
+  son_punStyle,
+  km10scalStyle,
+  km100scalStyle,
+  km500scalStyle,
+  machWasMitFSK
+} from './extStyle';
 
 
 const attribution = new Attribution({
-  collapsible: true,
+  collapsible: false,
 });
+const source = new VectorSource();
 
+const vector = new VectorLayer({
+  source: source,
+  style: {
+    'fill-color': 'rgba(255, 255, 255, 0.2)',
+    'stroke-color': '#ffcc33',
+    'stroke-width': 2,
+    'circle-radius': 7,
+    'circle-fill-color': '#ffcc33',
+  },
+});
+let sketch;
+let helpTooltipElement;
+let helpTooltip;
+let measureTooltipElement;
+let measureTooltip;
 
-const bwBruAndereStyle = new Style({
-  image: new Icon({
-    src: './data/bru_andere.svg',  // Hier wird der Pfad relativ zur HTML-Datei angenommen
-    scale: 0.9,
-    visible: false,
-  }),
-});
-const bwBruNlwknStyle = new Style({
-  image: new Icon({
-    src: './data/bru_nlwkn.svg',  // Hier wird der Pfad relativ zur HTML-Datei angenommen
-    scale: 0.9,
-  }),
-});
+const pointerMoveHandler = function (evt) {
+  if (evt.dragging) {
+     return;
+  }
+  let helpMsg = 'Click to start drawing';
+  if (sketch) {
+    const geom = sketch.getGeometry();
+    if (geom instanceof Polygon) {
+      helpMsg = 'Click to continue drawing the polygon';
+    } else if (geom instanceof LineString) {
+      helpMsg = 'Click to continue drawing the line';
+    }
+  }
+
+  if (helpTooltipElement) { // Überprüfen, ob helpTooltipElement definiert ist
+    helpTooltipElement.innerHTML = helpMsg; // Nur wenn helpTooltipElement definiert ist, setzen Sie innerHTML
+    helpTooltip.setPosition(evt.coordinate);
+    helpTooltipElement.classList.remove('hidden');
+  }
+};
 
 const mapView = new View({
-  center: fromLonLat([7.35, 52.7]),
-  zoom: 9,
-});
-const map = new Map({
-  target: 'map',
-  view: mapView,
-  controls: defaultControls().extend([ attribution, new ZoomToExtent({extent: [727361,  6839277, 858148, 6990951, ], }), ]),
+  center: proj.fromLonLat([7.35, 52.7]),
+  zoom: 9
+  });
   
+const map = new Map({
+  target: "map",
+  view: mapView,
+  //controls: defaults().extent([attribution, additionalControl]),
 });
-
-
-const switcher = new LayerSwitcher;
-map.addControl(switcher)
-
 
 const osmTile = new TileLayer({
-  title: 'osm',
+  title: "osm",
   type: 'base',
-  source: new OSM({url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png', }),
+  source: new OSM({
+      url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
+  }),
+});
+map.addLayer(osmTile);
+
+// exp_gew_info
+const gehoelzvecLayer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: Loadingstrategy.bbox }),
+  title: 'Gehölz(Plan)', // Titel für den Layer-Switcher
+  name: 'gehoelz_vec',
+  style: gehoelz_vecStyle,
+  visible: false
 });
 
+const exp_allgm_fsk_layer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_allgm_fsk.geojson' + '?bbox=' + extent.join(','); }, strategy: Loadingstrategy.bbox }),
+  title: 'fsk',
+  name: 'fsk', 
+  style: getStyleForArtFSK,
+  visible: false,
+  minResolution: 0,
+  maxResolution: 4
+})
 
-const  wmsUesgLayer = new TileLayer({
-  title: "ÜSG",
-  name: "ÜSG",
-  source: new TileWMS({
-    url:  'https://www.umweltkarten-niedersachsen.de/arcgis/services/HWSchutz_wms/MapServer/WMSServer',
-    params: {
-      'LAYERS': 'Überschwemmungsgebiete_Verordnungsfläechen_Niedersachsen11182',
-      'FORMAT': 'image/png',
-      'TRANSPARENT': true,
-      'TILED': true,
+map.on('pointermove', pointerMoveHandler);
+let draw;
+
+const formatLength = function (line) {
+  const length = getLength(line);
+  let output;
+  if (length > 100) {
+    output = Math.round((length / 1000) * 100) / 100 + ' ' + 'km';
+  } else {
+    output = Math.round(length * 100) / 100 + ' ' + 'm';
+  }
+  return output;
+};
+const formatArea = function (polygon) {
+  const area = getArea(polygon);
+  let output;
+  if (area > 10000) {
+    output = Math.round((area / 1000000) * 100) / 100 + ' ' + 'km<sup>2</sup>';
+  } else {
+    output = Math.round(area * 100) / 100 + ' ' + 'm<sup>2</sup>';
+  }
+  return output;
+};
+const style = new Style({
+  fill: new Fill({
+    color: 'rgba(255, 255, 255, 0.2)',
+  }),
+  stroke: new Stroke({
+    color: 'rgba(0, 0, 0, 0.5)',
+    lineDash: [10, 10],
+    width: 2,
+  }),
+  image: new CircleStyle({
+    radius: 5,
+    stroke: new Stroke({
+      color: 'rgba(0, 0, 0, 0.7)',
+    }),
+    fill: new Fill({
+      color: 'rgba(255, 255, 255, 0.2)',
+    }),
+  }),
+});
+
+function addInteraction(type) {
+  draw = new Draw({
+    source: source,
+    type: type,
+    style: function (feature) {
+      const geometryType = feature.getGeometry().getType();
+      if (geometryType === type || geometryType === 'Point') {
+        return style;
+      }
     },
-  }),
-  visible: true,
-  opacity: .5,
-});
-
-
-const  wmsNSGLayer = new TileLayer({
-  title: "NSG",
-  name: "NSG",
-  source: new TileWMS({
-    url:  'https://www.umweltkarten-niedersachsen.de/arcgis/services/Natur_wms/MapServer/WMSServer',
-    params: {
-      'LAYERS': 'Naturschutzgebiet',
-      'FORMAT': 'image/png',
-      'TRANSPARENT': true,
-      'TILED': true,
-    },
-  }),
-  visible: true,
-  opacity: .5,
-  TILED: true
-});
-
-const gnAtlas2023 = new TileLayer({
-  source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "10", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "2023",
-  opacity: 1,
-  visible: true,
-});
-const gnAtlas2020 = new TileLayer({
-  source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "9", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "2020",
-  opacity: 1,
-  visible: false,
-});
-const gnAtlas2017 = new TileLayer({
-  source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "8", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "2017",
-  opacity: 1,
-  visible: false,
-});
-const gnAtlas2014 = new TileLayer({
-  source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "7", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "2014",
-  opacity: 1,
-  visible: false,
-});
-const gnAtlas2012 = new TileLayer({
-  source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "6", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "2012",
-  opacity: 1,
-  visible: false,
-});
-const gnAtlas2010 = new TileLayer({
-  source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "5", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "2010",
-  opacity: 1,
-  visible: false,
-});
-const gnAtlas2009 = new TileLayer({
-  source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "4", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "2009",
-  opacity: 1,
-  visible: false,
-});
-const gnAtlas2002 = new TileLayer({
-  source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "3", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "2002",
-  opacity: 1,
-  visible: false,
-});
-const gnAtlas1970 = new TileLayer({
-  source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "2", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "1970",
-  opacity: 1,
-  visible: false,
-});
-const gnAtlas1957 = new TileLayer({
-  source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "1", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "1957",
-  opacity: 1,
-  visible: false,
-});
-const gnAtlas1937 = new TileLayer({
-  source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "0", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "1937",
-  opacity: 1,
-  visible: false,
-});
-
-
-
-const gewLayer = new Vector({
-  source: new VectorSource({
-    format: new GeoJSON(),
-    url: function (extent) {return './myLayers/gew.geojson' + '?bbox=' + extent.join(',');},
-    strategy: loadingstrategyBbox,
-  }),
-  title: 'Gew', // Titel für den Layer-Switcher
-  name: 'gew',
-  style: new Style({
-    fill: new Fill({ color: 'rgba(0, 28, 240, 0.4)' }),
-    stroke: new Stroke({ color: 'blue', width: 2 }),
-  }),
-});
-const bwBruNlwknLayer = new VectorLayer({
-  source: new VectorSource({
-    format: new GeoJSON(),
-    url: function (extent) { return './myLayers/bwBruNlwkn.geojson' + '?bbox=' + extent.join(','); },
-    strategy: loadingstrategyBbox,
-  }),
-  title: 'Brücke (NLWKN)',
-  name: 'bruNlwkn', // Titel für den Layer-Switcher
-  style: bwBruNlwknStyle, // Verwendung des neuen Stils
-  visible: true,
-});
-const bwBruAndereLayer = new VectorLayer({
-  source: new VectorSource({
-    format: new GeoJSON(),
-    url: function (extent) { return './myLayers/bwBruAndere.geojson' + '?bbox=' + extent.join(','); },
-    strategy: loadingstrategyBbox,
-  }),
-  title: 'Brücke (NLWKN)',
-  name: 'bruAndere', // Titel für den Layer-Switcher
-  style: bwBruAndereStyle, // Verwendung des neuen Stils
-  visible: false,
-});
-
-
-const BaseGroup = new Group({
-  title: "Base",
-  fold: true,
-  fold: 'close',
-  layers: [osmTile]
-});
-
-const wmsLayerGroup = new Group({
-  title: "WMS-Lay",
-  visible: false,
-  fold: true,
-  fold: 'close',
-  layers: [wmsUesgLayer, wmsNSGLayer ]
-});
-
-const GNAtlasGroup = new Group({
-  title: "GN-DOP's",
-  visible: false,
-  fold: true,
-  fold: 'close',
-  layers: [ gnAtlas2023, gnAtlas2020, gnAtlas2017, gnAtlas2014, gnAtlas2012, gnAtlas2010, gnAtlas2009, gnAtlas2002, gnAtlas1970, gnAtlas1957, gnAtlas1937]
-});
-
-const BwGroup = new Group({
-  title: "Bauw.",
-  fold: true,
-  fold: 'close',  
-  layers: [ bwBruAndereLayer, bwBruNlwknLayer]
-});
-
-map.addLayer(BaseGroup);
-map.addLayer(GNAtlasGroup);
-map.addLayer(gewLayer);
-map.addLayer(wmsLayerGroup);
-map.addLayer(BwGroup);
-
-
-
-map.on('singleclick', function (evt) {
-  const viewResolution = /** @type {number} */ (mapView.getResolution());
-
-  // ÜSG Layer
-  const urlUesg = wmsUesgLayer.getSource().getFeatureInfoUrl(
-    evt.coordinate,
-    viewResolution,
-    'EPSG:3857',
-    {'INFO_FORMAT': 'text/html'},
-  );
-
-  if (urlUesg) {
-    fetch(urlUesg)
-      .then((response) => response.text())
-      .then((html) => {
-        if (html.trim() !== '') {
-          createAndShowInfoDiv(html, 'ÜSG Layer');
-        }
-      });
-  }
-
-  // NSG Layer
-  const urlNsg = wmsNSGLayer.getSource().getFeatureInfoUrl(
-    evt.coordinate,
-    viewResolution,
-    'EPSG:3857',
-    {'INFO_FORMAT': 'text/html'},
-  );
-
-  if (urlNsg) {
-    fetch(urlNsg)
-      .then((response) => response.text())
-      .then((html) => {
-        if (html.trim() !== '') {
-          createAndShowInfoDiv(html, 'NSG Layer');
-        }
-      });
-  }
-});
-
-function createAndShowInfoDiv(html, layerName) {
-  const existingInfoDiv = document.getElementById('info');
-  if (existingInfoDiv) {
-    // Lösche das vorhandene div-Element, wenn es bereits existiert
-    existingInfoDiv.remove();
-  }
-
-  const infoDiv = document.createElement('div');
-  infoDiv.id = 'info';
-  infoDiv.style.border = '1px solid black';
-  infoDiv.innerHTML = `<strong>${layerName}</strong><br>${html}`;
-
-  const closeIcon = document.createElement('span');
-  closeIcon.id = 'closeIcon';
-  closeIcon.innerHTML = '&times;';
-  closeIcon.style.position = 'absolute';
-  closeIcon.style.top = '5px';
-  closeIcon.style.right = '5px';
-  closeIcon.style.cursor = 'pointer';
-  closeIcon.style.fontSize = '20px';
-
-  closeIcon.addEventListener('click', function () {
-    infoDiv.style.display = 'none';
   });
-
-  infoDiv.appendChild(closeIcon);
-
-  // Füge das Info-Element dem Dokument hinzu
-  document.body.appendChild(infoDiv);
+  map.addInteraction(draw);
+  createMeasureTooltip();
+  createHelpTooltip();
+  map.getViewport().addEventListener('mouseout', function () {
+    helpTooltipElement.classList.add('hidden');
+  });
+  
+  let listener;
+  draw.on('drawstart', function (evt) {
+    sketch = evt.feature;
+    let tooltipCoord = evt.coordinate;
+    listener = sketch.getGeometry().on('change', function (evt) {
+      const geom = evt.target;
+      let output;
+      if (geom instanceof Polygon) {
+        output = formatArea(geom);
+        tooltipCoord = geom.getInteriorPoint().getCoordinates();
+      } else if (geom instanceof LineString) {
+        output = formatLength(geom);
+        tooltipCoord = geom.getLastCoordinate();
+      }
+      measureTooltipElement.innerHTML = output;
+      measureTooltip.setPosition(tooltipCoord);
+    });
+  });
+  draw.on('drawend', function () {
+    measureTooltipElement.className = 'ol-tooltip ol-tooltip-static';
+    measureTooltip.setOffset([0, -7]);
+    sketch = null;
+    measureTooltipElement = null;
+    createMeasureTooltip();
+    unByKey(listener);
+  });
 }
 
-map.on('pointermove', function (evt) {
-  if (evt.dragging) {
-    return;
+function createHelpTooltip() {
+  if (helpTooltipElement) {
+    helpTooltipElement.parentNode.removeChild(helpTooltipElement);
   }
-  const data = wmsUesgLayer.getData(evt.pixel);
-  const hit = data && data[3] > 0; // transparent pixels have zero for data[3]
-  map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+  helpTooltipElement = document.createElement('div');
+  helpTooltipElement.className = 'ol-tooltip hidden';
+  helpTooltip = new Overlay({
+    element: helpTooltipElement,
+    offset: [15, 0],
+    positioning: 'center-left',
+  });
+  map.addOverlay(helpTooltip);
+}
+
+function createMeasureTooltip() {
+  if (measureTooltipElement) {
+    measureTooltipElement.parentNode.removeChild(measureTooltipElement);
+  }
+  measureTooltipElement = document.createElement('div');
+  measureTooltipElement.className = 'ol-tooltip ol-tooltip-measure';
+  measureTooltip = new Overlay({
+    element: measureTooltipElement,
+    offset: [0, -15],
+    positioning: 'bottom-center',
+    stopEvent: false,
+    insertFirst: false,
+  });
+  map.addOverlay(measureTooltip);
+}
+
+class CustomControls extends Control {
+  constructor(options) {
+    const element = document.createElement('div');
+    element.className = 'custom-controls ol-unselectable ol-control';
+    const buttonLength = document.createElement('button');
+    buttonLength.innerHTML = 'L';
+    buttonLength.className = 'ol-button';
+    buttonLength.addEventListener('click', function() {
+      alert('doppelclick um linie abzuschließen, zum beenden rechtsclick');
+      addInteraction('LineString');
+    });
+    const buttonArea = document.createElement('button');
+    buttonArea.innerHTML = 'F';
+    buttonArea.className = 'ol-button';
+    buttonArea.addEventListener('click', function() {
+      alert('doppelclick um linie abzuschließen, zum beenden rechtsclick');
+      addInteraction('Polygon');
+    });
+    element.appendChild(buttonLength);
+    element.appendChild(buttonArea);
+
+    super({
+      element: element,
+      target: options.target,
+    });
+  }
+}
+
+map.addControl(new CustomControls({
+  target: 'custom-controls'
+}));
+
+map.getViewport().addEventListener('contextmenu', function(evt) {
+  evt.preventDefault(); // Verhindert das Standardkontextmenü
+  if (draw) {
+    console.log('beenden');
+    source.clear(); // Löscht alle Vektoren aus der Quelle
+    draw.finishDrawing(); // Beendet die laufende Messung
+    map.removeInteraction(draw); // Entfernt die Zeicheninteraktion
+    map.un('pointermove', pointerMoveHandler); // Entfernt den Event-Listener für 'pointermove'
+    map.removeOverlay(measureTooltip); // Entfernt das Messergebnis-Tooltip
+    map.removeOverlay(helpTooltip);
+    return; // Beende die Funktion, um weitere Interaktionen zu verhindern
+  }
 });
+
+map.addLayer(vector);
+
+
+
+
+
+map.addLayer(gehoelzvecLayer, exp_allgm_fsk_layer);

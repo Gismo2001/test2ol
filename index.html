@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>GB1 Web Map</title>
-    <link rel="icon" type="image/x-icon" href="https://openlayers.org/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="node_modules/ol/ol.css">
-    <link rel="stylesheet" href="style.css">
- 
-    <title>First OpenLayers with Vite</title>
-  </head>
-  <body>
+<head>
+  <meta charset="UTF-8">
+  <title>Measure</title>
+  <link rel="stylesheet" href="node_modules/ol/ol.css">
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+   </style>
+</head>
+<body>
+  <div class="map-container">
     <div id="map" class="map"></div>
-    
-    <script type="module" src="main.js"></script>
-  </body>
+    <div id="custom-controls" class="custom-controls"></div>
+  </div>
+  <script type="module" src="main.js"></script>
+</body>
 </html>

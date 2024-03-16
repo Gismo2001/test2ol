@@ -1,6 +1,7 @@
 @import "node_modules/ol/ol.css";
 @import "node_modules/ol-ext/dist/ol-ext.css";
 
+
 html, body {
   margin: 0;
   height: 100%;
@@ -13,13 +14,25 @@ html, body {
   width: 100%;
 }
 
+.ol-button {
+  display: block;
+  margin-bottom: 5px;
+  padding: 5px 10px;
+  background-color: #0078d4;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+.ol-button:hover {
+  background-color: #005a9e;
+}
 
-#info {
+.custom-controls {
   position: absolute;
   top: 50px;
-  left: 50px;
-  background-color: white; /* Ändere die Hintergrundfarbe auf weiß */
-  /* opacity: 1; */ /* Entferne oder setze die Opazität auf 1 */
+  left: 5px;
   z-index: 1000;
-  /* Weitere CSS-Stile nach Bedarf hinzufügen */
 }
