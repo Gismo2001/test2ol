@@ -40,7 +40,7 @@ body{
   z-index: 1000;
 }
 .custom-controls button {
-  font-size: 1em; /* Ändern Sie die Schriftgröße der Schaltflächen */
+  font-size: 16px;
 }
 
 @media only screen and (max-width: 600px) {
