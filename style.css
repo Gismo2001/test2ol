@@ -26,7 +26,6 @@ body{
   border: none;
   border-radius: 3px;
   cursor: pointer;
-  font-size: 16px;
   transition: background-color 0.3s ease;
 }
 .ol-button:hover {
@@ -35,15 +34,9 @@ body{
 
 .custom-controls {
   position: absolute;
+  font-size: 16px;
   top: 50px;
   left: 5px;
   z-index: 1000;
 }
 
-@media only screen and (max-width: 600px) {
-  #map {
-    width: 100%; /* Vollständige Breite des Bildschirms auf Smartphones */
-    height: 100vh; /* Höhe auf 50% der Bildschirmhöhe begrenzen */
-  }
-
-}
