@@ -142,11 +142,13 @@ const map = new Map({
   controls: defaultControls().extend([attribution, additionalControl]),
 });
 
-const sourceP = new VectorSource();
+const source = new VectorSource();
 const layerP = new VectorLayer({
-  source: sourceP,
+  source: source,
+  title: 'Position',
+  name: 'Position'
 });
-map.addLayer(layerP);
+
 
 
 navigator.geolocation.watchPosition(
@@ -159,8 +161,6 @@ navigator.geolocation.watchPosition(
         accuracy.transform('EPSG:4326', map.getView().getProjection())
       ),
       new Feature(new Point(proj.fromLonLat(coords))),
-      
-
     ]);
   },
   function (error) {
@@ -192,10 +192,10 @@ map.addControl(
 
 
 // Layer für Messung
-const source = new VectorSource();
+
 const vectorM = new VectorLayer({
   displayInLayerSwitcher: false,
-  source: source,
+  source: new VectorSource(),
   style: {
     'fill-color': 'rgba(255, 255, 255, 0.2)',
     'stroke-color': '#ffcc33',
@@ -1134,3 +1134,5 @@ document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
   return false;
 };
+
+map.addLayer(layerP);
