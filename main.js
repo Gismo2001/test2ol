@@ -765,19 +765,11 @@ class CustomControls2 extends Control {
     // Event-Listener für den Klick auf den Button hinzufügen
     buttonPosition.addEventListener('click', function() {
       console.log('Position geklickt');
-      var trackingWasAlreadyOn = geolocation.getTracking();
-      if (trackingWasAlreadyOn) {
-        stopTracking();
-      } else {
-        startTracking();
-      }
-      handleGetPosition();
     });
 
     // Event-Listener für das Touch-Ereignis auf dem Button hinzufügen
     buttonPosition.addEventListener('touchstart', function() {
       console.log('Position (Touch) geklickt');
-      handleGetPosition();
     });
 
     element.appendChild(buttonPosition);
@@ -787,12 +779,19 @@ class CustomControls2 extends Control {
     });
   }
 }
-
 map.addControl(new CustomControls2({
   target: 'custom-controls'
 }));
 
 
+//Button für Postionierung hinzufügen
+var element = document.createElement('div');
+element.className = 'get-position ol-unselectable ol-control';
+element.id = "Button";
+const button = document.createElement('button');
+button.innerHTML = 'P';
+element.appendChild(button);
+document.body.appendChild(element);
 
 // Neues Objekt der Klasse ol.Geolocation
 var geolocation = new Geolocation({
@@ -808,7 +807,6 @@ function getPosition() {
 }
 
 var handleGetPosition = function(e) {
-  console.log("handelposition aufgerufen")
   var trackingWasAlreadyOn = geolocation.getTracking(); 
   if (trackingWasAlreadyOn) { 
     geolocation.setTracking(false);
@@ -819,8 +817,14 @@ var handleGetPosition = function(e) {
   } 
 };
 
+//EventListener für Positionierungsbutton
+button.addEventListener('click', handleGetPosition, false);
+button.addEventListener('touchstart', handleGetPosition, false);
+
+
 var accuracyFeature = new Feature();
 var positionFeature = new Feature();
+
 
 // Funktion zum Aktualisieren der Position
 function updatePosition() {
@@ -847,10 +851,16 @@ function stopTracking() {
   accuracyFeature.setGeometry(null);
   positionFeature.setGeometry(null);
 }
-
-//EventListener für Positionierungsbutton
-//button.addEventListener('click', handleGetPosition, false);
-//button.addEventListener('touchstart', handleGetPosition, false);
+// Event-Listener für den Button
+button.addEventListener('click', function() {
+  
+  var trackingWasAlreadyOn = geolocation.getTracking();
+  if (trackingWasAlreadyOn) {
+    stopTracking();
+  } else {
+    startTracking();
+  }
+});
 
 
 
