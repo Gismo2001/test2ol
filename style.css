@@ -80,6 +80,12 @@ pointer-events: none;
   color: white; /* Weiße Schriftfarbe im aktiven Zustand */
 }
 
+.locateMStyle {
+  top: 250px;
+  left: 8px;
+}
+
+
 .tooltip {
   background-color: white;
   border: 1px solid #ccc;

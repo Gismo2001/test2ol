@@ -45,9 +45,6 @@ import {
 } from './extStyle';
 import { calcSumme } from './myFunc.js';
 
-///////Test
-var ergebnis = calcSumme(5, 3);
-console.log(ergebnis);
 
 window.searchAddress = function searchAddress() {
   var address = document.getElementById('addressInput').value;
@@ -66,7 +63,7 @@ window.searchAddress = function searchAddress() {
         map.getView().setZoom(17); // Zoom-Level anpassen
 
         // Temporären Marker hinzufügen
-        console.log (location.lng, location.lat);
+        
         addTempMarker([location.lng, location.lat]);
       } else {
         // Adresse nicht gefunden, Meldung ausgeben
@@ -74,7 +71,8 @@ window.searchAddress = function searchAddress() {
       }
     })
     .catch(error => {
-      console.error('Geokodierung-Fehler:', error);
+      alert('Geokodierung-Fehler:', error);
+      
       removeTempMarker();
     });
 }
@@ -118,15 +116,13 @@ function removeTempMarker() {
 const attribution = new Attribution({
   collapsible: false,
 });
-//attribution.element.className = 'ol-button'; // Füge die Klasse ol-button hinzu
-
 const additionalControl = new ZoomToExtent({
   extent: [
     727361,  6839277, 858148,
     6990951,
   ],
 });
-//additionalControl.element.className = 'ol-button'; // Füge die Klasse ol-button hinzu
+
 
 const mapView = new View({
   center: proj.fromLonLat([7.35, 52.7]),
@@ -137,11 +133,13 @@ const map = new Map({
   view: mapView,
   controls: defaultControls().extend([attribution, additionalControl]),
 });
+
 const sourceP = new VectorSource();
 let layerP = null; // Initial kein Layer vorhanden
 let isFirstZoom = true; // Variable, um den ersten Zoom zu verfolgen
 let watchId = null; // Variable, um die Watch-ID der Geolokalisierung zu speichern
 
+//Button für Positionierung
 const locateP = document.createElement('div');
 locateP.className = 'ol-control ol-unselectable locate';
 locateP.innerHTML = '<button title="Locate me">◎</button>';
@@ -169,26 +167,42 @@ locateP.addEventListener('click', function () {
         sourceP.clear(true);
         sourceP.addFeatures([
           new Feature(accuracy.transform('EPSG:4326', map.getView().getProjection())),
-          new Feature(new Point(proj.fromLonLat(coords))),
+          new Feature(new Point(proj.fromLonLat(coords) ) ),
+          
         ]);
 
         // Führe den Zoom nur beim ersten Mal aus
         if (isFirstZoom) {
-          map.getView().fit(sourceP.getExtent(), { maxZoom: 18, duration: 500 }); // Korrigierte Schließung der fit-Methode
+          map.getView().fit(sourceP.getExtent(), { maxZoom: 18, duration: 500 }); 
           isFirstZoom = false; // Setze isFirstZoom auf false, um zukünftige Zooms zu verhindern
         }
 
         // Füge den Layer hinzu, um die Position anzuzeigen
+        // Füge den Layer hinzu, um die Position anzuzeigen
         if (!layerP) {
           layerP = new VectorLayer({
+            displayInLayerSwitcher: false,
+            style: new Style({
+              image: new CircleStyle({
+                radius: 8,
+                opacity: 0.5,
+                fill: new Fill({
+                  color: 'red'
+                }),
+                stroke: new Stroke({
+                  color: 'black',
+                  width: 2
+                })
+              })
+            }),
             source: sourceP,
-            title: 'Position',
-            name: 'Position',
+            title: 'Null',
+            name: 'Null',
             zIndex: 9999,
           });
           map.addLayer(layerP);
-        }
-      },
+          }
+        },
       function (error) {
         alert(`ERROR: ${error.message}`);
       },
@@ -218,23 +232,6 @@ map.addControl(
   })
 );
 
-// Layer für Messung
-const source = new VectorSource();
-const vector = new VectorLayer({
-  source: source,
-  style: {
-    'fill-color': 'rgba(255, 255, 255, 0.2)',
-    'stroke-color': '#ffcc33',
-    'stroke-width': 2,
-    'circle-radius': 7,
-    'circle-fill-color': '#ffcc33',
-  },
-});
-let sketch;
-let helpTooltipElement;
-let helpTooltip;
-let measureTooltipElement;
-let measureTooltip;
 
 const gehoelz_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
@@ -631,6 +628,26 @@ const osmTile = new TileLayer({
 const layerSwitcher = new LayerSwitcher({ });
 map.addControl(layerSwitcher);
 
+// Layer für Messung
+const source = new VectorSource();
+const vector = new VectorLayer({
+  displayInLayerSwitcher: false,
+  source: source,
+  style: {
+    'fill-color': 'rgba(255, 255, 255, 0.2)',
+    'stroke-color': '#ffcc33',
+    'stroke-width': 2,
+    'circle-radius': 7,
+    'circle-fill-color': '#ffcc33',
+  },
+});
+let sketch;
+let helpTooltipElement;
+let helpTooltip;
+let measureTooltipElement;
+let measureTooltip;
+
+
 // Funktionen für Messung
 const pointerMoveHandler = function (evt) {
   if (evt.pointerType === 'touch') {
@@ -790,16 +807,33 @@ function createMeasureTooltip() {
 map.getViewport().addEventListener('contextmenu', function(evt) {
   evt.preventDefault(); // Verhindert das Standardkontextmenü
   if (draw) {
-    console.log('beenden');
+    
     source.clear(); // Löscht alle Vektoren aus der Quelle
     draw.finishDrawing(); // Beendet die laufende Messung
     map.removeInteraction(draw); // Entfernt die Zeicheninteraktion
     map.un('pointermove', pointerMoveHandler); // Entfernt den Event-Listener für 'pointermove'
-    map.removeOverlay(measureTooltip); // Entfernt das Messergebnis-Tooltip
-    map.removeOverlay(helpTooltip); // Entfernt das Help-Tooltip
+    removeAllOverlays();
     return; // Beende die Funktion, um weitere Interaktionen zu verhindern
   }
 });
+
+
+// Funktion zum Entfernen aller Overlays von der Karte
+function removeAllOverlays() {
+  // Alle Overlays der Karte abrufen
+  const overlays = map.getOverlays().getArray();
+  
+  // Über jedes Overlay iterieren und es von der Karte entfernen
+  overlays.forEach(function(overlay) {
+    map.removeOverlay(overlay);
+  });
+}
+
+
+
+
+
+
 
 
 //Custom Controls 1 und 2
@@ -811,14 +845,14 @@ class CustomControls1 extends Control {
     buttonLength.innerHTML = 'L';
     buttonLength.className = 'ol-button';
     buttonLength.addEventListener('click', function() {
-      console.log('länge gecklickt')
+      
       addInteraction('LineString');
     });
     const buttonArea = document.createElement('button');
     buttonArea.innerHTML = 'F';
     buttonArea.className = 'ol-button';
     buttonArea.addEventListener('click', function() {
-      console.log('Fläche gecklickt')
+      
       addInteraction('Polygon');
     });
     element.appendChild(buttonLength);
@@ -845,12 +879,12 @@ class CustomControls2 extends Control {
 
     // Event-Listener für den Klick auf den Button hinzufügen
     buttonPosition.addEventListener('click', function() {
-      console.log('Position geklickt');
+      
     });
 
     // Event-Listener für das Touch-Ereignis auf dem Button hinzufügen
     buttonPosition.addEventListener('touchstart', function() {
-      console.log('Position (Touch) geklickt');
+      
     });
 
     element.appendChild(buttonPosition);
@@ -948,13 +982,14 @@ map.on('singleclick', function (evt) {
               }
             })
             .catch((error) => {
-              console.error('Fehler beim Abrufen der Informationen:', error);
+              alert('Position nicht gefunden, Standortermittlung aktiv??');
+              
             });
         }
       }
     });
   } else {
-    console.log('Die wmsLayerGroup ist nicht eingeschaltet.');
+    
   }
 });
 function createInfoDiv(name, html) {
@@ -1015,7 +1050,7 @@ map.on('click', function (evt) {
     };
     // Popup soll nur für bestimmte Layernamen angezeigt werden
     if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'son_lin') {
-      console.log('Clicked on layer:', layname);
+      
       machWasMitFSK(feature);
       if (feature) {
         coordinates = feature.getGeometry().getCoordinates();
