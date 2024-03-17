@@ -70,9 +70,16 @@ pointer-events: none;
   margin-right: 10px; /* Ändere den Abstand zum "X" nach Bedarf */
 }
 .locate {
-  top: 100px;
+  top: 125px;
   left: 8px;
 }
+.locate.active {
+  background-color: #4CAF50; /* Grüne Hintergrundfarbe im aktiven Zustand */
+}
+.locate.active button {
+  color: white; /* Weiße Schriftfarbe im aktiven Zustand */
+}
+
 .tooltip {
   background-color: white;
   border: 1px solid #ccc;
@@ -102,14 +109,14 @@ pointer-events: none;
 
 .custom-controls1 {
   position: absolute;
-  top: 150px;
+  top: 175px;
   left: 8px;
   z-index: 1001;
 }
 
 .custom-controls2 {
   position: absolute;
-  top: 225px;
+  top: 250px;
   left: 8px;
   z-index: 1002;
 }

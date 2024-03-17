@@ -136,6 +136,7 @@ const mapView = new View({
   center: proj.fromLonLat([7.35, 52.7]),
   zoom: 9
 });
+
 const map = new Map({
   target: "map",
   view: mapView,
@@ -149,40 +150,60 @@ const layerP = new VectorLayer({
   name: 'Position'
 });
 
-navigator.geolocation.watchPosition(
-  function (pos) {
-    const coords = [pos.coords.longitude, pos.coords.latitude];
-    const accuracy = circular(coords, pos.coords.accuracy);
-    source.clear(true);
-    source.addFeatures([new Feature(accuracy.transform('EPSG:4326', map.getView().getProjection())), new Feature(new Point(proj.fromLonLat(coords))),]);
-  },
-  function (error) {
-    alert(`ERROR: ${error.message}`);
-  },
-  {
-    enableHighAccuracy: true,
-  }
-);
+let watchId = null; // Variable, um die Watch-ID der Geolokalisierung zu speichern
 
 const locateP = document.createElement('div');
 locateP.className = 'ol-control ol-unselectable locate';
 locateP.innerHTML = '<button title="Locate me">◎</button>';
-locateP.addEventListener('click', function () {
-  if (!source.isEmpty()) {
-    map.getView().fit(source.getExtent(), {
-      maxZoom: 18,
-      duration: 500,
-    });
+let isActive = false; // Variable, um den Aktivierungsstatus der Geolokalisierung zu verfolgen
+
+// Funktion zum Aktualisieren des Aussehens des Buttons basierend auf dem Aktivierungsstatus
+function updateButtonAppearance() {
+  if (isActive) {
+    locateP.classList.add('active'); // Füge die Klasse 'active' hinzu, um den aktiven Zustand anzuzeigen
+  } else {
+    locateP.classList.remove('active'); // Entferne die Klasse 'active', um den deaktivierten Zustand anzuzeigen
   }
+}
+
+locateP.addEventListener('click', function () {
+  if (!watchId) {
+    // Starte die Geolokalisierung, wenn sie nicht aktiv ist
+    isActive = true; // Richtiges Zuweisen von isActive
+    watchId = navigator.geolocation.watchPosition(
+      function (pos) {
+        const coords = [pos.coords.longitude, pos.coords.latitude];
+        const accuracy = circular(coords, pos.coords.accuracy);
+        source.clear(true);
+        source.addFeatures([
+          new Feature(accuracy.transform('EPSG:4326', map.getView().getProjection())),
+          new Feature(new Point(proj.fromLonLat(coords))),
+        ]);
+      },
+      function (error) {
+        alert(`ERROR: ${error.message}`);
+      },
+      {
+        enableHighAccuracy: true,
+      }
+    );
+    map.addLayer(layerP); // Füge den Layer hinzu, um die Position anzuzeigen
+  } else {
+    // Beende die Geolokalisierung und entferne den Layer, wenn sie bereits aktiv ist
+    navigator.geolocation.clearWatch(watchId);
+    source.clear(true);
+    map.removeLayer(layerP); // Entferne den Layer, um die Position nicht mehr anzuzeigen
+    isActive = false; // Richtiges Zuweisen von isActive
+    watchId = null; // Setze die Watch-ID auf null, um anzuzeigen, dass die Geolokalisierung deaktiviert ist
+  }
+  updateButtonAppearance(); // Aktualisieren Sie das Erscheinungsbild des Buttons basierend auf dem aktualisierten isActive-Status
 });
+
 map.addControl(
   new Control({
     element: locateP,
   })
 );
-
-
-
 
 // Layer für Messung
 
@@ -1128,4 +1149,3 @@ document.getElementById('popup-closer').onclick = function () {
   return false;
 };
 
-map.addLayer(layerP);
