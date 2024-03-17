@@ -7,8 +7,8 @@ import Feature from 'ol/Feature';
 import Overlay from 'ol/Overlay.js';
 import Draw from 'ol/interaction/Draw.js';
 import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
-import Geolocation from 'ol/Geolocation.js';
 import {circular} from 'ol/geom/Polygon';
+import Geolocation from 'ol/Geolocation.js';
 
 import {Circle as CircleStyle, Fill, Stroke,Style} from 'ol/style.js';
 
@@ -17,7 +17,6 @@ import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import TileWMS from 'ol/source/TileWMS.js';
 import TileImage from 'ol/source/TileImage.js';
 import XYZ from 'ol/source/XYZ.js';
-
 
 import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
@@ -45,9 +44,6 @@ import {
   machWasMitFSK
 } from './extStyle';
 import { calcSumme } from './myFunc.js';
-
-
-
 
 ///////Test
 var ergebnis = calcSumme(5, 3);
@@ -136,19 +132,13 @@ const mapView = new View({
   center: proj.fromLonLat([7.35, 52.7]),
   zoom: 9
 });
-
 const map = new Map({
   target: "map",
   view: mapView,
   controls: defaultControls().extend([attribution, additionalControl]),
 });
-
-const source = new VectorSource();
-const layerP = new VectorLayer({
-  source: source,
-  title: 'Position',
-  name: 'Position'
-});
+const sourceP = new VectorSource();
+let layerP = null; // Initial kein Layer vorhanden
 
 let watchId = null; // Variable, um die Watch-ID der Geolokalisierung zu speichern
 
@@ -174,11 +164,23 @@ locateP.addEventListener('click', function () {
       function (pos) {
         const coords = [pos.coords.longitude, pos.coords.latitude];
         const accuracy = circular(coords, pos.coords.accuracy);
-        source.clear(true);
-        source.addFeatures([
+        sourceP.clear(true);
+        sourceP.addFeatures([
           new Feature(accuracy.transform('EPSG:4326', map.getView().getProjection())),
           new Feature(new Point(proj.fromLonLat(coords))),
         ]);
+        map.getView().fit(sourceP.getExtent(), { maxZoom: 18, duration: 500 }); // Korrigierte Schließung der fit-Methode
+
+        // Füge den Layer hinzu, um die Position anzuzeigen
+        if (!layerP) {
+          layerP = new VectorLayer({
+            source: sourceP,
+            title: 'Position',
+            name: 'Position',
+            zIndex: 9999,
+          });
+          map.addLayer(layerP);
+        }
       },
       function (error) {
         alert(`ERROR: ${error.message}`);
@@ -187,14 +189,17 @@ locateP.addEventListener('click', function () {
         enableHighAccuracy: true,
       }
     );
-    map.addLayer(layerP); // Füge den Layer hinzu, um die Position anzuzeigen
   } else {
-    // Beende die Geolokalisierung und entferne den Layer, wenn sie bereits aktiv ist
+    // Beende die Geolokalisierung, wenn sie bereits aktiv ist
     navigator.geolocation.clearWatch(watchId);
-    source.clear(true);
-    map.removeLayer(layerP); // Entferne den Layer, um die Position nicht mehr anzuzeigen
-    isActive = false; // Richtiges Zuweisen von isActive
     watchId = null; // Setze die Watch-ID auf null, um anzuzeigen, dass die Geolokalisierung deaktiviert ist
+    isActive = false; // Richtiges Zuweisen von isActive
+
+    // Entferne den Layer, um die Position nicht mehr anzuzeigen
+    if (layerP) {
+      map.removeLayer(layerP);
+      layerP = null;
+    }
   }
   updateButtonAppearance(); // Aktualisieren Sie das Erscheinungsbild des Buttons basierend auf dem aktualisierten isActive-Status
 });
@@ -205,11 +210,11 @@ map.addControl(
   })
 );
 
-// Layer für Messung
 
-const vectorM = new VectorLayer({
-  displayInLayerSwitcher: false,
-  source: new VectorSource(),
+// Layer für Messung
+const source = new VectorSource();
+const vector = new VectorLayer({
+  source: source,
   style: {
     'fill-color': 'rgba(255, 255, 255, 0.2)',
     'stroke-color': '#ffcc33',
@@ -705,8 +710,8 @@ function addInteraction(type) {
   draw = new Draw({
     source: source,
     type: type,
-    style: function (featureM) {
-      const geometryType = featureM.getGeometry().getType();
+    style: function (feature) {
+      const geometryType = feature.getGeometry().getType();
       if (geometryType === type || geometryType === 'Point') {
         return style;
       }
@@ -721,7 +726,7 @@ function addInteraction(type) {
   
   let listener;
   draw.on('drawstart', function (evt) {
-    sketch = evt.featureM;
+    sketch = evt.feature;
     let tooltipCoord = evt.coordinate;
     listener = sketch.getGeometry().on('change', function (evt) {
       const geom = evt.target;
@@ -831,9 +836,14 @@ class CustomControls2 extends Control {
     buttonPosition.innerHTML = 'P';
     buttonPosition.className = 'ol-button';
 
-    // Event-Listener für Position
+    // Event-Listener für den Klick auf den Button hinzufügen
     buttonPosition.addEventListener('click', function() {
       console.log('Position geklickt');
+    });
+
+    // Event-Listener für das Touch-Ereignis auf dem Button hinzufügen
+    buttonPosition.addEventListener('touchstart', function() {
+      console.log('Position (Touch) geklickt');
     });
 
     element.appendChild(buttonPosition);
@@ -843,9 +853,14 @@ class CustomControls2 extends Control {
     });
   }
 }
+
 map.addControl(new CustomControls2({
   target: 'custom-controls'
 }));
+
+
+
+
 
 
 const BwGroupP = new LayerGroup({
@@ -894,8 +909,7 @@ map.addLayer(wmsLayerGroup);
 map.addLayer(kmGroup);
 map.addLayer(BwGroupL);
 map.addLayer(BwGroupP);
-map.addLayer(vectorM); 
-
+map.addLayer(vector); 
 
 //Info für WMS-Layer
 map.on('singleclick', function (evt) {
@@ -985,7 +999,6 @@ map.on('click', function (evt) {
     var txtPopupCloser = document.getElementById('popup-closer');
     txtPopupCloser.innerHTML = (txtName);
     */
-    console.log ('feature gefunden')
     var layname = layer.get('name');
     var coordinates = evt.coordinates;
     var beschreibLangValue = feature.get('beschreib_lang');
@@ -1148,4 +1161,3 @@ document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
   return false;
 };
-
