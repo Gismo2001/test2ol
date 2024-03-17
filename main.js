@@ -140,6 +140,7 @@ const map = new Map({
 // Layer für Messung
 const source = new VectorSource();
 const vector = new VectorLayer({
+  displayInLayerSwitcher: false,
   source: source,
   style: {
     'fill-color': 'rgba(255, 255, 255, 0.2)',
@@ -636,8 +637,8 @@ function addInteraction(type) {
   draw = new Draw({
     source: source,
     type: type,
-    style: function (feature) {
-      const geometryType = feature.getGeometry().getType();
+    style: function (featureM) {
+      const geometryType = featureM.getGeometry().getType();
       if (geometryType === type || geometryType === 'Point') {
         return style;
       }
@@ -652,7 +653,7 @@ function addInteraction(type) {
   
   let listener;
   draw.on('drawstart', function (evt) {
-    sketch = evt.feature;
+    sketch = evt.featureM;
     let tooltipCoord = evt.coordinate;
     listener = sketch.getGeometry().on('change', function (evt) {
       const geom = evt.target;
@@ -783,7 +784,6 @@ map.addControl(new CustomControls2({
   target: 'custom-controls'
 }));
 
-
 //Button für Postionierung hinzufügen
 var element = document.createElement('div');
 element.className = 'get-position ol-unselectable ol-control';
@@ -792,6 +792,7 @@ const button = document.createElement('button');
 button.innerHTML = 'P';
 element.appendChild(button);
 document.body.appendChild(element);
+
 
 // Neues Objekt der Klasse ol.Geolocation
 var geolocation = new Geolocation({
@@ -810,9 +811,11 @@ var handleGetPosition = function(e) {
   var trackingWasAlreadyOn = geolocation.getTracking(); 
   if (trackingWasAlreadyOn) { 
     geolocation.setTracking(false);
+    console.log ("geolocation auf false");
     //** CODE HERE TO REMOVE THE LAYER **
   } else { 
     geolocation.setTracking(true); 
+    console.log ("geolocation auf true");
     getPosition(); 
   } 
 };
@@ -853,11 +856,13 @@ function stopTracking() {
 }
 // Event-Listener für den Button
 button.addEventListener('click', function() {
-  
+  console.log ("button gecklickt")
   var trackingWasAlreadyOn = geolocation.getTracking();
   if (trackingWasAlreadyOn) {
+    console.log ("tracking wird gestoppt");
     stopTracking();
   } else {
+    console.log ("tracking wird gestartet");
     startTracking();
   }
 });
@@ -1026,6 +1031,7 @@ map.on('click', function (evt) {
     var txtPopupCloser = document.getElementById('popup-closer');
     txtPopupCloser.innerHTML = (txtName);
     */
+    console.log ('feature gefunden')
     var layname = layer.get('name');
     var coordinates = evt.coordinates;
     var beschreibLangValue = feature.get('beschreib_lang');
