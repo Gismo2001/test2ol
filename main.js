@@ -88,13 +88,13 @@ inputElement.addEventListener('keydown', function (event) {
 // Marker für Positionsmarkierung zur Adresssuche
 function addTempMarker(coordinates) {
   var tempMarkerLayer = new VectorLayer({
-    source: new VectorSource({
+    sourceL: new VectorSource({
       features: [new Feature({
         geometry: new Point(coordinates),
       })]
     }),
-    style: new Style({
-      image: new CircleGeom({
+    styleL: new Style({
+      image: new Circle({
         radius: 20, // Radius des Kreises
         fill: new Fill({ color: 'red' }), // Ändern Sie die Füllfarbe des Kreises auf Rot
         stroke: new Stroke({ color: 'black', width: 2 }) // Randfarbe und -breite des Kreises bleiben unverändert
@@ -110,7 +110,7 @@ function removeTempMarker() {
   alert('xxmarker ');
   map.getLayers().getArray().forEach(function (layer) {
     if (layer.get('tempMarker')) {
-      map.removeLayer(layer);
+      map.removeLayer(layerL);
     }
   });
 }
@@ -139,7 +139,7 @@ const map = new Map({
 });
 const sourceP = new VectorSource();
 let layerP = null; // Initial kein Layer vorhanden
-
+let isFirstZoom = true; // Variable, um den ersten Zoom zu verfolgen
 let watchId = null; // Variable, um die Watch-ID der Geolokalisierung zu speichern
 
 const locateP = document.createElement('div');
@@ -151,8 +151,10 @@ let isActive = false; // Variable, um den Aktivierungsstatus der Geolokalisierun
 function updateButtonAppearance() {
   if (isActive) {
     locateP.classList.add('active'); // Füge die Klasse 'active' hinzu, um den aktiven Zustand anzuzeigen
+    isFirstZoom = true; 
   } else {
     locateP.classList.remove('active'); // Entferne die Klasse 'active', um den deaktivierten Zustand anzuzeigen
+    isFirstZoom = false;
   }
 }
 
@@ -169,7 +171,12 @@ locateP.addEventListener('click', function () {
           new Feature(accuracy.transform('EPSG:4326', map.getView().getProjection())),
           new Feature(new Point(proj.fromLonLat(coords))),
         ]);
-        map.getView().fit(sourceP.getExtent(), { maxZoom: 18, duration: 500 }); // Korrigierte Schließung der fit-Methode
+
+        // Führe den Zoom nur beim ersten Mal aus
+        if (isFirstZoom) {
+          map.getView().fit(sourceP.getExtent(), { maxZoom: 18, duration: 500 }); // Korrigierte Schließung der fit-Methode
+          isFirstZoom = false; // Setze isFirstZoom auf false, um zukünftige Zooms zu verhindern
+        }
 
         // Füge den Layer hinzu, um die Position anzuzeigen
         if (!layerP) {
@@ -194,6 +201,7 @@ locateP.addEventListener('click', function () {
     navigator.geolocation.clearWatch(watchId);
     watchId = null; // Setze die Watch-ID auf null, um anzuzeigen, dass die Geolokalisierung deaktiviert ist
     isActive = false; // Richtiges Zuweisen von isActive
+   
 
     // Entferne den Layer, um die Position nicht mehr anzuzeigen
     if (layerP) {
@@ -209,7 +217,6 @@ map.addControl(
     element: locateP,
   })
 );
-
 
 // Layer für Messung
 const source = new VectorSource();
