@@ -819,8 +819,6 @@ var handleGetPosition = function(e) {
   } 
 };
 
-
-
 var accuracyFeature = new Feature();
 var positionFeature = new Feature();
 
@@ -903,6 +901,32 @@ map.addLayer(kmGroup);
 map.addLayer(BwGroupL);
 map.addLayer(BwGroupP);
 map.addLayer(vector); 
+
+// Füge eine Vektorquelle und einen Vektorlayer für den blauen Kreis hinzu
+const vectorSource = new VectorSource({
+  features: [positionFeature],
+});
+
+const vectorLayer = new VectorLayer({
+  displayInLayerSwitcher: false,
+  source: vectorSource,
+  style: new Style({
+    image: new Circle({
+      radius: 8,
+      fill: new Fill({
+        color: 'blue',
+      }),
+      stroke: new Stroke({
+        color: 'white',
+        width: 2,
+      }),
+    }),
+  }),
+});
+
+//Marker für Position (sollte ganz oben sein)
+map.addLayer(vectorLayer);
+
 
 //Info für WMS-Layer
 map.on('singleclick', function (evt) {
