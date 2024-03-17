@@ -8,6 +8,7 @@ import Overlay from 'ol/Overlay.js';
 import Draw from 'ol/interaction/Draw.js';
 import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
 import Geolocation from 'ol/Geolocation.js';
+import {circular} from 'ol/geom/Polygon';
 
 import {Circle as CircleStyle, Fill, Stroke,Style} from 'ol/style.js';
 
@@ -16,6 +17,7 @@ import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import TileWMS from 'ol/source/TileWMS.js';
 import TileImage from 'ol/source/TileImage.js';
 import XYZ from 'ol/source/XYZ.js';
+
 
 import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
@@ -43,6 +45,9 @@ import {
   machWasMitFSK
 } from './extStyle';
 import { calcSumme } from './myFunc.js';
+
+
+
 
 ///////Test
 var ergebnis = calcSumme(5, 3);
@@ -137,9 +142,58 @@ const map = new Map({
   controls: defaultControls().extend([attribution, additionalControl]),
 });
 
+const sourceP = new VectorSource();
+const layerP = new VectorLayer({
+  source: sourceP,
+});
+map.addLayer(layerP);
+
+
+navigator.geolocation.watchPosition(
+  function (pos) {
+    const coords = [pos.coords.longitude, pos.coords.latitude];
+    const accuracy = circular(coords, pos.coords.accuracy);
+    source.clear(true);
+    source.addFeatures([
+      new Feature(
+        accuracy.transform('EPSG:4326', map.getView().getProjection())
+      ),
+      new Feature(new Point(proj.fromLonLat(coords))),
+      
+
+    ]);
+  },
+  function (error) {
+    alert(`ERROR: ${error.message}`);
+  },
+  {
+    enableHighAccuracy: true,
+  }
+);
+
+const locate = document.createElement('div');
+locate.className = 'ol-control ol-unselectable locate';
+locate.innerHTML = '<button title="Locate me">◎</button>';
+locate.addEventListener('click', function () {
+  if (!source.isEmpty()) {
+    map.getView().fit(source.getExtent(), {
+      maxZoom: 18,
+      duration: 500,
+    });
+  }
+});
+map.addControl(
+  new Control({
+    element: locate,
+  })
+);
+
+
+
+
 // Layer für Messung
 const source = new VectorSource();
-const vector = new VectorLayer({
+const vectorM = new VectorLayer({
   displayInLayerSwitcher: false,
   source: source,
   style: {
@@ -763,14 +817,9 @@ class CustomControls2 extends Control {
     buttonPosition.innerHTML = 'P';
     buttonPosition.className = 'ol-button';
 
-    // Event-Listener für den Klick auf den Button hinzufügen
+    // Event-Listener für Position
     buttonPosition.addEventListener('click', function() {
       console.log('Position geklickt');
-    });
-
-    // Event-Listener für das Touch-Ereignis auf dem Button hinzufügen
-    buttonPosition.addEventListener('touchstart', function() {
-      console.log('Position (Touch) geklickt');
     });
 
     element.appendChild(buttonPosition);
@@ -783,90 +832,6 @@ class CustomControls2 extends Control {
 map.addControl(new CustomControls2({
   target: 'custom-controls'
 }));
-
-//Button für Postionierung hinzufügen
-var element = document.createElement('div');
-element.className = 'get-position ol-unselectable ol-control';
-element.id = "Button";
-const button = document.createElement('button');
-button.innerHTML = 'P';
-element.appendChild(button);
-document.body.appendChild(element);
-
-
-// Neues Objekt der Klasse ol.Geolocation
-var geolocation = new Geolocation({
-  projection: mapView.getProjection(), // Zugriff auf die Projektion der Karte
-  tracking: false, // Verfolgung deaktiviert
-  trackingOptions: { enableHighAccuracy: true, maximumAge: 5000 }
-});
-
-// Funktion zum Abrufen der Position
-function getPosition() {
-  // Hier kannst du den Code für die Positionierung einfügen
- // console.log('Position wird abgerufen...');
-}
-
-var handleGetPosition = function(e) {
-  var trackingWasAlreadyOn = geolocation.getTracking(); 
-  if (trackingWasAlreadyOn) { 
-    geolocation.setTracking(false);
-    console.log ("geolocation auf false");
-    //** CODE HERE TO REMOVE THE LAYER **
-  } else { 
-    geolocation.setTracking(true); 
-    console.log ("geolocation auf true");
-    getPosition(); 
-  } 
-};
-
-//EventListener für Positionierungsbutton
-button.addEventListener('click', handleGetPosition, false);
-button.addEventListener('touchstart', handleGetPosition, false);
-
-
-var accuracyFeature = new Feature();
-var positionFeature = new Feature();
-
-
-// Funktion zum Aktualisieren der Position
-function updatePosition() {
-  geolocation.on('change:accuracyGeometry', function() {
-    accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
-  });
-
-  geolocation.on('change:position', function() {
-    var pos = geolocation.getPosition();
-    positionFeature.setGeometry(pos ? new ol.geom.Point(pos) : null);
-    mapView.setCenter(pos);
-  });
-}
-
-// Funktion zum Starten der Verfolgung
-function startTracking() {
-  geolocation.setTracking(true);
-  updatePosition();
-}
-
-// Funktion zum Stoppen der Verfolgung
-function stopTracking() {
-  geolocation.setTracking(false);
-  accuracyFeature.setGeometry(null);
-  positionFeature.setGeometry(null);
-}
-// Event-Listener für den Button
-button.addEventListener('click', function() {
-  console.log ("button gecklickt")
-  var trackingWasAlreadyOn = geolocation.getTracking();
-  if (trackingWasAlreadyOn) {
-    console.log ("tracking wird gestoppt");
-    stopTracking();
-  } else {
-    console.log ("tracking wird gestartet");
-    startTracking();
-  }
-});
-
 
 
 const BwGroupP = new LayerGroup({
@@ -915,32 +880,7 @@ map.addLayer(wmsLayerGroup);
 map.addLayer(kmGroup);
 map.addLayer(BwGroupL);
 map.addLayer(BwGroupP);
-map.addLayer(vector); 
-
-// Füge eine Vektorquelle und einen Vektorlayer für den blauen Kreis hinzu
-const vectorSource = new VectorSource({
-  features: [positionFeature],
-});
-
-const vectorLayer = new VectorLayer({
-  displayInLayerSwitcher: false,
-  source: vectorSource,
-  style: new Style({
-    image: new Circle({
-      radius: 8,
-      fill: new Fill({
-        color: 'blue',
-      }),
-      stroke: new Stroke({
-        color: 'white',
-        width: 2,
-      }),
-    }),
-  }),
-});
-
-//Marker für Position (sollte ganz oben sein)
-map.addLayer(vectorLayer);
+map.addLayer(vectorM); 
 
 
 //Info für WMS-Layer

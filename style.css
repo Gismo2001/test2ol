@@ -15,18 +15,7 @@ body{
   width: 100vw;
   height: 100vh;
 }
-.mousePosition {
-  position: fixed;
-  bottom: 5px; /* Abstand von unten */
-  left: 50%; /* Zentrierung horizontal */
-  transform: translateX(-50%); /* Zentrierung relativ zur Mitte */
-  border:1px solid rgba(211, 189, 216);
-  border-radius: 10px;
-  padding: 5px;
-  background-color: rgba(225, 225, 225, 0.6);
-  font-family:Verdana, Geneva, Tahoma, sans-serif;
-  font-size: 12px;
-}
+
 .ol-popup {
   background-color: rgb(255, 255, 255);
   padding: 5px;
@@ -81,8 +70,8 @@ pointer-events: none;
   margin-right: 10px; /* Ändere den Abstand zum "X" nach Bedarf */
 }
 .locate {
-  top: 75px;
-  left: 8px;
+  top: 6em;
+  left: .5em;
 }
 .tooltip {
   background-color: white;
