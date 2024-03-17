@@ -149,19 +149,12 @@ const layerP = new VectorLayer({
   name: 'Position'
 });
 
-
-
 navigator.geolocation.watchPosition(
   function (pos) {
     const coords = [pos.coords.longitude, pos.coords.latitude];
     const accuracy = circular(coords, pos.coords.accuracy);
     source.clear(true);
-    source.addFeatures([
-      new Feature(
-        accuracy.transform('EPSG:4326', map.getView().getProjection())
-      ),
-      new Feature(new Point(proj.fromLonLat(coords))),
-    ]);
+    source.addFeatures([new Feature(accuracy.transform('EPSG:4326', map.getView().getProjection())), new Feature(new Point(proj.fromLonLat(coords))),]);
   },
   function (error) {
     alert(`ERROR: ${error.message}`);
@@ -171,10 +164,10 @@ navigator.geolocation.watchPosition(
   }
 );
 
-const locate = document.createElement('div');
-locate.className = 'ol-control ol-unselectable locate';
-locate.innerHTML = '<button title="Locate me">◎</button>';
-locate.addEventListener('click', function () {
+const locateP = document.createElement('div');
+locateP.className = 'ol-control ol-unselectable locate';
+locateP.innerHTML = '<button title="Locate me">◎</button>';
+locateP.addEventListener('click', function () {
   if (!source.isEmpty()) {
     map.getView().fit(source.getExtent(), {
       maxZoom: 18,
@@ -184,7 +177,7 @@ locate.addEventListener('click', function () {
 });
 map.addControl(
   new Control({
-    element: locate,
+    element: locateP,
   })
 );
 

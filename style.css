@@ -70,8 +70,8 @@ pointer-events: none;
   margin-right: 10px; /* Ändere den Abstand zum "X" nach Bedarf */
 }
 .locate {
-  top: 6em;
-  left: .5em;
+  top: 100px;
+  left: 8px;
 }
 .tooltip {
   background-color: white;
