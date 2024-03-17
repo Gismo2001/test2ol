@@ -7,6 +7,7 @@ import Feature from 'ol/Feature';
 import Overlay from 'ol/Overlay.js';
 import Draw from 'ol/interaction/Draw.js';
 import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
+import Geolocation from 'ol/Geolocation.js';
 
 import {Circle as CircleStyle, Fill, Stroke,Style} from 'ol/style.js';
 
@@ -112,9 +113,30 @@ function removeTempMarker() {
     }
   });
 }
+
 const attribution = new Attribution({
   collapsible: false,
 });
+//attribution.element.className = 'ol-button'; // Füge die Klasse ol-button hinzu
+
+const additionalControl = new ZoomToExtent({
+  extent: [
+    727361,  6839277, 858148,
+    6990951,
+  ],
+});
+//additionalControl.element.className = 'ol-button'; // Füge die Klasse ol-button hinzu
+
+const mapView = new View({
+  center: proj.fromLonLat([7.35, 52.7]),
+  zoom: 9
+});
+const map = new Map({
+  target: "map",
+  view: mapView,
+  controls: defaultControls().extend([attribution, additionalControl]),
+});
+
 // Layer für Messung
 const source = new VectorSource();
 const vector = new VectorLayer({
@@ -132,23 +154,6 @@ let helpTooltipElement;
 let helpTooltip;
 let measureTooltipElement;
 let measureTooltip;
-
-const additionalControl = new ZoomToExtent({
-  extent: [
-    727361,  6839277, 858148,
-    6990951,
-  ],
-});
-
-const mapView = new View({
-  center: proj.fromLonLat([7.35, 52.7]),
-  zoom: 9
-});
-const map = new Map({
-  target: "map",
-  view: mapView,
-  controls: defaultControls().extend([attribution, additionalControl]),
-});
 
 const gehoelz_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
@@ -725,12 +730,14 @@ class CustomControls1 extends Control {
     buttonLength.innerHTML = 'L';
     buttonLength.className = 'ol-button';
     buttonLength.addEventListener('click', function() {
+      console.log('länge gecklickt')
       addInteraction('LineString');
     });
     const buttonArea = document.createElement('button');
     buttonArea.innerHTML = 'F';
     buttonArea.className = 'ol-button';
     buttonArea.addEventListener('click', function() {
+      console.log('Fläche gecklickt')
       addInteraction('Polygon');
     });
     element.appendChild(buttonLength);
@@ -745,6 +752,8 @@ class CustomControls1 extends Control {
 map.addControl(new CustomControls1({
   target: 'custom-controls'
 }));
+
+
 class CustomControls2 extends Control {
   constructor(options) {
     const element = document.createElement('div');
@@ -752,30 +761,99 @@ class CustomControls2 extends Control {
     const buttonPosition = document.createElement('button');
     buttonPosition.innerHTML = 'P';
     buttonPosition.className = 'ol-button';
-    buttonPosition.addEventListener('click', function() {
-      addInteraction('Position');
-    });
-    /* const buttonArea = document.createElement('button');
-    buttonArea.innerHTML = 'F';
-    buttonArea.className = 'ol-button';
-    buttonArea.addEventListener('click', function() {
-      addInteraction('Polygon');
-    }); */
-    element.appendChild(buttonPosition);
-    //element.appendChild(buttonArea);
 
+    // Event-Listener für den Klick auf den Button hinzufügen
+    buttonPosition.addEventListener('click', function() {
+      console.log('Position geklickt');
+      var trackingWasAlreadyOn = geolocation.getTracking();
+      if (trackingWasAlreadyOn) {
+        stopTracking();
+      } else {
+        startTracking();
+      }
+      handleGetPosition();
+    });
+
+    // Event-Listener für das Touch-Ereignis auf dem Button hinzufügen
+    buttonPosition.addEventListener('touchstart', function() {
+      console.log('Position (Touch) geklickt');
+      handleGetPosition();
+    });
+
+    element.appendChild(buttonPosition);
     super({
       element: element,
       target: options.target,
     });
   }
 }
-map.addControl(new CustomControls1({
-  target: 'custom-controls'
-}));
+
 map.addControl(new CustomControls2({
   target: 'custom-controls'
 }));
+
+
+
+// Neues Objekt der Klasse ol.Geolocation
+var geolocation = new Geolocation({
+  projection: mapView.getProjection(), // Zugriff auf die Projektion der Karte
+  tracking: false, // Verfolgung deaktiviert
+  trackingOptions: { enableHighAccuracy: true, maximumAge: 5000 }
+});
+
+// Funktion zum Abrufen der Position
+function getPosition() {
+  // Hier kannst du den Code für die Positionierung einfügen
+ // console.log('Position wird abgerufen...');
+}
+
+var handleGetPosition = function(e) {
+  console.log("handelposition aufgerufen")
+  var trackingWasAlreadyOn = geolocation.getTracking(); 
+  if (trackingWasAlreadyOn) { 
+    geolocation.setTracking(false);
+    //** CODE HERE TO REMOVE THE LAYER **
+  } else { 
+    geolocation.setTracking(true); 
+    getPosition(); 
+  } 
+};
+
+
+
+var accuracyFeature = new Feature();
+var positionFeature = new Feature();
+
+// Funktion zum Aktualisieren der Position
+function updatePosition() {
+  geolocation.on('change:accuracyGeometry', function() {
+    accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
+  });
+
+  geolocation.on('change:position', function() {
+    var pos = geolocation.getPosition();
+    positionFeature.setGeometry(pos ? new ol.geom.Point(pos) : null);
+    mapView.setCenter(pos);
+  });
+}
+
+// Funktion zum Starten der Verfolgung
+function startTracking() {
+  geolocation.setTracking(true);
+  updatePosition();
+}
+
+// Funktion zum Stoppen der Verfolgung
+function stopTracking() {
+  geolocation.setTracking(false);
+  accuracyFeature.setGeometry(null);
+  positionFeature.setGeometry(null);
+}
+
+//EventListener für Positionierungsbutton
+//button.addEventListener('click', handleGetPosition, false);
+//button.addEventListener('touchstart', handleGetPosition, false);
+
 
 
 const BwGroupP = new LayerGroup({

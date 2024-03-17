@@ -94,6 +94,9 @@ pointer-events: none;
   display: none;
 }
 
+.ol-button:hover {
+  background-color: #005a9e;
+}
 
 .ol-button {
   display: block;
@@ -106,9 +109,6 @@ pointer-events: none;
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s ease;
-}
-.ol-button:hover {
-  background-color: #005a9e;
 }
 
 .custom-controls1 {
