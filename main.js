@@ -1,15 +1,15 @@
+import Map from 'ol/Map.js';
+import View from 'ol/View.js';
 import GeoJSON from 'ol/format/GeoJSON.js';
 import * as LoadingStrategy from 'ol/loadingstrategy';
 import * as proj from 'ol/proj';
 import Feature from 'ol/Feature';
-
-
-import Draw from 'ol/interaction/Draw.js';
-import Map from 'ol/Map.js';
 import Overlay from 'ol/Overlay.js';
-import View from 'ol/View.js';
-import {Circle as CircleStyle, Fill, Stroke,Style} from 'ol/style.js';
+import Draw from 'ol/interaction/Draw.js';
 import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
+
+import {Circle as CircleStyle, Fill, Stroke,Style} from 'ol/style.js';
+
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import TileWMS from 'ol/source/TileWMS.js';
@@ -20,7 +20,7 @@ import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
 import {Attribution, defaults as defaultControls, Control} from 'ol/control.js';
 import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
-
+import LayerGroup from 'ol/layer/Group';
 import { 
   getStyleForArtEin,
   gehoelz_vecStyle, 
@@ -37,33 +37,14 @@ import {
   km10scalStyle,
   km100scalStyle,
   km500scalStyle,
+  combinedStyle,
   machWasMitFSK
 } from './extStyle';
-import LayerGroup from 'ol/layer/Group';
+import { calcSumme } from './myFunc.js';
 
-const arrowStyle = new Style({
-  stroke: new Stroke({
-      color: 'black',
-      width: 4,
-  }),
-});
-
-const endpointStyle = new Style({
-  geometry: function (feature) {
-      const coordinates = feature.getGeometry().getCoordinates();
-      return new Point(coordinates[coordinates.length - 1]);
-  },
-  image: new CircleStyle({
-      radius: 6,          // Radius des Kreises (Endpunkt)
-      fill: new Fill({ color: 'red' }), // Füllfarbe des Kreises
-      stroke: new Stroke({
-      color: 'black',    // Randfarbe des Kreises
-      width: 2,          // Breite des Randes
-      }),
-  }),
-});
-
-const combinedStyle = [arrowStyle, endpointStyle];
+///////Test
+var ergebnis = calcSumme(5, 3);
+console.log(ergebnis);
 
 window.searchAddress = function searchAddress() {
   var address = document.getElementById('addressInput').value;
@@ -101,7 +82,7 @@ inputElement.addEventListener('keydown', function (event) {
     searchAddress();
   }
 });
-/// Marker für Positionsmarkierung zur Adresssuche
+// Marker für Positionsmarkierung zur Adresssuche
 function addTempMarker(coordinates) {
   var tempMarkerLayer = new VectorLayer({
     source: new VectorSource({
@@ -709,22 +690,21 @@ function createMeasureTooltip() {
   });
   map.addOverlay(measureTooltip);
 }
-class CustomControls extends Control {
+
+class CustomControls1 extends Control {
   constructor(options) {
     const element = document.createElement('div');
-    element.className = 'custom-controls ol-unselectable ol-control';
+    element.className = 'custom-controls1 ol-unselectable ol-control';
     const buttonLength = document.createElement('button');
     buttonLength.innerHTML = 'L';
     buttonLength.className = 'ol-button';
     buttonLength.addEventListener('click', function() {
-      
       addInteraction('LineString');
     });
     const buttonArea = document.createElement('button');
     buttonArea.innerHTML = 'F';
     buttonArea.className = 'ol-button';
     buttonArea.addEventListener('click', function() {
-      
       addInteraction('Polygon');
     });
     element.appendChild(buttonLength);
@@ -736,9 +716,45 @@ class CustomControls extends Control {
     });
   }
 }
-map.addControl(new CustomControls({
+map.addControl(new CustomControls1({
   target: 'custom-controls'
 }));
+
+class CustomControls2 extends Control {
+  constructor(options) {
+    const element = document.createElement('div');
+    element.className = 'custom-controls2 ol-unselectable ol-control';
+    const buttonPosition = document.createElement('button');
+    buttonPosition.innerHTML = 'P';
+    buttonPosition.className = 'ol-button';
+    buttonPosition.addEventListener('click', function() {
+      addInteraction('Position');
+    });
+    /* const buttonArea = document.createElement('button');
+    buttonArea.innerHTML = 'F';
+    buttonArea.className = 'ol-button';
+    buttonArea.addEventListener('click', function() {
+      addInteraction('Polygon');
+    }); */
+    element.appendChild(buttonPosition);
+    //element.appendChild(buttonArea);
+
+    super({
+      element: element,
+      target: options.target,
+    });
+  }
+}
+map.addControl(new CustomControls1({
+  target: 'custom-controls'
+}));
+
+map.addControl(new CustomControls2({
+  target: 'custom-controls'
+}));
+
+
+
 map.getViewport().addEventListener('contextmenu', function(evt) {
   evt.preventDefault(); // Verhindert das Standardkontextmenü
   if (draw) {
