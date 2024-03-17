@@ -18,7 +18,8 @@ import XYZ from 'ol/source/XYZ.js';
 
 import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
-import {Attribution, defaults as defaultControls, Control} from 'ol/control.js';
+import {Attribution, ZoomToExtent, defaults as defaultControls, Control} from 'ol/control.js';
+
 import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
 import LayerGroup from 'ol/layer/Group';
 import { 
@@ -131,6 +132,14 @@ let helpTooltipElement;
 let helpTooltip;
 let measureTooltipElement;
 let measureTooltip;
+
+const additionalControl = new ZoomToExtent({
+  extent: [
+    727361,  6839277, 858148,
+    6990951,
+  ],
+});
+
 const mapView = new View({
   center: proj.fromLonLat([7.35, 52.7]),
   zoom: 9
@@ -138,7 +147,7 @@ const mapView = new View({
 const map = new Map({
   target: "map",
   view: mapView,
-  //controls: defaults().extent([attribution, additionalControl]),
+  controls: defaultControls().extend([attribution, additionalControl]),
 });
 
 const gehoelz_vecLayer = new VectorLayer({
@@ -536,6 +545,7 @@ const osmTile = new TileLayer({
 const layerSwitcher = new LayerSwitcher({ });
 map.addControl(layerSwitcher);
 
+// Funktionen für Messung
 const pointerMoveHandler = function (evt) {
   if (evt.pointerType === 'touch') {
     if (evt.dragging) {
@@ -691,6 +701,22 @@ function createMeasureTooltip() {
   map.addOverlay(measureTooltip);
 }
 
+map.getViewport().addEventListener('contextmenu', function(evt) {
+  evt.preventDefault(); // Verhindert das Standardkontextmenü
+  if (draw) {
+    console.log('beenden');
+    source.clear(); // Löscht alle Vektoren aus der Quelle
+    draw.finishDrawing(); // Beendet die laufende Messung
+    map.removeInteraction(draw); // Entfernt die Zeicheninteraktion
+    map.un('pointermove', pointerMoveHandler); // Entfernt den Event-Listener für 'pointermove'
+    map.removeOverlay(measureTooltip); // Entfernt das Messergebnis-Tooltip
+    map.removeOverlay(helpTooltip); // Entfernt das Help-Tooltip
+    return; // Beende die Funktion, um weitere Interaktionen zu verhindern
+  }
+});
+
+
+//Custom Controls 1 und 2
 class CustomControls1 extends Control {
   constructor(options) {
     const element = document.createElement('div');
@@ -719,7 +745,6 @@ class CustomControls1 extends Control {
 map.addControl(new CustomControls1({
   target: 'custom-controls'
 }));
-
 class CustomControls2 extends Control {
   constructor(options) {
     const element = document.createElement('div');
@@ -748,26 +773,10 @@ class CustomControls2 extends Control {
 map.addControl(new CustomControls1({
   target: 'custom-controls'
 }));
-
 map.addControl(new CustomControls2({
   target: 'custom-controls'
 }));
 
-
-
-map.getViewport().addEventListener('contextmenu', function(evt) {
-  evt.preventDefault(); // Verhindert das Standardkontextmenü
-  if (draw) {
-    console.log('beenden');
-    source.clear(); // Löscht alle Vektoren aus der Quelle
-    draw.finishDrawing(); // Beendet die laufende Messung
-    map.removeInteraction(draw); // Entfernt die Zeicheninteraktion
-    map.un('pointermove', pointerMoveHandler); // Entfernt den Event-Listener für 'pointermove'
-    map.removeOverlay(measureTooltip); // Entfernt das Messergebnis-Tooltip
-    map.removeOverlay(helpTooltip);
-    return; // Beende die Funktion, um weitere Interaktionen zu verhindern
-  }
-});
 
 const BwGroupP = new LayerGroup({
   title: "Bauw.(P)",
@@ -817,6 +826,7 @@ map.addLayer(BwGroupL);
 map.addLayer(BwGroupP);
 map.addLayer(vector); 
 
+//Info für WMS-Layer
 map.on('singleclick', function (evt) {
   const isWmsLayerGroupVisible = map.getLayers().getArray().some(layer => layer.get('name') === 'WMS-Lay' && layer.getVisible());
   
@@ -834,7 +844,6 @@ map.on('singleclick', function (evt) {
 
     layersToCheck.forEach(({ layer, name }) => {
       if (layer.getVisible()) {
-        
         const url = layer.getSource().getFeatureInfoUrl(evt.coordinate, viewResolution, viewProjection, {'INFO_FORMAT': 'text/html'});
         if (url) {
           fetch(url)
@@ -842,7 +851,6 @@ map.on('singleclick', function (evt) {
             .then((html) => {
               if (html.trim() !== '') {
                 removeExistingInfoDiv();
-
                 const infoDiv = createInfoDiv(name, html);
                 document.body.appendChild(infoDiv);
               }
@@ -857,37 +865,6 @@ map.on('singleclick', function (evt) {
     console.log('Die wmsLayerGroup ist nicht eingeschaltet.');
   }
 });
-
-var container = document.getElementById('popup');
-var content = document.getElementById('popup-content');
-var closer = document.getElementById('popup-closer');
-
-var popup = new Overlay({
-  element: container,//document.getElementById('popup'),
-  id: '1',
-  autoPan: true,
-  autoPanAnimation: {
-  duration: 250
-  }
-});
-
-map.addOverlay(popup);
-
-closer.onclick = function()
-{
-  popup.setPosition(undefined);
-  closer.blur();
-  return false;
-};
-
-
-
-
-function removeExistingInfoDiv() {
-  const existingInfoDiv = document.getElementById('info');
-  if (existingInfoDiv) { existingInfoDiv.remove(); }
-}
-
 function createInfoDiv(name, html) {
   const infoDiv = document.createElement('div');
   infoDiv.id = 'info';
@@ -904,8 +881,32 @@ function createInfoDiv(name, html) {
   infoDiv.appendChild(closeIcon);
   return infoDiv;
 }
-var closer = document.getElementById('popup-closer');
+function removeExistingInfoDiv() {
+  const existingInfoDiv = document.getElementById('info');
+  if (existingInfoDiv) { existingInfoDiv.remove(); }
+}
 
+
+// Funktionen für Popup
+var container = document.getElementById('popup');
+var content = document.getElementById('popup-content');
+var closer = document.getElementById('popup-closer');
+var popup = new Overlay({
+  element: container,//document.getElementById('popup'),
+  id: '1',
+  autoPan: true,
+  autoPanAnimation: {
+  duration: 250
+  }
+});
+map.addOverlay(popup);
+closer.onclick = function()
+{
+  popup.setPosition(undefined);
+  closer.blur();
+  return false;
+};
+var closer = document.getElementById('popup-closer');
 map.on('click', function (evt) {
   var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
     /* Neu
@@ -1053,7 +1054,6 @@ map.on('click', function (evt) {
     }
   });
 });
-
 document.addEventListener('DOMContentLoaded', function () {
   var popup = document.getElementById('popup');
   var popupCloser = document.getElementById('popup-closer');
@@ -1072,7 +1072,6 @@ document.addEventListener('DOMContentLoaded', function () {
   container.appendChild(popupCloser);
   popup.appendChild(container);
 });
-
 document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
   return false;
