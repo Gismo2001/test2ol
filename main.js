@@ -26,6 +26,7 @@ import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
 import LayerGroup from 'ol/layer/Group';
 import { 
   getStyleForArtEin,
+  getStyleForArtSonPun,
   gehoelz_vecStyle, 
   sleStyle, 
   wehStyle, 
@@ -289,7 +290,7 @@ const exp_bw_son_pun_layer = new VectorLayer({
   url: function (extent) {return './myLayers/exp_bw_son_pun.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Sonstige, Punkte', 
   name: 'son_pun', 
-  style: son_punStyle,
+  style: getStyleForArtSonPun,
   visible: false
 });
 const exp_bw_ein_layer = new VectorLayer({

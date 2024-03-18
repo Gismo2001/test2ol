@@ -98,6 +98,25 @@ function getStyleForArtEin(feature) {
         })
     });
 }
+function getStyleForArtSonPun(feature) {   
+    const artValue = feature.get('bauart');
+    
+    let iconSrc;
+    switch (artValue) {
+        case 'Bootsanleger':
+            iconSrc = './data/sonPunBoot.svg';
+            break;
+        default:
+            iconSrc = './data/sonPunSonstige.svg';
+    }
+
+    return new Style({
+        image: new Icon({
+            src: iconSrc,
+            scale: .9 
+        })
+    });
+};
 function machWasMitFSK(feature){
     console.log (feature.get('Art'));
 };
@@ -255,6 +274,7 @@ export { bru_nlwknStyle,
     gehoelz_vecStyle,
     getStyleForArtFSK,
     getStyleForArtEin,
+    getStyleForArtSonPun,
     getStyleForArtUmn,
     km100scalStyle,
     km500scalStyle,
