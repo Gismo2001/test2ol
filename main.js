@@ -20,7 +20,7 @@ import XYZ from 'ol/source/XYZ.js';
 
 import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
-import {Attribution, ZoomToExtent, defaults as defaultControls, Control} from 'ol/control.js';
+import {FullScreen, Attribution, ZoomToExtent, defaults as defaultControls, Control} from 'ol/control.js';
 
 import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
 import LayerGroup from 'ol/layer/Group';
@@ -116,7 +116,9 @@ function removeTempMarker() {
 
 const attribution = new Attribution({
   collapsible: false,
+  html: '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
 });
+
 const additionalControl = new ZoomToExtent({
   extent: [
     727361,  6839277, 858148,
@@ -132,7 +134,7 @@ const mapView = new View({
 const map = new Map({
   target: "map",
   view: mapView,
-  controls: defaultControls().extend([attribution, additionalControl]),
+  controls: defaultControls().extend([new FullScreen()], [attribution, additionalControl]),
 });
 
 const sourceP = new VectorSource();

@@ -8,14 +8,53 @@
 }
 body{
   margin: 0;
-  padding: 0;
   overflow: hidden;
 }
 #map {
   width: 100vw;
   height: 100vh;
 }
+.map:-webkit-full-screen {
+  height: 100%;
+  margin: 0;
+}
+.map:fullscreen {
+  height: 100%;
+}
+.ol-full-screen {
+  right: 0.5em;
+  top: calc(100% - 2.375em);
+}
 
+
+.map .ol-rotate {
+  top: 3em;
+}
+.locate {
+  top: 100px;
+  left: 8px;
+}
+
+
+.locate.active {
+  background-color: #4CAF50; /* Grüne Hintergrundfarbe im aktiven Zustand */
+}
+.locate.active button {
+  color: white; /* Weiße Schriftfarbe im aktiven Zustand */
+}
+.locateMStyle {
+  top: 250px;
+  left: 8px;
+}
+.tooltip {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  position: absolute;
+  display: none;
+}
 .ol-popup {
   background-color: rgb(255, 255, 255);
   padding: 5px;
@@ -69,37 +108,9 @@ pointer-events: none;
 .popup-text {
   margin-right: 10px; /* Ändere den Abstand zum "X" nach Bedarf */
 }
-.locate {
-  top: 125px;
-  left: 8px;
-}
-.locate.active {
-  background-color: #4CAF50; /* Grüne Hintergrundfarbe im aktiven Zustand */
-}
-.locate.active button {
-  color: white; /* Weiße Schriftfarbe im aktiven Zustand */
-}
-
-.locateMStyle {
-  top: 250px;
-  left: 8px;
-}
-
-
-.tooltip {
-  background-color: white;
-  border: 1px solid #ccc;
-  padding: 5px;
-  border-radius: 3px;
-  font-size: 12px;
-  position: absolute;
-  display: none;
-}
-
 .ol-button:hover {
   background-color: #005a9e;
 }
-
 .ol-button {
   display: block;
   margin-bottom: 5px;
@@ -112,21 +123,18 @@ pointer-events: none;
   font-size: 16px;
   transition: background-color 0.3s ease;
 }
-
 .custom-controls1 {
   position: absolute;
   top: 175px;
   left: 8px;
   z-index: 1001;
 }
-
 .custom-controls2 {
   position: absolute;
   top: 250px;
   left: 8px;
   z-index: 1002;
 }
-
 /* Stil für den Container der Infodiv */
 .info-container {
   border: 1px solid black;
@@ -139,7 +147,6 @@ pointer-events: none;
   left: 0px;
   z-index: 1003;
 }
-
 /* Stil für das Schließen-Symbol */
 .close-icon {
   position: absolute;
@@ -148,5 +155,8 @@ pointer-events: none;
   cursor: pointer;
   font-size: 20px;
 }
-
+.ol-full-screen {
+  right: .5em;
+  top: calc(100% - 2.375em);
+}
 
