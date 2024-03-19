@@ -638,13 +638,24 @@ const ESRIWorldImagery = new TileLayer({
       url: 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
   })
 });
-const osmTile = new TileLayer({
-  title: "osm",
+const osmTileGr = new TileLayer({
+  title: "osm-grey",
+  className: 'bw',
   type: 'base',
   source: new OSM({
       url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   }),
+});
+
+const osmTileCr = new TileLayer({
+  title: "osm-color",
+  type: 'base',
+  source: new OSM({
+      url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
+  }),
+  visible: false,
 });
 
 const layerSwitcher = new LayerSwitcher({ });
@@ -840,7 +851,6 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
   }
 });
 
-
 // Funktion zum Entfernen aller Overlays von der Karte
 function removeAllOverlays() {
   // Alle Overlays der Karte abrufen
@@ -851,13 +861,6 @@ function removeAllOverlays() {
     map.removeOverlay(overlay);
   });
 }
-
-
-
-
-
-
-
 
 //Custom Controls 1 und 2
 class CustomControls1 extends Control {
@@ -952,7 +955,7 @@ const BaseGroup = new LayerGroup({
   title: "Base",
   fold: true,
   fold: 'close',
-  layers: [ESRIWorldImagery, googleLayer, dop20ni_layer, osmTile]
+  layers: [ESRIWorldImagery, googleLayer, dop20ni_layer, osmTileCr, osmTileGr]
 });
 
 map.addLayer(BaseGroup);
