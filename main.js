@@ -716,7 +716,7 @@ let draw;
 const formatLength = function (line) {
   const length = getLength(line);
   let output;
-  if (length > 100) {
+  if (length > 1000) {
     output = Math.round((length / 1000) * 100) / 100 + ' ' + 'km';
   } else {
     output = Math.round(length * 100) / 100 + ' ' + 'm';
@@ -726,13 +726,14 @@ const formatLength = function (line) {
 const formatArea = function (polygon) {
   const area = getArea(polygon);
   let output;
-  if (area > 10000) {
-    output = Math.round((area / 1000000) * 100) / 100 + ' ' + 'km<sup>2</sup>';
+  if (area >= 10000) {
+    output = (area / 1000000).toFixed(3) + ' ' + 'km<sup>2</sup>';
   } else {
-    output = Math.round(area * 100) / 100 + ' ' + 'm<sup>2</sup>';
+    output = area.toFixed(3) + ' ' + 'm<sup>2</sup>';
   }
   return output;
 };
+
 const style = new Style({
   fill: new Fill({
     color: 'rgba(255, 255, 255, 0.2)',
@@ -898,7 +899,9 @@ class CustomControls2 extends Control {
 
     // Event-Listener für den Klick auf den Button hinzufügen
     buttonPrint.addEventListener('click', function() {
-      options.handleExportButtonClick(buttonPrint);
+      const defaultFormat = 'a4';
+      const defaultResolution = 150;
+      options.handleExportButtonClick(map, defaultFormat, defaultResolution);
     });
 
     element.appendChild(buttonPrint);

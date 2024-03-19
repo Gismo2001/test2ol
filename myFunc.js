@@ -1,10 +1,9 @@
 //myFunc.js
 
-function handleExportButtonClick(map, buttonPrint, dims, jspdf) {
-    console.log ("Funktion aufgerufen");
+function handleExportButtonClick(map, dims, jspdf) {
+    console.log ("gestartet");
     return function () {
-      buttonPrint.disabled = true;
-      console.log ("button disabled");
+      console.log ("Funktion aufgerufen");
       document.body.style.cursor = 'progress';
   
       const format = document.getElementById('format').value;
@@ -56,7 +55,7 @@ function handleExportButtonClick(map, buttonPrint, dims, jspdf) {
         // Reset original map size
         map.setSize(size);
         map.getView().setResolution(viewResolution);
-        buttonPrint.disabled = false;
+        
         document.body.style.cursor = 'auto';
       });
   
