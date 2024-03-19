@@ -23,6 +23,11 @@ import XYZ from 'ol/source/XYZ.js';
 import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
 import { FullScreen, Attribution, defaults as defaultControls, ZoomToExtent, Control } from 'ol/control.js';
+import { DragRotateAndZoom } from 'ol/interaction.js';
+import { defaults as defaultInteractions } from 'ol/interaction.js';
+import MousePosition from 'ol/control/MousePosition.js';
+import {createStringXY} from 'ol/coordinate.js';
+
 import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
 import LayerGroup from 'ol/layer/Group';
 import { 
@@ -132,6 +137,7 @@ const mapView = new View({
 const map = new Map({
   target: "map",
   view: mapView,
+  
   controls: defaultControls().extend([
     new FullScreen(),
     new Attribution(),
@@ -139,8 +145,16 @@ const map = new Map({
       extent: [727361,  6839277, 858148,
         6990951,] // Geben Sie hier das Ausdehnungsintervall an
     })
-  ])
+  ]),
+  interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
+
+/* var mousePosition = new MousePosition({
+  coordinateFormat: createStringXY(4),
+  projection: 'EPSG:4326'
+});
+
+map.addControl(mousePosition); */
 
 const sourceP = new VectorSource();
 let layerP = null; // Initial kein Layer vorhanden
