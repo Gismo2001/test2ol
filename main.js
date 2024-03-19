@@ -9,6 +9,8 @@ import Draw from 'ol/interaction/Draw.js';
 import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
 import {circular} from 'ol/geom/Polygon';
 import Geolocation from 'ol/Geolocation.js';
+import { jsPDF } from "jspdf";
+
 
 import {Circle as CircleStyle, Fill, Stroke,Style} from 'ol/style.js';
 
@@ -20,8 +22,7 @@ import XYZ from 'ol/source/XYZ.js';
 
 import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
-import {FullScreen, Attribution, ZoomToExtent, defaults as defaultControls, Control} from 'ol/control.js';
-
+import { FullScreen, Attribution, defaults as defaultControls, ZoomToExtent, Control } from 'ol/control.js';
 import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
 import LayerGroup from 'ol/layer/Group';
 import { 
@@ -45,6 +46,9 @@ import {
   machWasMitFSK
 } from './extStyle';
 import { calcSumme } from './myFunc.js';
+import { handleExportButtonClick } from './myFunc.js';
+
+
 
 
 window.searchAddress = function searchAddress() {
@@ -119,22 +123,25 @@ const attribution = new Attribution({
   html: '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
 });
 
-const additionalControl = new ZoomToExtent({
-  extent: [
-    727361,  6839277, 858148,
-    6990951,
-  ],
-});
+
 
 
 const mapView = new View({
   center: proj.fromLonLat([7.35, 52.7]),
   zoom: 9
 });
+
 const map = new Map({
   target: "map",
   view: mapView,
-  controls: defaultControls().extend([new FullScreen()], [attribution, additionalControl]),
+  controls: defaultControls().extend([
+    new FullScreen(),
+    new Attribution(),
+    new ZoomToExtent({
+      extent: [727361,  6839277, 858148,
+        6990951,] // Geben Sie hier das Ausdehnungsintervall an
+    })
+  ])
 });
 
 const sourceP = new VectorSource();
@@ -876,21 +883,27 @@ class CustomControls2 extends Control {
   constructor(options) {
     const element = document.createElement('div');
     element.className = 'custom-controls2 ol-unselectable ol-control';
-    const buttonPosition = document.createElement('button');
-    buttonPosition.innerHTML = 'P';
-    buttonPosition.className = 'ol-button';
+    const buttonPrint  = document.createElement('button');
+    buttonPrint.innerHTML = 'P';
+    buttonPrint.className = 'ol-button';
 
     // Event-Listener für den Klick auf den Button hinzufügen
-    buttonPosition.addEventListener('click', function() {
-      
+    buttonPrint.addEventListener('click', function() {
+      const staticMap = map; // Wenn `map` eine globale Variable ist oder aus einem anderen Kontext verfügbar ist
+      const staticExportButton = document.getElementById('buttonPrint'); // Wenn der Export-Button ein DOM-Element mit der ID 'exportButton' ist
+      const staticDims = { format: 'A4', size: [210, 297] }; // Beispiel für statische Abmessungen
+      const staticJspdf = new jsPDF(); // Wenn `jsPDF` eine Klasse ist und du eine Instanz erstellen möchtest
+
+    
+      handleExportButtonClick(staticMap, staticExportButton, staticDims, staticJspdf);
     });
 
     // Event-Listener für das Touch-Ereignis auf dem Button hinzufügen
-    buttonPosition.addEventListener('touchstart', function() {
-      
+    buttonPrint.addEventListener('touchstart', function() {
+      handleExportButtonClick(map, exportButton, dims, jspdf);
     });
 
-    element.appendChild(buttonPosition);
+    element.appendChild(buttonPrint);
     super({
       element: element,
       target: options.target,
@@ -901,11 +914,6 @@ class CustomControls2 extends Control {
 map.addControl(new CustomControls2({
   target: 'custom-controls'
 }));
-
-
-
-
-
 
 const BwGroupP = new LayerGroup({
   title: "Bauw.(P)",
