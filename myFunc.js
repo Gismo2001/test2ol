@@ -1,16 +1,10 @@
 //myFunc.js
 
-
-function calcSumme(a,b) {
-var summe = a + b;
-return summe;
-}; 
-
 function handleExportButtonClick(map, buttonPrint, dims, jspdf) {
     console.log ("Funktion aufgerufen");
     return function () {
       buttonPrint.disabled = true;
-      console.log ("butto");
+      console.log ("button disabled");
       document.body.style.cursor = 'progress';
   
       const format = document.getElementById('format').value;
@@ -62,7 +56,7 @@ function handleExportButtonClick(map, buttonPrint, dims, jspdf) {
         // Reset original map size
         map.setSize(size);
         map.getView().setResolution(viewResolution);
-        exportButton.disabled = false;
+        buttonPrint.disabled = false;
         document.body.style.cursor = 'auto';
       });
   
@@ -73,7 +67,5 @@ function handleExportButtonClick(map, buttonPrint, dims, jspdf) {
       map.getView().setResolution(viewResolution / scaling);
     };
 }
-  
-  // Exportiere die Funktion, damit sie in anderen Dateien verwendet werden kann
+
 export { handleExportButtonClick };
-export {calcSumme};

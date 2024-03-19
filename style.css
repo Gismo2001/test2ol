@@ -26,7 +26,7 @@ body{
   top: 0.375em;
 }
 .map .ol-rotate {
-  top: 3em;
+  bottom: 3em;
 }
 .locate {
   top: 125px;
@@ -107,7 +107,7 @@ pointer-events: none;
 .ol-button:hover {
   background-color: #005a9e;
 }
-/* .ol-button {
+/*  .ol-button {
   display: block;
   margin-bottom: 5px;
   padding: 5px 10px;
@@ -119,7 +119,8 @@ pointer-events: none;
   font-size: 16px;
   transition: background-color 0.3s ease;
 } */
-.custom-controls1 {
+
+.custom-controls1{
   top: 10em;
   left: .5em;
   height: 1.375em; 
@@ -133,6 +134,8 @@ pointer-events: none;
   width: 1.375em;
   z-index: 1002;
 }
+.custom-controls1:ol-button
+
 /* Stil für den Container der Infodiv */
 .info-container {
   border: 1px solid black;

@@ -45,7 +45,7 @@ import {
   combinedStyle,
   machWasMitFSK
 } from './extStyle';
-import { calcSumme } from './myFunc.js';
+
 import { handleExportButtonClick } from './myFunc.js';
 
 
@@ -122,8 +122,6 @@ const attribution = new Attribution({
   collapsible: false,
   html: '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
 });
-
-
 
 
 const mapView = new View({
@@ -855,14 +853,12 @@ class CustomControls1 extends Control {
     buttonLength.innerHTML = 'L';
     buttonLength.className = 'ol-button';
     buttonLength.addEventListener('click', function() {
-      
       addInteraction('LineString');
     });
     const buttonArea = document.createElement('button');
     buttonArea.innerHTML = 'F';
     buttonArea.className = 'ol-button';
     buttonArea.addEventListener('click', function() {
-      
       addInteraction('Polygon');
     });
     element.appendChild(buttonLength);
@@ -878,29 +874,17 @@ map.addControl(new CustomControls1({
   target: 'custom-controls'
 }));
 
-
 class CustomControls2 extends Control {
   constructor(options) {
     const element = document.createElement('div');
     element.className = 'custom-controls2 ol-unselectable ol-control';
-    const buttonPrint  = document.createElement('button');
+    const buttonPrint = document.createElement('button');
     buttonPrint.innerHTML = 'P';
     buttonPrint.className = 'ol-button';
 
     // Event-Listener für den Klick auf den Button hinzufügen
     buttonPrint.addEventListener('click', function() {
-      const staticMap = map; // Wenn `map` eine globale Variable ist oder aus einem anderen Kontext verfügbar ist
-      const staticExportButton = document.getElementById('buttonPrint'); // Wenn der Export-Button ein DOM-Element mit der ID 'exportButton' ist
-      const staticDims = { format: 'A4', size: [210, 297] }; // Beispiel für statische Abmessungen
-      const staticJspdf = new jsPDF(); // Wenn `jsPDF` eine Klasse ist und du eine Instanz erstellen möchtest
-
-    
-      handleExportButtonClick(staticMap, staticExportButton, staticDims, staticJspdf);
-    });
-
-    // Event-Listener für das Touch-Ereignis auf dem Button hinzufügen
-    buttonPrint.addEventListener('touchstart', function() {
-      handleExportButtonClick(map, exportButton, dims, jspdf);
+      options.handleExportButtonClick(buttonPrint);
     });
 
     element.appendChild(buttonPrint);
@@ -912,7 +896,8 @@ class CustomControls2 extends Control {
 }
 
 map.addControl(new CustomControls2({
-  target: 'custom-controls'
+  target: 'custom-controls',
+  handleExportButtonClick: handleExportButtonClick
 }));
 
 const BwGroupP = new LayerGroup({
@@ -1061,8 +1046,6 @@ map.on('click', function (evt) {
     };
     // Popup soll nur für bestimmte Layernamen angezeigt werden
     if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'son_lin') {
-      
-      machWasMitFSK(feature);
       if (feature) {
         coordinates = feature.getGeometry().getCoordinates();
         popup.setPosition(coordinates);
@@ -1145,16 +1128,45 @@ map.on('click', function (evt) {
     if (layname === 'son_lin') {
       coordinates = evt.coordinate; 
       popup.setPosition(coordinates);
-      content.innerHTML =
-      '<div style="max-height: 300px; overflow-y: auto;">' +
-      '<p>Name: ' + feature.get('name') +  ' (' + feature.get('KTR') +')' + '<br>' +
-      '<p><a href="' + feature.get('foto1') + '" onclick="window.open(\'' + feature.get('foto1') + '\', \'_blank\'); return false;">Foto 1</a> ' +
-      '<a href="' + feature.get('foto2') + '" onclick="window.open(\'' + feature.get('foto2') + '\', \'_blank\'); return false;">Foto 2</a> ' +
-      '<a href="' + feature.get('foto3') + '" onclick="window.open(\'' + feature.get('foto3') + '\', \'_blank\'); return false;">Foto 3</a> ' +
-      '<a href="' + feature.get('foto4') + '" onclick="window.open(\'' + feature.get('foto4') + '\', \'_blank\'); return false;">Foto 4</a></p>' +
-      '<br>' + "Beschreib kurz = " + feature.get('beschreib') + '</p>' +
-      beschreibLangHtml +
-      '</div>';
+      var foto1Value = feature.get('foto1');
+      console.log (foto1Value);
+      var foto1Html = '';
+        var foto2Value = feature.get('foto2');
+        var foto2Html = '';
+        var foto3Value = feature.get('foto3');
+        var foto3Html = '';
+        var foto4Value = feature.get('foto4');
+        var foto4Html = '';
+        
+        if (foto1Value && foto1Value.trim() !== '') {
+          foto1Html = '<a href="' + foto1Value + '" onclick="window.open(\'' + foto1Value + '\', \'_blank\'); return false;">Foto 1</a>';
+        } else {
+          foto1Html =   " Foto 1 ";
+        }
+        if (foto2Value && foto2Value.trim() !== '') {
+          foto2Html = '<a href="' + foto2Value + '" onclick="window.open(\'' + foto2Value + '\', \'_blank\'); return false;">Foto 2</a>';
+        } else {
+          foto2Html = " Foto 2 ";
+        }
+        if (foto3Value && foto3Value.trim() !== '') {
+          foto3Html = '<a href="' + foto3Value + '" onclick="window.open(\'' + foto3Value + '\', \'_blank\'); return false;">Foto 3</a>';
+        } else {
+          foto3Html = " Foto 3 ";
+        }
+        if (foto4Value && foto4Value.trim() !== '') {
+          foto4Html = '<a href="' + foto4Value + '" onclick="window.open(\'' + foto4Value + '\', \'_blank\'); return false;">Foto 4</a>';
+        } else {
+          foto4Html = " Foto 4 ";
+        }
+        content.innerHTML =
+          '<div style="max-height: 200px; overflow-y: auto;">' +
+          '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
+          '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
+          '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
+           '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
+           '<p>' + beschreibLangHtml + '</p>' +
+          '</div>';
+      
     }
     // Führen Sie Aktionen für den Layernamen 'gehoelz_vecLayer' durch
     if (layname === 'gehoelz_vec') {
