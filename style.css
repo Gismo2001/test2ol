@@ -1,47 +1,58 @@
 @import "node_modules/ol/ol.css";
 @import "node_modules/ol-ext/dist/ol-ext.css";
 
-*{
+* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
-body{
+
+body {
   margin: 0;
   /* overflow: hidden;  */
 }
+
 #map {
   width: 100vw;
   height: 100vh;
 }
+
 .map:-webkit-full-screen {
   height: 100%;
   margin: 0;
 }
+
 .map:fullscreen {
   height: 100%;
 }
+
 .ol-full-screen {
   right: .5em;
   top: 0.375em;
 }
+
 .map .ol-rotate {
   top: calc(100vh - 100px)
 }
+
 .locate {
   top: 125px;
   left: 8px;
 }
+
 .locate.active {
   background-color: #4CAF50; /* Grüne Hintergrundfarbe im aktiven Zustand */
 }
+
 .locate.active button {
   color: white; /* Weiße Schriftfarbe im aktiven Zustand */
 }
+
 .locateMStyle {
   top: 250px;
   left: 8px;
 }
+
 .tooltip {
   background-color: white;
   border: 1px solid #ccc;
@@ -51,6 +62,7 @@ body{
   position: absolute;
   display: none;
 }
+
 .ol-popup {
   background-color: rgb(255, 255, 255);
   padding: 5px;
@@ -62,71 +74,68 @@ body{
   left: 20px;  
   top: -20px; 
   min-width: 280px;
- }
- #popup-content {
+}
+
+#popup-content {
   user-select: text;
 }
-.ol-popup:after, .ol-popup:before{
-top: 10px;  
-border: solid transparent;
-content: " ";
-height: 0;
-width: 0;
-position: absolute;
-pointer-events: none;
+
+.ol-popup:after,
+.ol-popup:before {
+  top: 10px;  
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
 }
-.ol-popup:after{
+
+.ol-popup:after {
   border-top-color: white;
   border-width: 10px;
   left: -10px;
   margin-left: -10px;
   transform: rotate(90deg); /* Drehung um 90 Grad */
 }
-.ol-popup:before{
+
+.ol-popup:before {
   border-top-color: #4400ff;
   border-width: 11px;
   left: -10px;
   margin-left: -11px;
   transform: rotate(90deg); /* Drehung um 90 Grad */
 }
-.ol-popup-closer{
+
+.ol-popup-closer {
   text-decoration: none;
   position: absolute;
   top: 5px;
   right: 5px;
   height: 10px;
-
 }
-.ol-popup-closer:after{
+
+.ol-popup-closer:after {
   content: "X";
   font-weight: bold; /* Fett formatieren */
 }
+
 .popup-text {
   margin-right: 10px; /* Ändere den Abstand zum "X" nach Bedarf */
 }
+
 .ol-button:hover {
   background-color: #005a9e;
 }
-/*  .ol-button {
-  display: block;
-  margin-bottom: 5px;
-  padding: 5px 10px;
-  background-color: #0078d4;
-  color: #fff;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
-} */
 
-.custom-controls1{
+.custom-controls1 {
   top: 10em;
   left: .5em;
   height: 1.375em; 
   width: 1.375em;
   z-index: 1001;
 }
+
 .custom-controls2 {
   top: 14em;
   left: .5em;
@@ -134,7 +143,10 @@ pointer-events: none;
   width: 1.375em;
   z-index: 1002;
 }
-.custom-controls1:ol-button
+
+/* .custom-controls1:ol-button { 
+   Diese Zeile wurde auskommentiert, da sie nicht korrekt ist.
+} */
 
 /* Stil für den Container der Infodiv */
 .info-container {
@@ -148,6 +160,7 @@ pointer-events: none;
   left: 0px;
   z-index: 1003;
 }
+
 /* Stil für das Schließen-Symbol */
 .close-icon {
   position: absolute;
@@ -156,4 +169,3 @@ pointer-events: none;
   cursor: pointer;
   font-size: 20px;
 }
-

@@ -479,6 +479,9 @@ const wmsWrrlFgLayer = new TileLayer({
   visible: false,
   opacity: 1,
 });
+
+
+
 const wmsGewWmsFgLayer = new TileLayer({
   title: "GewWms",
   name: "GewWms",
@@ -655,7 +658,7 @@ const osmTileCr = new TileLayer({
       url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   }),
-  visible: false,
+  visible: false
 });
 
 const layerSwitcher = new LayerSwitcher({ });
@@ -971,8 +974,9 @@ map.addLayer(vector);
 //Info für WMS-Layer
 map.on('singleclick', function (evt) {
   const isWmsLayerGroupVisible = map.getLayers().getArray().some(layer => layer.get('name') === 'WMS-Lay' && layer.getVisible());
-  
+  console.log ('wms');
   if (isWmsLayerGroupVisible) {
+    console.log ("grujppe sichtbar");
     const layersToCheck = [
       { layer: wmsGewWmsFgLayer, name: 'GewWms' },
       { layer: wmsWrrlFgLayer, name: 'WRRL' },
@@ -985,6 +989,7 @@ map.on('singleclick', function (evt) {
     const viewProjection = map.getView().getProjection();
 
     layersToCheck.forEach(({ layer, name }) => {
+      console.log (name);
       if (layer.getVisible()) {
         const url = layer.getSource().getFeatureInfoUrl(evt.coordinate, viewResolution, viewProjection, {'INFO_FORMAT': 'text/html'});
         if (url) {
