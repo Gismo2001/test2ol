@@ -53,9 +53,6 @@ import {
 
 import { handleExportButtonClick } from './myFunc.js';
 
-
-
-
 window.searchAddress = function searchAddress() {
   var address = document.getElementById('addressInput').value;
   // Direktes Setzen des API-Schlüssels, falls process.env.API_KEY nicht definiert ist
@@ -195,11 +192,9 @@ locateP.addEventListener('click', function () {
 
         // Führe den Zoom nur beim ersten Mal aus
         if (isFirstZoom) {
-          map.getView().fit(sourceP.getExtent(), { maxZoom: 18, duration: 500 }); 
+          map.getView().fit(sourceP.getExtent(), { maxZoom: 13, duration: 500 }); 
           isFirstZoom = false; // Setze isFirstZoom auf false, um zukünftige Zooms zu verhindern
         }
-
-        // Füge den Layer hinzu, um die Position anzuzeigen
         // Füge den Layer hinzu, um die Position anzuzeigen
         if (!layerP) {
           layerP = new VectorLayer({
@@ -237,9 +232,7 @@ locateP.addEventListener('click', function () {
     navigator.geolocation.clearWatch(watchId);
     watchId = null; // Setze die Watch-ID auf null, um anzuzeigen, dass die Geolokalisierung deaktiviert ist
     isActive = false; // Richtiges Zuweisen von isActive
-   
-
-    // Entferne den Layer, um die Position nicht mehr anzuzeigen
+       // Entferne den Layer, um die Position nicht mehr anzuzeigen
     if (layerP) {
       map.removeLayer(layerP);
       layerP = null;
@@ -247,13 +240,11 @@ locateP.addEventListener('click', function () {
   }
   updateButtonAppearance(); // Aktualisieren Sie das Erscheinungsbild des Buttons basierend auf dem aktualisierten isActive-Status
 });
-
 map.addControl(
   new Control({
     element: locateP,
   })
 );
-
 
 const gehoelz_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
@@ -470,7 +461,7 @@ const wmsWrrlFgLayer = new TileLayer({
   source: new TileWMS({
     url:  'https://www.umweltkarten-niedersachsen.de/arcgis/services/WRRL_wms/MapServer/WMSServer',
     params: {
-      'LAYERS': 'Fliessgewaesser_WRRL',
+      'LAYERS': 'Natuerliche_erheblich_veraenderte_und_kuenstliche_Fliessgewaesser',
       'FORMAT': 'image/png',
       'TRANSPARENT': true,
       'TILED': true,
@@ -479,7 +470,6 @@ const wmsWrrlFgLayer = new TileLayer({
   visible: false,
   opacity: 1,
 });
-
 
 
 const wmsGewWmsFgLayer = new TileLayer({
@@ -974,9 +964,7 @@ map.addLayer(vector);
 //Info für WMS-Layer
 map.on('singleclick', function (evt) {
   const isWmsLayerGroupVisible = map.getLayers().getArray().some(layer => layer.get('name') === 'WMS-Lay' && layer.getVisible());
-  console.log ('wms');
   if (isWmsLayerGroupVisible) {
-    console.log ("grujppe sichtbar");
     const layersToCheck = [
       { layer: wmsGewWmsFgLayer, name: 'GewWms' },
       { layer: wmsWrrlFgLayer, name: 'WRRL' },
@@ -989,8 +977,7 @@ map.on('singleclick', function (evt) {
     const viewProjection = map.getView().getProjection();
 
     layersToCheck.forEach(({ layer, name }) => {
-      console.log (name);
-      if (layer.getVisible()) {
+       if (layer.getVisible()) {
         const url = layer.getSource().getFeatureInfoUrl(evt.coordinate, viewResolution, viewProjection, {'INFO_FORMAT': 'text/html'});
         if (url) {
           fetch(url)
@@ -1033,7 +1020,6 @@ function removeExistingInfoDiv() {
   const existingInfoDiv = document.getElementById('info');
   if (existingInfoDiv) { existingInfoDiv.remove(); }
 }
-
 
 // Funktionen für Popup
 var container = document.getElementById('popup');
