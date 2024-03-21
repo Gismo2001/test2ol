@@ -61,15 +61,44 @@ const gehoelz_vecStyle = new Style({
     width: 3
     }),
 });
-const son_linStyle = new Style({
-    stroke: new Stroke({
-    color: 'rgba(209, 32, 253, 1)',
-    width: 4
-    }),
-});
+
+function getStyleForArtSonLin(feature) {   
+    const artValue = feature.get('bauart');
+    let strokeColor;
+    let strokeWidth;
+    let lineDash;
+    
+    switch (artValue) {
+        case 'Anlegehilfe':
+            strokeColor = 'blue';
+            strokeWidth = 3;
+            break;
+        case 'Sohlgleite':
+            strokeColor = 'red';
+            strokeWidth = 10;
+            lineDash = [10, 5]; // Array mit Längen der Striche und Lücken
+            break;
+        default:
+            strokeColor = 'black';
+            lineDash = undefined; // Keine gestrichelte Linie für den Standardfall
+    }
+    
+    return new Style({
+        fill: new Fill({
+            color: strokeColor
+        }),
+        stroke: new Stroke({
+            color: strokeColor,
+            width: strokeWidth,
+            lineDash: lineDash // Verwendung der lineDash-Eigenschaft für gestrichelte Linie
+        })
+    });
+}
+
+
+
 function getStyleForArtEin(feature) {   
     const artValue = feature.get('Ein_ord');
-    
     let iconSrc;
     switch (artValue) {
         case '1. Ordnung':
@@ -97,7 +126,7 @@ function getStyleForArtEin(feature) {
             scale: .9 
         })
     });
-}
+};
 function getStyleForArtSonPun(feature) {   
     const artValue = feature.get('bauart');
     
@@ -150,6 +179,7 @@ function getStyleForArtFSK(feature) {
         })
     });
 };
+
 function getStyleForArtUmn(feature) {
   const mnIdValue = feature.get('Massn_ID');
   let fillColor, strokeColor;
@@ -243,9 +273,8 @@ const arrowStyle = new Style({
         color: 'black',
         width: 4,
     }),
-  });
-  
-  const endpointStyle = new Style({
+});
+const endpointStyle = new Style({
     geometry: function (feature) {
         const coordinates = feature.getGeometry().getCoordinates();
         return new Point(coordinates[coordinates.length - 1]);
@@ -258,18 +287,17 @@ const arrowStyle = new Style({
         width: 2,          // Breite des Randes
         }),
     }),
-  });
-  
+});
 const combinedStyle = [arrowStyle, endpointStyle];
 
-export { bru_nlwknStyle,
+export { 
+    bru_nlwknStyle,
     sleStyle,
     wehStyle, 
     bruAndereStyle, 
     dueStyle,
     queStyle,
-    son_linStyle, 
-    son_punStyle,
+    getStyleForArtSonLin, 
     km10scalStyle,
     gehoelz_vecStyle,
     getStyleForArtFSK,

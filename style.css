@@ -158,7 +158,8 @@ body {
   bottom: 150px;
   width: 100%;
   left: 0px;
-  z-index: 1003;
+   font-size: 25px;
+     z-index: 1003;
 }
 
 /* Stil für das Schließen-Symbol */

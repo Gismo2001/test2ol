@@ -42,13 +42,12 @@ import {
   queStyle, 
   getStyleForArtFSK, 
   getStyleForArtUmn,
-  son_linStyle, 
-  son_punStyle,
   km10scalStyle,
   km100scalStyle,
   km500scalStyle,
   combinedStyle,
-  machWasMitFSK
+  machWasMitFSK,
+  getStyleForArtSonLin
 } from './extStyle';
 
 import { handleExportButtonClick } from './myFunc.js';
@@ -266,7 +265,7 @@ const exp_bw_son_lin_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_son_lin.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }), 
   title: 'Sonstig, Linien', 
   name: 'son_lin',
-  style: son_linStyle,
+  style: getStyleForArtSonLin,
   visible: false
 });
 const exp_gew_umn_layer = new VectorLayer({
@@ -834,7 +833,6 @@ function createMeasureTooltip() {
 map.getViewport().addEventListener('contextmenu', function(evt) {
   evt.preventDefault(); // Verhindert das Standardkontextmenü
   if (draw) {
-    
     source.clear(); // Löscht alle Vektoren aus der Quelle
     draw.finishDrawing(); // Beendet die laufende Messung
     map.removeInteraction(draw); // Entfernt die Zeicheninteraktion
@@ -848,7 +846,6 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
 function removeAllOverlays() {
   // Alle Overlays der Karte abrufen
   const overlays = map.getOverlays().getArray();
-  
   // Über jedes Overlay iterieren und es von der Karte entfernen
   overlays.forEach(function(overlay) {
     map.removeOverlay(overlay);
