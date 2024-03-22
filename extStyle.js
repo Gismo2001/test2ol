@@ -129,16 +129,20 @@ function getStyleForArtEin(feature) {
 };
 function getStyleForArtSonPun(feature) {   
     const artValue = feature.get('bauart');
-    
     let iconSrc;
     switch (artValue) {
         case 'Bootsanleger':
             iconSrc = './data/sonPunBoot.svg';
             break;
+        case 'Betriebsgebäude':
+            iconSrc = './data/sonPunBetrieb.svg';
+            break;
+        case 'Infotafel':
+            iconSrc = './data/sonPunInfo.svg';
+            break;
         default:
             iconSrc = './data/sonPunSonstige.svg';
     }
-
     return new Style({
         image: new Icon({
             src: iconSrc,

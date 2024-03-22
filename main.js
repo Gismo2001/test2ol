@@ -49,9 +49,7 @@ import {
   machWasMitFSK,
   getStyleForArtSonLin
 } from './extStyle';
-
 import { handleExportButtonClick } from './myFunc.js';
-
 window.searchAddress = function searchAddress() {
   var address = document.getElementById('addressInput').value;
   // Direktes Setzen des API-Schlüssels, falls process.env.API_KEY nicht definiert ist
@@ -118,13 +116,10 @@ function removeTempMarker() {
     }
   });
 }
-
 const attribution = new Attribution({
   collapsible: false,
   html: '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
 });
-
-
 const mapView = new View({
   center: proj.fromLonLat([7.35, 52.7]),
   zoom: 9
@@ -144,12 +139,10 @@ const map = new Map({
   ]),
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
-
 /* var mousePosition = new MousePosition({
   coordinateFormat: createStringXY(4),
   projection: 'EPSG:4326'
 });
-
 map.addControl(mousePosition); */
 
 const sourceP = new VectorSource();

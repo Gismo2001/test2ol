@@ -151,7 +151,7 @@ body {
 /* Stil für den Container der Infodiv */
 .info-container {
   border: 1px solid black;
-  background: white;
+  background: rgb(255, 255, 255);
   opacity: 1;
   overflow-x: auto;
   position: absolute;

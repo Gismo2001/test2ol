@@ -8,9 +8,9 @@
    ]]>
   </style>
  </defs>
- <g id="a">
+ <g id="a" transform="matrix(1.004 0 0 1.5247 -7.4198e-5 -.45649)" style="stroke-width:.80822">
   
   
   
- <rect x=".0435" y=".4785" width="1.653" height=".783" style="fill:none;stroke-width:.087;stroke:#000"/><path d="m0.018323 0.47445 1.7034 0.79108" style="fill:none;stroke-width:.087;stroke:#000"/><path d="m0.018348 1.2655 1.7034-0.79109" style="fill:none;stroke-width:.087;stroke:#000"/></g>
+ <rect x="7.3692e-5" y=".29939" width="1.733" height="1.1412" style="clip-rule:evenodd;fill-rule:evenodd;fill:#fff;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;stroke-width:.070315"/><rect x=".0435" y=".4772" width="1.6627" height=".78558" style="clip-rule:evenodd;fill:none;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;stroke-width:.070315;stroke:#b90000"/><path d="m0.018323 0.47445 1.7034 0.79108" style="fill:none;stroke-width:.070315;stroke:#a50000"/><path d="m0.018348 1.2655 1.7034-0.79109" style="fill:#f00;stroke-width:.070315;stroke:#a60000"/></g>
 </svg>
