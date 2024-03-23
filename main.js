@@ -472,7 +472,7 @@ const wmsWrrlFgLayer = new TileLayer({
       'TILED': true,
     },
   }),
-  visible: false,
+  visible: true,
   opacity: 1,
 });
 
@@ -929,6 +929,7 @@ const wmsLayerGroup = new LayerGroup({
   name: "WMS-Lay",
   fold: true,
   fold: 'close',
+  visible: false,
   layers: [ wmsLsgLayer, wmsNsgLayer, wmsUesgLayer, wmsWrrlFgLayer, wmsGewWmsFgLayer ]
 });
 const GNAtlasGroup = new LayerGroup({
@@ -1040,6 +1041,11 @@ var closer = document.getElementById('popup-closer');
 
 //--------------------------------------------------Funktionen für Text im Popup
 map.on('click', function (evt) {
+  //gibt es schon einen Marker
+  if (markerCoordOverlay) {
+    console.log('es gibt einen Marker');
+    map.removeOverlay(markerCoordOverlay);
+  };
   console.log(globalCoordAnOderAus);
   if (globalCoordAnOderAus===false){
     var coordinates = evt.coordinate;
@@ -1214,6 +1220,7 @@ map.on('click', function (evt) {
     });
   } else if(globalCoordAnOderAus===true) {  
   console.log ("funktion für marker setzen aufrufen");
+  console.log (markerCoordOverlay);
   placeMarkerAndShowCoordinates(evt);
   }
 }
@@ -1222,6 +1229,8 @@ map.on('click', function (evt) {
 //--------------------------------------------------Bestimmung geclickter Koordinaten
 //Globale Variable, die die Projektion wiedergibt
 const projectionSelect = document.getElementById('projecSelect');
+//Glabale Variable für markerCoordOverlay
+//let markerCoordOverlay = []; // Globale Variable für markerCoordOverlay
 projectionSelect.addEventListener('change', function (event) {
   if (projectionSelect.value === 'EPSG:3857') {
     const format = createStringXY(2);
@@ -1247,13 +1256,14 @@ function placeMarkerAndShowCoordinates(event) {
   if (toggleCheckbox.checked) {
     const marker = document.createElement('div');
     marker.className = 'marker';
-    const markerCoordOverlay = new Overlay({
+    markerCoordOverlay = new Overlay({
       position: event.coordinate,
       positioning: 'center-center', 
       element: marker,
       stopEvent: false,
     });
     map.addOverlay(markerCoordOverlay);
+    
     if (projectionSelect.value === 'EPSG:3857') {
       const format = createStringXY(2);
       mousePositionElement.innerHTML = `Coordinates: ${format(event.coordinate)}`;
@@ -1272,8 +1282,6 @@ function placeMarkerAndShowCoordinates(event) {
   }
 };
 
-
-
 // Checkbox, wenn an kann der Marker gesetzt werden und die Koordinaten werden ausgegeben
 const toggleCheckbox = document.getElementById('toggle-checkbox');
 toggleCheckbox.addEventListener('change', function() {
@@ -1283,39 +1291,33 @@ toggleCheckbox.addEventListener('change', function() {
     globalCoordAnOderAus=true;
     console.log(globalCoordAnOderAus);
   } else {
+    if (markerCoordOverlay) {
+      console.log('es gibt einen Marker');
+      map.removeOverlay(markerCoordOverlay);
+    };
     globalCoordAnOderAus=false;
     console.log(globalCoordAnOderAus);
     map.addControl(mousePositionControl);
   }
 });
 //Button, der die Sichtbarkeit des Controlls steuert
+// Array zum Speichern aller hinzugefügten Marker
+let markerCoordOverlay
 document.getElementById('hide-button').addEventListener('click', function() {
   const controls = document.querySelector('.controls');
   controls.classList.toggle('hidden');
-  //Wenn das Control verborgen ist
+  // Wenn das Control verborgen ist
   if (controls.classList.contains('hidden')) {
-    //Alle Overlayers entfernen (auch p)
-    //map.getOverlays().clear();
-    // Überprüfen und Entfernen aller Overlays mit dem Namen "markerCoordOverlay"
-    map.getOverlays().getArray().forEach(function(overlay) {
-    if (overlay.get('name') === 'markerCoordOverlay') {
-        map.removeOverlay(overlay);
-      }
-    });
-
-    
+    // Überprüfen und Entfernen aller Marker, die durch markerCoordOverlay dargestellt werden
+    //map.removeOverlay(marker);
     document.getElementById('toggle-checkbox').checked = false;
-    //Eventlistener entfernen
-    //map.un('click', placeMarkerAndShowCoordinates);
-    
-    //Wenn das Control sichtbar ist
+    // Wenn das Control sichtbar ist
   } else {
-    // muss eigentlich true sein!!!!!!!!!!!!!!!!!!!!!!
-    
+    // Muss eigentlich true sein
     map.addControl(mousePositionControl);
-   
   }
 });
+
 //Umrechnung geclickter Kartenpositionen in mousePositionControl-Format
 //für EPSG:4326
 function transformCoordinateToMousePosition4326(coordinate) {
