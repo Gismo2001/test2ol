@@ -89,6 +89,9 @@ window.searchAddress = function searchAddress() {
       removeTempMarker();
     });
 }
+
+var globalCoordAnOderAus = false;
+
 // Event-Listener für die Enter-Taste hinzufügen
 var inputElement = document.getElementById('addressInput');
 inputElement.addEventListener('keydown', function (event) {
@@ -142,8 +145,7 @@ const map = new Map({
     new FullScreen(),
     new Attribution(),
     new ZoomToExtent({
-      extent: [727361,  6839277, 858148,
-        6990951,] // Geben Sie hier das Ausdehnungsintervall an
+      extent: [727361, 6839277, 858148, 6990951,] // Geben Sie hier das Ausdehnungsintervall an
     })
   ]),
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
@@ -157,90 +159,6 @@ const mousePositionControl = new MousePosition({
 });
 map.addControl(mousePositionControl);
 // Projektion für Maus anwenden
-const projectionSelect = document.getElementById('projecSelect');
-projectionSelect.addEventListener('change', function (event) {
-  if (projectionSelect.value === 'EPSG:3857') {
-    const format = createStringXY(2);
-    mousePositionControl.setCoordinateFormat(format);
-    mousePositionControl.setProjection(event.target.value);
-    
-  } else if (projectionSelect.value === 'EPSG:4326') {
-    const format = createStringXY(6);
-    mousePositionControl.setCoordinateFormat(format);
-    mousePositionControl.setProjection(event.target.value);
-
-  } else if (projectionSelect.value === 'EPSG:32632') {
-    console.log('32632')
-    const format = createStringXY(1);
-    mousePositionControl.setCoordinateFormat(format);
-    mousePositionControl.setProjection(event.target.value);
-  }
-});
-function placeMarkerAndShowCoordinates(event) {
-  map.getOverlays().clear();
-  const mousePositionElement = document.getElementById('mouse-position'); // Auswahl des HTML-Elements
-  if (toggleCheckbox.checked) {
-    const marker = document.createElement('div');
-    marker.className = 'marker';
-    const markerOverlay = new Overlay({
-      position: event.coordinate,
-      positioning: 'center-center', 
-      element: marker,
-      stopEvent: false,
-    });
-    map.addOverlay(markerOverlay);
-    if (projectionSelect.value === 'EPSG:3857') {
-      const format = createStringXY(2);
-      mousePositionElement.innerHTML = `Coordinates: ${format(event.coordinate)}`;
-    } else if (projectionSelect.value === 'EPSG:4326') {
-      const format = createStringXY(6);
-      const transformedCoordinate = transformCoordinateToMousePosition4326(event.coordinate);
-      mousePositionElement.innerHTML = `Coordinates: ${format(transformedCoordinate)}`;
-    } else if (projectionSelect.value === 'EPSG:32632') {
-      console.log('32632')
-      const format = createStringXY(1);
-      const transformedCoordinate = transformCoordinateToMousePosition32632(event.coordinate);
-      mousePositionElement.innerHTML = `Coordinates: ${format(transformedCoordinate)}`;
-      //const googleMapsLink = `https://maps.app.goo.gl/?q=${transformedCoordinate[0]},${transformedCoordinate[1]}`;
-      //console.log(googleMapsLink);
-    }
-  }
-}
-//map.on('click', placeMarkerAndShowCoordinates);
-const toggleCheckbox = document.getElementById('toggle-checkbox');
-toggleCheckbox.addEventListener('change', function() {
-  if (this.checked) {
-    document.getElementById('mouse-position').innerHTML = "";
-    map.removeControl(mousePositionControl); 
-  } else {
-    map.addControl(mousePositionControl);
-  }
-});
-document.getElementById('hide-button').addEventListener('click', function() {
-  const controls = document.querySelector('.controls');
-  controls.classList.toggle('hidden');
-  if (controls.classList.contains('hidden')) {
-    //map.getOverlays().clear();
-    document.getElementById('toggle-checkbox').checked = false;
-    map.un('click', placeMarkerAndShowCoordinates);
-  } else {
-    map.addControl(mousePositionControl);
-    //map.on('click', placeMarkerAndShowCoordinates);
-  }
-});
-//Umrechnung geclickter Kartenpositionen in mousePositionControl-Format
-//für EPSG:4326
-function transformCoordinateToMousePosition4326(coordinate) {
-  // Koordinaten in das Format von mousePositionControl (EPSG:4326) umwandeln
-  return transform(coordinate, map.getView().getProjection(), 'EPSG:4326');
-}
-//für EPSG:32632
-function transformCoordinateToMousePosition32632(coordinate) {
-  // Koordinaten von der aktuellen Karte (EPSG:3857) nach EPSG:32632 umwandeln
-  //  const transformedCoordinate32632 = transform(clickedCoordinate3857, 'EPSG:3857', 'EPSG:32632');
-  return transform(coordinate, 'EPSG:3857', 'EPSG:32632');
-}
-
 
 const sourceP = new VectorSource();
 let layerP = null; // Initial kein Layer vorhanden
@@ -1049,6 +967,7 @@ map.addLayer(BwGroupP);
 map.addLayer(vector); 
 
 //Info für WMS-Layer
+
 map.on('singleclick', function (evt) {
   const isWmsLayerGroupVisible = map.getLayers().getArray().some(layer => layer.get('name') === 'WMS-Lay' && layer.getVisible());
   if (isWmsLayerGroupVisible) {
@@ -1059,10 +978,8 @@ map.on('singleclick', function (evt) {
       { layer: wmsNsgLayer, name: 'NSG' },
       { layer: wmsLsgLayer, name: 'LSG' },
     ];
-
     const viewResolution = map.getView().getResolution();
     const viewProjection = map.getView().getProjection();
-
     layersToCheck.forEach(({ layer, name }) => {
        if (layer.getVisible()) {
         const url = layer.getSource().getFeatureInfoUrl(evt.coordinate, viewResolution, viewProjection, {'INFO_FORMAT': 'text/html'});
@@ -1128,15 +1045,21 @@ closer.onclick = function()
   return false;
 };
 var closer = document.getElementById('popup-closer');
+
 map.on('click', function (evt) {
+  
+  var coordinates = evt.coordinate;
+  if (globalCoordAnOderAus===false){
   var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
     /* Neu
     var txtName = feature.get('name');
     var txtPopupCloser = document.getElementById('popup-closer');
     txtPopupCloser.innerHTML = (txtName);
     */
+    
+    
     var layname = layer.get('name');
-    var coordinates = evt.coordinates;
+    
     var beschreibLangValue = feature.get('beschreib_lang');
     var beschreibLangHtml = '';
     if (beschreibLangValue && beschreibLangValue.trim() !== '') {
@@ -1144,8 +1067,10 @@ map.on('click', function (evt) {
     };
     // Popup soll nur für bestimmte Layernamen angezeigt werden
     if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'son_lin') {
+      
       if (feature) {
         coordinates = feature.getGeometry().getCoordinates();
+        
         popup.setPosition(coordinates);
         // HTML-Tag Foto1
         var foto1Value = feature.get('foto1');
@@ -1186,8 +1111,8 @@ map.on('click', function (evt) {
            '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
            '<p>' + beschreibLangHtml + '</p>' +
           '</div>';
-      
-        
+          console.log("Am Ende");
+         
       } else {
         popup.setPosition(undefined);
       }
@@ -1300,8 +1225,110 @@ map.on('click', function (evt) {
           '</div>';
       }
     }
+    
   });
+  } else if(globalCoordAnOderAus===true) {  
+   // placeMarkerAndShowCoordinates(evt);
+  }
+
+}
+
+);
+
+const projectionSelect = document.getElementById('projecSelect');
+projectionSelect.addEventListener('change', function (event) {
+  if (projectionSelect.value === 'EPSG:3857') {
+    const format = createStringXY(2);
+    mousePositionControl.setCoordinateFormat(format);
+    mousePositionControl.setProjection(event.target.value);
+    
+  } else if (projectionSelect.value === 'EPSG:4326') {
+    const format = createStringXY(6);
+    mousePositionControl.setCoordinateFormat(format);
+    mousePositionControl.setProjection(event.target.value);
+
+  } else if (projectionSelect.value === 'EPSG:32632') {
+    console.log('32632')
+    const format = createStringXY(1);
+    mousePositionControl.setCoordinateFormat(format);
+    mousePositionControl.setProjection(event.target.value);
+  }
 });
+function placeMarkerAndShowCoordinates(event) {
+  console.log ("Funktion aufgerufen");
+  map.getOverlays().clear();
+  const mousePositionElement = document.getElementById('mouse-position'); // Auswahl des HTML-Elements
+  if (toggleCheckbox.checked) {
+    const marker = document.createElement('div');
+    marker.className = 'marker';
+    const markerOverlay = new Overlay({
+      position: event.coordinate,
+      positioning: 'center-center', 
+      element: marker,
+      stopEvent: false,
+    });
+    map.addOverlay(markerOverlay);
+    if (projectionSelect.value === 'EPSG:3857') {
+      const format = createStringXY(2);
+      mousePositionElement.innerHTML = `Coordinates: ${format(event.coordinate)}`;
+    } else if (projectionSelect.value === 'EPSG:4326') {
+      const format = createStringXY(6);
+      const transformedCoordinate = transformCoordinateToMousePosition4326(event.coordinate);
+      mousePositionElement.innerHTML = `Coordinates: ${format(transformedCoordinate)}`;
+    } else if (projectionSelect.value === 'EPSG:32632') {
+      console.log('32632')
+      const format = createStringXY(1);
+      const transformedCoordinate = transformCoordinateToMousePosition32632(event.coordinate);
+      mousePositionElement.innerHTML = `Coordinates: ${format(transformedCoordinate)}`;
+      //const googleMapsLink = `https://maps.app.goo.gl/?q=${transformedCoordinate[0]},${transformedCoordinate[1]}`;
+      //console.log(googleMapsLink);
+    }
+  }
+}
+
+
+const toggleCheckbox = document.getElementById('toggle-checkbox');
+toggleCheckbox.addEventListener('change', function() {
+  if (this.checked) {
+    document.getElementById('mouse-position').innerHTML = "";
+    map.removeControl(mousePositionControl); 
+  } else {
+    map.addControl(mousePositionControl);
+  }
+});
+document.getElementById('hide-button').addEventListener('click', function() {
+  const controls = document.querySelector('.controls');
+  controls.classList.toggle('hidden');
+  if (controls.classList.contains('hidden')) {
+    //Alle Overlayers entfernen (auch p)
+    globalCoordAnOderAus=false;
+    document.getElementById('toggle-checkbox').checked = false;
+    //map.getOverlays().clear();
+    //Eventlistener entfernen
+    //map.un('click', placeMarkerAndShowCoordinates);
+  } else {
+    // muss eigentlich true sein!!!!!!!!!!!!!!!!!!!!!!
+    globalCoordAnOderAus=false;
+    map.addControl(mousePositionControl);
+    //map.on('click', placeMarkerAndShowCoordinates);
+    //map.on('click', placeMarkerAndShowCoordinates);
+  }
+});
+//Umrechnung geclickter Kartenpositionen in mousePositionControl-Format
+//für EPSG:4326
+function transformCoordinateToMousePosition4326(coordinate) {
+  // Koordinaten in das Format von mousePositionControl (EPSG:4326) umwandeln
+  return transform(coordinate, map.getView().getProjection(), 'EPSG:4326');
+}
+//für EPSG:32632
+function transformCoordinateToMousePosition32632(coordinate) {
+  // Koordinaten von der aktuellen Karte (EPSG:3857) nach EPSG:32632 umwandeln
+  //  const transformedCoordinate32632 = transform(clickedCoordinate3857, 'EPSG:3857', 'EPSG:32632');
+  return transform(coordinate, 'EPSG:3857', 'EPSG:32632');
+}
+
+
+
 document.addEventListener('DOMContentLoaded', function () {
   var popup = document.getElementById('popup');
   var popupCloser = document.getElementById('popup-closer');
