@@ -170,3 +170,74 @@ body {
   cursor: pointer;
   font-size: 20px;
 }
+
+.marker {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #000; /* Randstil des Kreises */
+  border-radius: 50%; /* Macht den Kreis */
+  position: relative; /* Erforderlich, um den Punkt in der Mitte zu positionieren */
+}
+
+.marker::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background-color: #000; /* Farbe des Punktes */
+  border-radius: 50%; /* Macht den Punkt */
+}
+
+
+.controls * {
+  font-size: 12px; /* Hier kannst du die gewünschte Größe für alle Elemente innerhalb des Div-Containers angeben */
+}
+.controls {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background-color: white;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+.hidden {
+  display: none;
+}
+.button-container {
+  text-align: center;
+  margin-top: 10px;
+  position: absolute;
+  bottom: 10px;
+  left: 10%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+.controls {
+  display: flex; /* Verwende Flexbox für die Ausrichtung der Elemente */
+  align-items: center; /* Zentriere die Elemente vertikal */
+}
+
+#toggle-checkbox {
+  margin-left: 10px; /* Füge einen Abstand zwischen der Checkbox und dem Mouse-Position-Element hinzu */
+}
+
+#mouse-position {
+  margin-left: 10px; /* Füge einen Abstand zwischen der Checkbox und dem Mouse-Position-Element hinzu */
+}
+
+.hidden {
+  display: none;
+}
+
+
+#hide-button {
+  width: 25px; /* Setze die Breite auf 50px */
+  height: 25px; /* Setze die Höhe auf 30px */
+  font-size: 16px; /* Setze die Schriftgröße auf 16px */
+}
