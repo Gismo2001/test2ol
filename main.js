@@ -35,7 +35,7 @@ import proj4 from 'proj4';
 //projektion definieren und registrieren
 proj4.defs('EPSG:32632', '+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs');
 register(proj4);
-
+var globalCoordAnOderAus = false;
 
 import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
 import LayerGroup from 'ol/layer/Group';
@@ -89,8 +89,6 @@ window.searchAddress = function searchAddress() {
       removeTempMarker();
     });
 }
-
-var globalCoordAnOderAus = false;
 
 // Event-Listener für die Enter-Taste hinzufügen
 var inputElement = document.getElementById('addressInput');
@@ -681,7 +679,7 @@ let measureTooltipElement;
 let measureTooltip;
 
 
-// Funktionen für Messung
+//-------------------------------------------Funktionen für Messung----------------- //
 const pointerMoveHandler = function (evt) {
   if (evt.pointerType === 'touch') {
     if (evt.dragging) {
@@ -744,7 +742,6 @@ const formatArea = function (polygon) {
   }
   return output;
 };
-
 const style = new Style({
   fill: new Fill({
     color: 'rgba(255, 255, 255, 0.2)',
@@ -837,7 +834,7 @@ function createMeasureTooltip() {
   });
   map.addOverlay(measureTooltip);
 }
-
+//Mit Kontextmenü werden die Overlays fü Messungen wieder gelöscht
 map.getViewport().addEventListener('contextmenu', function(evt) {
   evt.preventDefault(); // Verhindert das Standardkontextmenü
   if (draw) {
@@ -845,11 +842,10 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
     draw.finishDrawing(); // Beendet die laufende Messung
     map.removeInteraction(draw); // Entfernt die Zeicheninteraktion
     map.un('pointermove', pointerMoveHandler); // Entfernt den Event-Listener für 'pointermove'
-    removeAllOverlays();
+    //removeAllOverlays();
     return; // Beende die Funktion, um weitere Interaktionen zu verhindern
   }
 });
-
 // Funktion zum Entfernen aller Overlays von der Karte
 function removeAllOverlays() {
   // Alle Overlays der Karte abrufen
@@ -860,7 +856,7 @@ function removeAllOverlays() {
   });
 }
 
-//Custom Controls 1 und 2
+//------------------------------------Custom Controls 1 und 2........................
 class CustomControls1 extends Control {
   constructor(options) {
     const element = document.createElement('div');
@@ -889,7 +885,6 @@ class CustomControls1 extends Control {
 map.addControl(new CustomControls1({
   target: 'custom-controls'
 }));
-
 class CustomControls2 extends Control {
   constructor(options) {
     const element = document.createElement('div');
@@ -912,12 +907,11 @@ class CustomControls2 extends Control {
     });
   }
 }
-
 map.addControl(new CustomControls2({
   target: 'custom-controls',
   handleExportButtonClick: handleExportButtonClick
 }));
-
+//---------------------------------------------Layergruppen
 const BwGroupP = new LayerGroup({
   title: "Bauw.(P)",
   fold: true,
@@ -955,7 +949,6 @@ const BaseGroup = new LayerGroup({
   fold: 'close',
   layers: [ESRIWorldImagery, googleLayer, dop20ni_layer, osmTileCr, osmTileGr]
 });
-
 map.addLayer(BaseGroup);
 map.addLayer(GNAtlasGroup);
 map.addLayer (exp_allgm_fsk_layer);
@@ -966,8 +959,7 @@ map.addLayer(BwGroupL);
 map.addLayer(BwGroupP);
 map.addLayer(vector); 
 
-//Info für WMS-Layer
-
+//--------------------------------------------------Info für WMS-Layer
 map.on('singleclick', function (evt) {
   const isWmsLayerGroupVisible = map.getLayers().getArray().some(layer => layer.get('name') === 'WMS-Lay' && layer.getVisible());
   if (isWmsLayerGroupVisible) {
@@ -1025,7 +1017,7 @@ function removeExistingInfoDiv() {
   if (existingInfoDiv) { existingInfoDiv.remove(); }
 }
 
-// Funktionen für Popup
+//---------------------------------------------------Funktionen für Popup
 var container = document.getElementById('popup');
 var content = document.getElementById('popup-content');
 var closer = document.getElementById('popup-closer');
@@ -1046,20 +1038,13 @@ closer.onclick = function()
 };
 var closer = document.getElementById('popup-closer');
 
+//--------------------------------------------------Funktionen für Text im Popup
 map.on('click', function (evt) {
-  
-  var coordinates = evt.coordinate;
+  console.log(globalCoordAnOderAus);
   if (globalCoordAnOderAus===false){
-  var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-    /* Neu
-    var txtName = feature.get('name');
-    var txtPopupCloser = document.getElementById('popup-closer');
-    txtPopupCloser.innerHTML = (txtName);
-    */
-    
-    
+    var coordinates = evt.coordinate;
+    var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
     var layname = layer.get('name');
-    
     var beschreibLangValue = feature.get('beschreib_lang');
     var beschreibLangHtml = '';
     if (beschreibLangValue && beschreibLangValue.trim() !== '') {
@@ -1111,7 +1096,7 @@ map.on('click', function (evt) {
            '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
            '<p>' + beschreibLangHtml + '</p>' +
           '</div>';
-          console.log("Am Ende");
+          
          
       } else {
         popup.setPosition(undefined);
@@ -1226,15 +1211,16 @@ map.on('click', function (evt) {
       }
     }
     
-  });
+    });
   } else if(globalCoordAnOderAus===true) {  
-   // placeMarkerAndShowCoordinates(evt);
+  console.log ("funktion für marker setzen aufrufen");
+  placeMarkerAndShowCoordinates(evt);
   }
-
 }
-
 );
 
+//--------------------------------------------------Bestimmung geclickter Koordinaten
+//Globale Variable, die die Projektion wiedergibt
 const projectionSelect = document.getElementById('projecSelect');
 projectionSelect.addEventListener('change', function (event) {
   if (projectionSelect.value === 'EPSG:3857') {
@@ -1254,20 +1240,20 @@ projectionSelect.addEventListener('change', function (event) {
     mousePositionControl.setProjection(event.target.value);
   }
 });
+// Funktion für den Marker und die Koordinatenausgabe
 function placeMarkerAndShowCoordinates(event) {
-  console.log ("Funktion aufgerufen");
-  map.getOverlays().clear();
+  //map.getOverlays().clear();
   const mousePositionElement = document.getElementById('mouse-position'); // Auswahl des HTML-Elements
   if (toggleCheckbox.checked) {
     const marker = document.createElement('div');
     marker.className = 'marker';
-    const markerOverlay = new Overlay({
+    const markerCoordOverlay = new Overlay({
       position: event.coordinate,
       positioning: 'center-center', 
       element: marker,
       stopEvent: false,
     });
-    map.addOverlay(markerOverlay);
+    map.addOverlay(markerCoordOverlay);
     if (projectionSelect.value === 'EPSG:3857') {
       const format = createStringXY(2);
       mousePositionElement.innerHTML = `Coordinates: ${format(event.coordinate)}`;
@@ -1284,34 +1270,50 @@ function placeMarkerAndShowCoordinates(event) {
       //console.log(googleMapsLink);
     }
   }
-}
+};
 
 
+
+// Checkbox, wenn an kann der Marker gesetzt werden und die Koordinaten werden ausgegeben
 const toggleCheckbox = document.getElementById('toggle-checkbox');
 toggleCheckbox.addEventListener('change', function() {
   if (this.checked) {
     document.getElementById('mouse-position').innerHTML = "";
     map.removeControl(mousePositionControl); 
+    globalCoordAnOderAus=true;
+    console.log(globalCoordAnOderAus);
   } else {
+    globalCoordAnOderAus=false;
+    console.log(globalCoordAnOderAus);
     map.addControl(mousePositionControl);
   }
 });
+//Button, der die Sichtbarkeit des Controlls steuert
 document.getElementById('hide-button').addEventListener('click', function() {
   const controls = document.querySelector('.controls');
   controls.classList.toggle('hidden');
+  //Wenn das Control verborgen ist
   if (controls.classList.contains('hidden')) {
     //Alle Overlayers entfernen (auch p)
-    globalCoordAnOderAus=false;
-    document.getElementById('toggle-checkbox').checked = false;
     //map.getOverlays().clear();
+    // Überprüfen und Entfernen aller Overlays mit dem Namen "markerCoordOverlay"
+    map.getOverlays().getArray().forEach(function(overlay) {
+    if (overlay.get('name') === 'markerCoordOverlay') {
+        map.removeOverlay(overlay);
+      }
+    });
+
+    
+    document.getElementById('toggle-checkbox').checked = false;
     //Eventlistener entfernen
     //map.un('click', placeMarkerAndShowCoordinates);
+    
+    //Wenn das Control sichtbar ist
   } else {
     // muss eigentlich true sein!!!!!!!!!!!!!!!!!!!!!!
-    globalCoordAnOderAus=false;
+    
     map.addControl(mousePositionControl);
-    //map.on('click', placeMarkerAndShowCoordinates);
-    //map.on('click', placeMarkerAndShowCoordinates);
+   
   }
 });
 //Umrechnung geclickter Kartenpositionen in mousePositionControl-Format
@@ -1327,26 +1329,24 @@ function transformCoordinateToMousePosition32632(coordinate) {
   return transform(coordinate, 'EPSG:3857', 'EPSG:32632');
 }
 
-
-
+//--------------------------------------------Hyerperlink um ein neues Browserfenster zu öffnen wird dem Popup hinzugefügt
 document.addEventListener('DOMContentLoaded', function () {
   var popup = document.getElementById('popup');
   var popupCloser = document.getElementById('popup-closer');
   var container = document.createElement('div');
   var link = document.createElement('a');
   link.textContent = 'Weitere Infos';
-
   link.href = '#'; // Verhindert, dass der Link die Seite neu lädt
   link.addEventListener('click', function(event) {
     event.preventDefault(); // Verhindert die Standardaktion des Links
     var newWindow = window.open('', '_blank');
     newWindow.document.body.innerHTML = '<p>Hallo neue Welt</p>';
   });
-  
   container.appendChild(link);
   container.appendChild(popupCloser);
   popup.appendChild(container);
 });
+//--------------------------------------------Popup schließen
 document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
   return false;

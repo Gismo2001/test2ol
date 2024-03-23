@@ -140,6 +140,9 @@ function getStyleForArtSonPun(feature) {
         case 'Infotafel':
             iconSrc = './data/sonPunInfo.svg';
             break;
+        case 'Auskolkung':
+            iconSrc = './data/sonPunKolk.svg';
+            break;
         default:
             iconSrc = './data/sonPunSonstige.svg';
     }
