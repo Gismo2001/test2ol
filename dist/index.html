@@ -10,66 +10,14 @@
         /* overflow: hidden; */
        margin: 0;
     }
-     #map {
-      width: 100vw;
-      height: 100vh;
-    }
-    /* Style für den Button P */
-    .get-position {
-        position: absolute;
-        bottom: 20px;
-        left: 10px;
-        padding: 3px 3px; 
-        cursor: pointer;
-        font-size: 12px;         
-        background-color: #f10404;
-        border: 1px solid #ccc;
-        border-radius: 2px;
-      }
-
-    #searchBox {
-        position: absolute;
-        top: 10px; 
-        left: 50px; 
-        z-index: 1000; 
-      }
-      #notification {
-        display: none;
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #fff;
-        padding: 10px;
-        border: 1px solid #ccc;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-      }
-      #notification p {
-        margin: 0;
-      }
-      #retryButton {
-        cursor: pointer;
-        color: #007bff;
-        text-decoration: underline;
-      }
-    
-      .bw {
-        filter: grayscale(100%);
-      }
-    
    </style>
-  <script type="module" crossorigin src="/assets/index-vTOctA5H.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-fC_vjG-Y.css">
+  <script type="module" crossorigin src="/assets/index-jZax07FK.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-ctqfIjFN.css">
 </head>
 <body>
   <div class="map-container">
     <div id="map" class="map"></div>
     <div id="custom-controls" class="custom-controls"></div>
-    <div id="notification">
-      <p>Es gab einen Fehler bei der Standortbestimmung.</p>
-      <p>Möchten Sie es erneut versuchen? <span id="retryButton">Erneut versuchen</span></p>
-    </div>
     <div id="searchBox">
       <input type="text" id="addressInput" placeholder="Adresse eingeben"/>
       <button onclick="searchAddress()">Suchen</button>
@@ -90,5 +38,9 @@
     <div id="mouse-position" class="custom-mouse-position"></div>
   </div>
   <div class="button-container"><button id="hide-button">C</button></div>
+  <div id="notification">
+    <p>Es gab einen Fehler bei der Standortbestimmung.</p>
+    <p>Möchten Sie es erneut versuchen? <span id="retryButton">Erneut versuchen</span></p>
+  </div>
 </body>
 </html>

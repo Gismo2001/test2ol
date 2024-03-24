@@ -59,11 +59,13 @@ import {
   getStyleForArtSonLin
 } from './extStyle';
 import { handleExportButtonClick } from './myFunc.js';
+
+
+//------------------------------------------------------------Adresssuche
 window.searchAddress = function searchAddress() {
   var address = document.getElementById('addressInput').value;
   // Direktes Setzen des API-Schlüssels, falls process.env.API_KEY nicht definiert ist
   var apiKey = 'c592a3d99b8d43878cf7d727d44187ce';
-
   var apiUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(address)}&key=${apiKey}`;
 
   fetch(apiUrl)
@@ -89,7 +91,6 @@ window.searchAddress = function searchAddress() {
       removeTempMarker();
     });
 }
-
 // Event-Listener für die Enter-Taste hinzufügen
 var inputElement = document.getElementById('addressInput');
 inputElement.addEventListener('keydown', function (event) {
@@ -126,10 +127,13 @@ function removeTempMarker() {
     }
   });
 }
+
 const attribution = new Attribution({
+  attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   collapsible: false,
   html: '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
 });
+
 const mapView = new View({
   center: proj.fromLonLat([7.35, 52.7]),
   zoom: 9
@@ -139,24 +143,24 @@ const map = new Map({
   target: "map",
   view: mapView,
   
-  controls: defaultControls().extend([
+  controls: [
     new FullScreen(),
-    new Attribution(),
+    attribution, // Fügen Sie hier Ihre benutzerdefinierte Attribution-Steuerung hinzu
     new ZoomToExtent({
-      extent: [727361, 6839277, 858148, 6990951,] // Geben Sie hier das Ausdehnungsintervall an
+      extent: [727361, 6839277, 858148, 6990951]
     })
-  ]),
+  ],
+  
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
-
-const mousePositionControl = new MousePosition({
-  coordinateFormat: createStringXY(6),
-  projection: 'EPSG:4326', // Start-Projektion
-  className: 'custom-mouse-position',
-  target: document.getElementById('mouse-position'),
-});
-map.addControl(mousePositionControl);
-// Projektion für Maus anwenden
+//---------------------------------------------------Handle Attributions
+function checkSize() {
+  const small = map.getSize()[0] < 600;
+  attribution.setCollapsible(small);
+  attribution.setCollapsed(small);
+}
+map.on('change:size', checkSize);
+checkSize();
 
 const sourceP = new VectorSource();
 let layerP = null; // Initial kein Layer vorhanden
@@ -642,7 +646,7 @@ const osmTileGr = new TileLayer({
   type: 'base',
   source: new OSM({
       url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
+      //attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   }),
 });
 
@@ -651,7 +655,7 @@ const osmTileCr = new TileLayer({
   type: 'base',
   source: new OSM({
       url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
+      //attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   }),
   visible: false
 });
@@ -1227,6 +1231,15 @@ map.on('click', function (evt) {
 );
 
 //--------------------------------------------------Bestimmung geclickter Koordinaten
+const mousePositionControl = new MousePosition({
+  coordinateFormat: createStringXY(6),
+  projection: 'EPSG:4326', // Start-Projektion
+  className: 'custom-mouse-position',
+  target: document.getElementById('mouse-position'),
+});
+map.addControl(mousePositionControl);
+// Projektion für Maus anwenden
+
 //Globale Variable, die die Projektion wiedergibt
 const projectionSelect = document.getElementById('projecSelect');
 //Glabale Variable für markerCoordOverlay
