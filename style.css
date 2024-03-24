@@ -36,7 +36,7 @@ html {
   position: absolute;
   top: 10px; 
   left: 50px; 
-  z-index: 1000; 
+  z-index: 1001; 
 }
  #notification {
   display: none;
@@ -48,7 +48,7 @@ html {
   padding: 10px;
   border: 1px solid #ccc;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  z-index: 1002;
 }
 #notification p {
   margin: 0;
@@ -184,7 +184,7 @@ html {
   left: .5em;
   height: 1.375em; 
   width: 1.375em;
-  z-index: 1001;
+  z-index: 1003;
 }
 
 .custom-controls2 {
@@ -192,7 +192,7 @@ html {
   left: .5em;
   height: 1.375em; 
   width: 1.375em;
-  z-index: 1002;
+  z-index: 1004;
 }
 
 /* .custom-controls1:ol-button { 
@@ -210,7 +210,7 @@ html {
   width: 100%;
   left: 0px;
    font-size: 25px;
-     z-index: 1003;
+     z-index: 1005;
 }
 
 /* Stil für das Schließen-Symbol */
@@ -222,6 +222,7 @@ html {
   font-size: 20px;
 }
 
+/* Marker für Koordinatenanzeige */
 .marker {
   width: 20px;
   height: 20px;
@@ -251,27 +252,29 @@ html {
   bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
+  z-index: 1006;
   background-color: white;
   padding: 5px;
   border-radius: 5px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.3);
-}
-.hidden {
-  display: none;
-}
-.button-container {
-  text-align: center;
-  margin-top: 10px;
-  position: absolute;
-  bottom: 10px;
-  left: 10%;
-  transform: translateX(-50%);
-  z-index: 1000;
+  box-shadow: 0 0 5px rgba(167, 164, 164, 0.412);
 }
 .controls {
   display: flex; /* Verwende Flexbox für die Ausrichtung der Elemente */
   align-items: center; /* Zentriere die Elemente vertikal */
+}
+.hidden {
+  display: none;
+}
+
+.button-container {
+  text-align: center;
+  margin-top: 10px;
+  position: absolute;
+  bottom: 15px;
+  left: 20px;
+  transform: translateX(-50%);
+  z-index: 1007;
+  font-weight: bold; 
 }
 
 #toggle-checkbox {

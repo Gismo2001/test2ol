@@ -665,7 +665,7 @@ const vector = new VectorLayer({
   displayInLayerSwitcher: false,
   source: source,
   style: {
-    'fill-color': 'rgba(255, 255, 255, 0.2)',
+    'fill-color': 'rgba(136, 136, 136, 0.526)',
     'stroke-color': '#ffcc33',
     'stroke-width': 2,
     'circle-radius': 7,
@@ -715,9 +715,8 @@ const style = new Style({
     color: 'rgba(255, 255, 255, 0.2)',
   }),
   stroke: new Stroke({
-    color: 'rgba(0, 0, 0, 0.5)',
-    lineDash: [10, 10],
-    width: 2,
+    color: 'blue', // Blaue Linienfarbe
+    width: 2, // Linienbreite
   }),
   image: new CircleStyle({
     radius: 5,
