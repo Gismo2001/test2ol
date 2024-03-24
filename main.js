@@ -666,7 +666,7 @@ const vector = new VectorLayer({
   source: source,
   style: {
     'fill-color': 'rgba(136, 136, 136, 0.526)',
-    'stroke-color': '#ffcc33',
+    'stroke-color': 'blue',
     'stroke-width': 2,
     'circle-radius': 7,
     'circle-fill-color': '#ffcc33',
@@ -792,22 +792,22 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
     draw.finishDrawing(); // Beendet die laufende Messung
     map.removeInteraction(draw); // Entfernt die Zeicheninteraktion
     map.un('pointermove', pointerMoveHandler); // Entfernt den Event-Listener für 'pointermove'
-    map.removeOverlay(measureTooltip);
-    //removeAllOverlays();
+    //map.removeOverlay(measureTooltip);
+    removeMeasureResult();
     return; // Beende die Funktion, um weitere Interaktionen zu verhindern
   }
 });
 
-// Funktion zum Entfernen aller Overlays von der Karte
-/* function removeAllOverlays() {
-  // Alle Overlays der Karte abrufen
-  //map.removeOverlay(markerCoordOverlay);
-  const overlays = map.getOverlays().getArray();
-  // Über jedes Overlay iterieren und es von der Karte entfernen
-  overlays.forEach(function(overlay) {
-    map.removeOverlay(overlay);
-  });
-} */
+// Funktion zum Entfernen des Messergebnisses
+function removeMeasureResult() {
+  if (measureTooltipElement) {
+    measureTooltipElement.innerHTML = ''; // Löscht den Inhalt des Elements
+  }
+  map.removeOverlay(measureTooltip);
+  measureTooltip = null;
+  measureTooltipElement = null;
+}
+
 
 //------------------------------------Custom Controls 1 und 2........................
 class CustomControls1 extends Control {
