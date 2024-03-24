@@ -55,7 +55,7 @@ import {
   machWasMitFSK,
   getStyleForArtSonLin
 } from './extStyle';
-import { handleExportButtonClick } from './myFunc.js';
+import { schreibeInnerHtml } from './myFunc.js';
 
 
 //------------------------------------------------------------Adresssuche
@@ -1314,6 +1314,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var popupCloser = document.getElementById('popup-closer');
   var container = document.createElement('div');
   var link = document.createElement('a');
+  //schreibeInnerHtml(layer);
   link.textContent = 'Weitere Infos';
   link.href = '#'; // Verhindert, dass der Link die Seite neu lädt
   link.addEventListener('click', function(event) {
@@ -1326,7 +1327,7 @@ document.addEventListener('DOMContentLoaded', function () {
   popup.appendChild(container);
 });
 //--------------------------------------------Popup schließen
-document.getElementById('popup-closer').onclick = function () {
+/* document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
   return false;
 };
@@ -1342,11 +1343,10 @@ const dims = {
 };
 
 document.getElementById('print-button').addEventListener('click', function() {
-  console.log ('Funktion aufgerufen');
   document.getElementById('print-button').disabled = true;
   document.body.style.cursor = 'progress';
   const format = 'a4';//document.getElementById('format').value;
-  const resolution = '300' //document.getElementById('resolution').value;
+  const resolution = '72' //document.getElementById('resolution').value;
   const dim = dims[format];
   const width = Math.round((dim[0] * resolution) / 25.4);
   const height = Math.round((dim[1] * resolution) / 25.4);
@@ -1380,7 +1380,7 @@ document.getElementById('print-button').addEventListener('click', function() {
     );
     mapContext.globalAlpha = 1;
     mapContext.setTransform(1, 0, 0, 1, 0, 0);
-    const pdf = new jspdf.jsPDF('landscape', undefined, format);
+    const pdf = new jsPDF('landscape', undefined, format);
     pdf.addImage(
       mapCanvas.toDataURL('image/jpeg'),
       'JPEG',
@@ -1404,3 +1404,4 @@ document.getElementById('print-button').addEventListener('click', function() {
 },
 false,
 );
+ */

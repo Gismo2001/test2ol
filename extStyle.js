@@ -37,18 +37,7 @@ const queStyle = new Style({
     scale: .9
     })
 });
-const son_punStyle = new Style({
-    image: new RegularShape({
-    fill: new Fill({color:'rgba(209, 32, 253, 1)' }),
-    stroke: new Stroke({
-    color: 'black',
-    width: 2
-    }),
-    points: 4,
-    radius: 7,
-    angle: Math.PI / 4
-    })
-});
+
 const km10scalStyle = new Style({
     stroke: new Stroke({
         color: 'grey',
@@ -62,6 +51,152 @@ const gehoelz_vecStyle = new Style({
     }),
 });
 
+function getStyleForArtUmn(feature) {
+    const mnIdValue = feature.get('Massn_ID');
+    let fillColor, strokeColor;
+  
+    switch (mnIdValue) {
+ //keine Mahd
+    case 3:
+        
+        strokeColor = 'blue';
+        break;
+    case 4:
+        
+        strokeColor = 'blue';
+        break;
+    case 5:
+        
+        strokeColor = 'blue';
+        break;
+
+//zweimalige Mahd
+    case 6:
+        
+        strokeColor = 'black';
+        break;
+    case 7:
+        
+        strokeColor = 'black';
+        break;
+    case 8:
+        
+        strokeColor = 'black';
+        break;
+    case 9:
+        
+        strokeColor = 'black';
+        break;
+    case 10:
+        
+        strokeColor = 'black';
+        break;
+            
+//einmalige Mahd
+    case 11:
+        width: 1.5
+        strokeColor = 'green';
+        break;
+    case 12:
+        width: 1.5
+        strokeColor = 'green';
+        break;
+    case 13:
+        
+        strokeColor = 'green';
+        break;
+    case 14:
+        
+        strokeColor = 'green';
+        break;
+    case 15:
+        
+        strokeColor = 'green';
+        break;
+    case 16:
+    
+        strokeColor = 'green';
+        break;
+    case 17:
+        
+        strokeColor = 'green';
+        break;
+    case 18:
+        
+        strokeColor = 'green';
+        break;
+    case 26:
+        
+        strokeColor = 'green';
+        break;
+    case 27:
+        
+        strokeColor = 'green';
+        break;                                                
+   
+//Schilfsaum belassen
+    case 22:
+        
+        strokeColor = 'rgba(255, 190, 190, 0.5';
+        break;  
+
+//Mahd, Schilfsaum belassen
+    case 23:
+        
+        strokeColor = 'rgba(255, 190, 190, 0.5';
+        break;  
+
+//keine Mahd am der unteren Böschung
+    case 24:
+        
+        strokeColor = 'rgba(115, 38, 0, 0.5';
+        break;  
+//keine Mahd am der unteren Böschung
+    case 50:
+        
+        strokeColor = 'rgba(230, 152, 0, 0.5';
+        break;  
+    case 2:
+        
+        strokeColor = 'rgba(230, 152, 0, 0.5';
+        break;  
+
+//Mahd an Bauwerken
+    case 200:
+        
+        strokeColor = 'rgba(205, 205, 205, 0.5';
+        break;  
+    case 201:
+        
+        strokeColor = 'rgba(205, 205, 205, 0.5';
+        break; 
+        
+//Schilfkrautung
+    case 300:
+        
+        strokeColor = 'rgba(230, 230, 0, 0.5';
+        break;  
+//Bauwerksunterhaltung
+    case 400:
+        
+        strokeColor = 'rgba(130, 130, 130, 0';
+        break;  
+
+//beobachtende Unterhaltung
+    default:
+        //fillColor = 'rgba(255, 255, 255, 1)';
+        strokeColor = 'grey';
+    }
+    return new Style({
+        //fill: new Fill({
+        //    color: fillColor
+        //}),
+        stroke: new Stroke({
+            color: strokeColor,
+            width: 5
+        })
+    });
+};
 function getStyleForArtSonLin(feature) {   
     const artValue = feature.get('bauart');
     let strokeColor;
@@ -94,9 +229,6 @@ function getStyleForArtSonLin(feature) {
         })
     });
 }
-
-
-
 function getStyleForArtEin(feature) {   
     const artValue = feature.get('Ein_ord');
     let iconSrc;
@@ -187,50 +319,6 @@ function getStyleForArtFSK(feature) {
     });
 };
 
-function getStyleForArtUmn(feature) {
-  const mnIdValue = feature.get('Massn_ID');
-  let fillColor, strokeColor;
-
-  switch (mnIdValue) {
-  //zweimalige Mahd
-  case 23:
-      //fillColor = 'rgba(200, 200, 200, .6)';
-      strokeColor = 'rgba(135, 101, 0, 0.1)';
-      break;  
-  //zweimalige Mahd
-  case 9:
-      //fillColor = 'rgba(200, 200, 200, .6)';
-      strokeColor = 'red';
-      break;
-  //keine Mahd
-  case 4:
-      //fillColor = 'rgba(200, 200, 200, .6)';
-      strokeColor = 'blue';
-      break;
-  //einmalige Mahd
-  case 11:
-      //fillColor = 'rgba(255, 220, 220, .6)';
-      strokeColor = 'blue';
-      break;
-  //beobachtende Unterhaltung
-  case 1:
-      //fillColor = 'rgba(255, 190, 150, .6)';
-      strokeColor = 'blue';
-      break;
-  default:
-      //fillColor = 'rgba(255, 255, 255, 1)';
-      strokeColor = 'grey';
-  }
-  return new Style({
-      //fill: new Fill({
-      //    color: fillColor
-      //}),
-      stroke: new Stroke({
-          color: strokeColor,
-          width: 5
-      })
-  });
-};
 const km100scalStyle = function(feature, text, resolution) {
     var minResolution = 0;
     var maxResolution = 5; 
