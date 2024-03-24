@@ -619,15 +619,22 @@ var dop20ni_layer = new TileLayer({
     },
   }),
 });
-const googleLayer = new TileLayer({
+const googleSatLayer = new TileLayer({
   title: "GoogleSat",
   type: 'base',
   baseLayer: false,
   visible: false,
   source: new TileImage({url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}' })
 });
+const googleHybLayer = new TileLayer({
+  title: "GoogleHybrid",
+  type: 'base',
+  baseLayer: false,
+  visible: false,
+  source: new TileImage({url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}' })
+});
 const ESRIWorldImagery = new TileLayer({
-  title: 'ESRI',
+  title: 'ESRI-Sat',
   type: 'base',
   opacity: 1.000000,
   visible: false,
@@ -636,6 +643,19 @@ const ESRIWorldImagery = new TileLayer({
       url: 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
   })
 });
+
+const ESRIWorldGrey = new TileLayer({
+  title: 'ESRI-Grey',
+  type: 'base',
+  opacity: 1.000000,
+  visible: false,
+  source: new XYZ({
+      attributions: 'Powered by Esri',
+      url: 'http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+  })
+});
+
+
 const osmTileGr = new TileLayer({
   title: "osm-grey",
   className: 'bw',
@@ -882,7 +902,7 @@ const BaseGroup = new LayerGroup({
   title: "Base",
   fold: true,
   fold: 'close',
-  layers: [ESRIWorldImagery, googleLayer, dop20ni_layer, osmTileCr, osmTileGr]
+  layers: [ESRIWorldImagery, ESRIWorldGrey, googleHybLayer, googleSatLayer, dop20ni_layer, osmTileCr, osmTileGr]
 });
 map.addLayer(BaseGroup);
 map.addLayer(GNAtlasGroup);
