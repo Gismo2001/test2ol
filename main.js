@@ -10,10 +10,7 @@ import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
 import {circular} from 'ol/geom/Polygon';
 import Geolocation from 'ol/Geolocation.js';
 import { jsPDF } from "jspdf";
-
-
 import {Circle as CircleStyle, Fill, Stroke,Style} from 'ol/style.js';
-
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import TileWMS from 'ol/source/TileWMS.js';
@@ -128,8 +125,8 @@ function removeTempMarker() {
   });
 }
 
+
 const attribution = new Attribution({
-  attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   collapsible: false,
   html: '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
 });
@@ -142,18 +139,16 @@ const mapView = new View({
 const map = new Map({
   target: "map",
   view: mapView,
-  
-  controls: [
+  controls: defaultControls().extend([
     new FullScreen(),
-    attribution, // Fügen Sie hier Ihre benutzerdefinierte Attribution-Steuerung hinzu
     new ZoomToExtent({
-      extent: [727361, 6839277, 858148, 6990951]
-    })
-  ],
-  
+      extent: [727361, 6839277, 858148, 6990951] // Geben Sie hier das Ausdehnungsintervall an
+    }),
+    attribution // Fügen Sie hier Ihre benutzerdefinierte Attribution-Steuerung hinzu
+  ]),
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
-//---------------------------------------------------Handle Attributions
+//------------------------------------Attribution collapse
 function checkSize() {
   const small = map.getSize()[0] < 600;
   attribution.setCollapsible(small);
@@ -162,6 +157,7 @@ function checkSize() {
 map.on('change:size', checkSize);
 checkSize();
 
+//---------------------------------------------------Marker für Adresssuche
 const sourceP = new VectorSource();
 let layerP = null; // Initial kein Layer vorhanden
 let isFirstZoom = true; // Variable, um den ersten Zoom zu verfolgen
@@ -663,7 +659,7 @@ const osmTileCr = new TileLayer({
 const layerSwitcher = new LayerSwitcher({ });
 map.addControl(layerSwitcher);
 
-// Layer für Messung
+//------------------------------------ Layer für Messung
 const source = new VectorSource();
 const vector = new VectorLayer({
   displayInLayerSwitcher: false,
@@ -677,11 +673,8 @@ const vector = new VectorLayer({
   },
 });
 let sketch;
-let helpTooltipElement;
-let helpTooltip;
 let measureTooltipElement;
 let measureTooltip;
-
 
 //-------------------------------------------Funktionen für Messung----------------- //
 const pointerMoveHandler = function (evt) {
@@ -689,40 +682,11 @@ const pointerMoveHandler = function (evt) {
     if (evt.dragging) {
        return;
     }
-    let helpMsg = 'Click to start drawing';
-    if (sketch) {
-      const geom = sketch.getGeometry();
-      if (geom instanceof Polygon) {
-        helpMsg = 'Click to continue drawing the polygon';
-      } else if (geom instanceof LineString) {
-        helpMsg = 'Click to continue drawing the line';
-      }
-    }
-
-    if (helpTooltipElement) { // Überprüfen, ob helpTooltipElement definiert ist
-      helpTooltipElement.innerHTML = helpMsg; // Nur wenn helpTooltipElement definiert ist, setzen Sie innerHTML
-      helpTooltip.setPosition(evt.coordinate);
-      helpTooltipElement.classList.remove('hidden');
-    }
   } else {
     if (evt.dragging) {
       return;
     }
-    let helpMsg = 'Click to start drawing';
-    if (sketch) {
-      const geom = sketch.getGeometry();
-       if (geom instanceof Polygon) {
-         helpMsg = 'Click to continue drawing the polygon';
-      } else if (geom instanceof LineString) {
-         helpMsg = 'Click to continue drawing the line';
-      }
-    }
-    if (helpTooltipElement) { // Überprüfen, ob helpTooltipElement definiert ist
-    helpTooltipElement.innerHTML = helpMsg; // Nur wenn helpTooltipElement definiert ist, setzen Sie innerHTML
-    helpTooltip.setPosition(evt.coordinate);
-    helpTooltipElement.classList.remove('hidden');
-  }
- }  
+  }  
 };
 map.on('pointermove', pointerMoveHandler);
 let draw;
@@ -778,11 +742,7 @@ function addInteraction(type) {
   });
   map.addInteraction(draw);
   createMeasureTooltip();
-  createHelpTooltip();
-  map.getViewport().addEventListener('mouseout', function () {
-    helpTooltipElement.classList.add('hidden');
-  });
-  
+   
   let listener;
   draw.on('drawstart', function (evt) {
     sketch = evt.feature;
@@ -810,19 +770,6 @@ function addInteraction(type) {
     unByKey(listener);
   });
 }
-function createHelpTooltip() {
-  if (helpTooltipElement) {
-    helpTooltipElement.parentNode.removeChild(helpTooltipElement);
-  }
-  helpTooltipElement = document.createElement('div');
-  helpTooltipElement.className = 'ol-tooltip hidden';
-  helpTooltip = new Overlay({
-    element: helpTooltipElement,
-    offset: [15, 0],
-    positioning: 'center-left',
-  });
-  map.addOverlay(helpTooltip);
-}
 function createMeasureTooltip() {
   if (measureTooltipElement) {
     measureTooltipElement.parentNode.removeChild(measureTooltipElement);
@@ -846,19 +793,22 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
     draw.finishDrawing(); // Beendet die laufende Messung
     map.removeInteraction(draw); // Entfernt die Zeicheninteraktion
     map.un('pointermove', pointerMoveHandler); // Entfernt den Event-Listener für 'pointermove'
+    map.removeOverlay(measureTooltip);
     //removeAllOverlays();
     return; // Beende die Funktion, um weitere Interaktionen zu verhindern
   }
 });
+
 // Funktion zum Entfernen aller Overlays von der Karte
-function removeAllOverlays() {
+/* function removeAllOverlays() {
   // Alle Overlays der Karte abrufen
+  //map.removeOverlay(markerCoordOverlay);
   const overlays = map.getOverlays().getArray();
   // Über jedes Overlay iterieren und es von der Karte entfernen
   overlays.forEach(function(overlay) {
     map.removeOverlay(overlay);
   });
-}
+} */
 
 //------------------------------------Custom Controls 1 und 2........................
 class CustomControls1 extends Control {
@@ -1237,13 +1187,11 @@ const mousePositionControl = new MousePosition({
   className: 'custom-mouse-position',
   target: document.getElementById('mouse-position'),
 });
-map.addControl(mousePositionControl);
 // Projektion für Maus anwenden
-
+map.addControl(mousePositionControl);
 //Globale Variable, die die Projektion wiedergibt
 const projectionSelect = document.getElementById('projecSelect');
 //Glabale Variable für markerCoordOverlay
-//let markerCoordOverlay = []; // Globale Variable für markerCoordOverlay
 projectionSelect.addEventListener('change', function (event) {
   if (projectionSelect.value === 'EPSG:3857') {
     const format = createStringXY(2);
@@ -1264,7 +1212,6 @@ projectionSelect.addEventListener('change', function (event) {
 });
 // Funktion für den Marker und die Koordinatenausgabe
 function placeMarkerAndShowCoordinates(event) {
-  //map.getOverlays().clear();
   const mousePositionElement = document.getElementById('mouse-position'); // Auswahl des HTML-Elements
   if (toggleCheckbox.checked) {
     const marker = document.createElement('div');
@@ -1294,7 +1241,6 @@ function placeMarkerAndShowCoordinates(event) {
     }
   }
 };
-
 // Checkbox, wenn an kann der Marker gesetzt werden und die Koordinaten werden ausgegeben
 const toggleCheckbox = document.getElementById('toggle-checkbox');
 toggleCheckbox.addEventListener('change', function() {
