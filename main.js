@@ -604,6 +604,21 @@ const gnAtlas1937 = new TileLayer({
   visible: false,
 });
 
+var baseDE_layer = new TileLayer({
+  title: "Base-DE",
+  opacity: 1.000000,
+  visible: false,
+  type: 'base',
+  source: new TileWMS({
+    url: "https://sgx.geodatenzentrum.de/wms_basemapde",
+    attributions: '© GeoBasis-DE / BKG (Jahr des letzten Datenbezugs) CC BY 4.0',
+    params: {
+      "LAYERS": "de_basemapde_web_raster_farbe",
+      "TILED": true, // "true" sollte ohne Anführungszeichen sein
+      "VERSION": "1.3.0"
+    },
+  }),
+});
 var dop20ni_layer = new TileLayer({
   title: "DOP20 NI",
   opacity: 1.000000,
@@ -902,7 +917,7 @@ const BaseGroup = new LayerGroup({
   title: "Base",
   fold: true,
   fold: 'close',
-  layers: [ESRIWorldImagery, ESRIWorldGrey, googleHybLayer, googleSatLayer, dop20ni_layer, osmTileCr, osmTileGr]
+  layers: [ESRIWorldImagery, ESRIWorldGrey, googleHybLayer, googleSatLayer, dop20ni_layer, baseDE_layer, osmTileCr, osmTileGr]
 });
 map.addLayer(BaseGroup);
 map.addLayer(GNAtlasGroup);
