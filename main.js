@@ -789,15 +789,20 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
   evt.preventDefault(); // Verhindert das Standardkontextmenü
   if (draw) {
     source.clear(); // Löscht alle Vektoren aus der Quelle
+    
     draw.finishDrawing(); // Beendet die laufende Messung
     map.removeInteraction(draw); // Entfernt die Zeicheninteraktion
     map.un('pointermove', pointerMoveHandler); // Entfernt den Event-Listener für 'pointermove'
+    measureTooltip = null;
+    measureTooltipElement = null;
+    map.removeOverlay(measureTooltip);
+    
     //map.removeOverlay(measureTooltip);
-    removeMeasureResult();
+    
     return; // Beende die Funktion, um weitere Interaktionen zu verhindern
   }
 });
-
+/* 
 // Funktion zum Entfernen des Messergebnisses
 function removeMeasureResult() {
   if (measureTooltipElement) {
@@ -806,10 +811,10 @@ function removeMeasureResult() {
   map.removeOverlay(measureTooltip);
   measureTooltip = null;
   measureTooltipElement = null;
-}
+} */
 
 
-//------------------------------------Custom Controls 1 und 2........................
+//------------------------------------Custom Controls 1 ........................
 class CustomControls1 extends Control {
   constructor(options) {
     const element = document.createElement('div');
@@ -838,32 +843,8 @@ class CustomControls1 extends Control {
 map.addControl(new CustomControls1({
   target: 'custom-controls'
 }));
-class CustomControls2 extends Control {
-  constructor(options) {
-    const element = document.createElement('div');
-    element.className = 'custom-controls2 ol-unselectable ol-control';
-    const buttonPrint = document.createElement('button');
-    buttonPrint.innerHTML = 'P';
-    buttonPrint.className = 'ol-button';
 
-    // Event-Listener für den Klick auf den Button hinzufügen
-    buttonPrint.addEventListener('click', function() {
-      const defaultFormat = 'a4';
-      const defaultResolution = 150;
-      options.handleExportButtonClick(map, defaultFormat, defaultResolution);
-    });
 
-    element.appendChild(buttonPrint);
-    super({
-      element: element,
-      target: options.target,
-    });
-  }
-}
-map.addControl(new CustomControls2({
-  target: 'custom-controls',
-  handleExportButtonClick: handleExportButtonClick
-}));
 //---------------------------------------------Layergruppen
 const BwGroupP = new LayerGroup({
   title: "Bauw.(P)",
@@ -1264,15 +1245,18 @@ let markerCoordOverlay
 document.getElementById('hide-button').addEventListener('click', function() {
   const controls = document.querySelector('.controls');
   controls.classList.toggle('hidden');
+  const customControls = document.getElementById('custom-controls');
   // Wenn das Control verborgen ist
   if (controls.classList.contains('hidden')) {
     // Überprüfen und Entfernen aller Marker, die durch markerCoordOverlay dargestellt werden
     //map.removeOverlay(marker);
     document.getElementById('toggle-checkbox').checked = false;
+    customControls.buttonLength.disabled = true;
     // Wenn das Control sichtbar ist
   } else {
     // Muss eigentlich true sein
     map.addControl(mousePositionControl);
+    customControls.buttonLength.disabled = false;
   }
 });
 
@@ -1311,3 +1295,77 @@ document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
   return false;
 };
+
+//----------------------------------------------Print
+const dims = {
+  a0: [1189, 841],
+  a1: [841, 594],
+  a2: [594, 420],
+  a3: [420, 297],
+  a4: [297, 210],
+  a5: [210, 148],
+};
+
+document.getElementById('print-button').addEventListener('click', function() {
+  console.log ('Funktion aufgerufen');
+  document.getElementById('print-button').disabled = true;
+  document.body.style.cursor = 'progress';
+  const format = 'a4';//document.getElementById('format').value;
+  const resolution = '300' //document.getElementById('resolution').value;
+  const dim = dims[format];
+  const width = Math.round((dim[0] * resolution) / 25.4);
+  const height = Math.round((dim[1] * resolution) / 25.4);
+  const size = map.getSize();
+  const viewResolution = map.getView().getResolution();
+  map.once('rendercomplete', function () {
+    const mapCanvas = document.createElement('canvas');
+    mapCanvas.width = width;
+    mapCanvas.height = height;
+    const mapContext = mapCanvas.getContext('2d');
+    Array.prototype.forEach.call(
+      document.querySelectorAll('.ol-layer canvas'),
+      function (canvas) {
+        if (canvas.width > 0) {
+          const opacity = canvas.parentNode.style.opacity;
+          mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+          const transform = canvas.style.transform;
+          // Get the transform parameters from the style's transform matrix
+          const matrix = transform
+            .match(/^matrix\(([^\(]*)\)$/)[1]
+            .split(',')
+            .map(Number);
+          // Apply the transform to the export map context
+          CanvasRenderingContext2D.prototype.setTransform.apply(
+            mapContext,
+            matrix,
+          );
+          mapContext.drawImage(canvas, 0, 0);
+        }
+      },
+    );
+    mapContext.globalAlpha = 1;
+    mapContext.setTransform(1, 0, 0, 1, 0, 0);
+    const pdf = new jspdf.jsPDF('landscape', undefined, format);
+    pdf.addImage(
+      mapCanvas.toDataURL('image/jpeg'),
+      'JPEG',
+      0,
+      0,
+      dim[0],
+      dim[1],
+    );
+    pdf.save('map.pdf');
+    // Reset original map size
+    map.setSize(size);
+    map.getView().setResolution(viewResolution);
+    document.getElementById('print-button').disabled = false; //exportButton.disabled = false;
+    document.body.style.cursor = 'auto';
+  });
+  // Set print size
+  const printSize = [width, height];
+  map.setSize(printSize);
+  const scaling = Math.min(width / size[0], height / size[1]);
+  map.getView().setResolution(viewResolution / scaling);
+},
+false,
+);

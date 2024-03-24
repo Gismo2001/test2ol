@@ -194,18 +194,6 @@ html {
   z-index: 1003;
 }
 
-.custom-controls2 {
-  top: 14em;
-  left: .5em;
-  height: 1.375em; 
-  width: 1.375em;
-  z-index: 1004;
-}
-
-/* .custom-controls1:ol-button { 
-   Diese Zeile wurde auskommentiert, da sie nicht korrekt ist.
-} */
-
 /* Stil für den Container der Infodiv */
 .info-container {
   border: 1px solid black;
@@ -273,15 +261,38 @@ html {
   display: none;
 }
 
+.locked {
+  pointer-events: none;
+  opacity: 0.5; /* Optional: Reduziert die Deckkraft des Elements, um anzuzeigen, dass es gesperrt ist */
+}
+.unlocked {
+  pointer-events: auto; /* Aktiviert Pointer-Ereignisse */
+  opacity: 1; /* Setzt die Deckkraft auf den normalen Wert */
+}
+/* 
+.custom-controls2 {
+  top: 14em;
+  left: .5em;
+  height: 1.375em; 
+  width: 1.375em;
+  z-index: 1004;
+}
+ */
 .button-container {
   text-align: center;
   margin-top: 10px;
   position: absolute;
   bottom: 15px;
-  left: 20px;
+  left: 40px;
   transform: translateX(-50%);
   z-index: 1007;
+  font-size: 16px;
   font-weight: bold; 
+}
+
+.button-container button {
+  width: 25px; /* Setze die Breite der Buttons auf 25px */
+  height: 25px; /* Setze die Höhe der Buttons auf 25px */
 }
 
 #toggle-checkbox {
@@ -296,9 +307,3 @@ html {
   display: none;
 }
 
-
-#hide-button {
-  width: 25px; /* Setze die Breite auf 50px */
-  height: 25px; /* Setze die Höhe auf 30px */
-  font-size: 16px; /* Setze die Schriftgröße auf 16px */
-}
