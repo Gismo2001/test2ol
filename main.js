@@ -658,7 +658,6 @@ const ESRIWorldImagery = new TileLayer({
       url: 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
   })
 });
-
 const ESRIWorldGrey = new TileLayer({
   title: 'ESRI-Grey',
   type: 'base',
@@ -669,18 +668,16 @@ const ESRIWorldGrey = new TileLayer({
       url: 'http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
   })
 });
-
-
 const osmTileGr = new TileLayer({
   title: "osm-grey",
   className: 'bw',
   type: 'base',
+  visible: false,
   source: new OSM({
       url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       //attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   }),
 });
-
 const osmTileCr = new TileLayer({
   title: "osm-color",
   type: 'base',
@@ -688,7 +685,8 @@ const osmTileCr = new TileLayer({
       url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       //attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   }),
-  visible: false
+  visible: true,
+  opacity: 0.75
 });
 
 const layerSwitcher = new LayerSwitcher({ });
@@ -917,7 +915,7 @@ const BaseGroup = new LayerGroup({
   title: "Base",
   fold: true,
   fold: 'close',
-  layers: [ESRIWorldImagery, ESRIWorldGrey, googleHybLayer, googleSatLayer, dop20ni_layer, baseDE_layer, osmTileCr, osmTileGr]
+  layers: [ESRIWorldImagery, ESRIWorldGrey, googleHybLayer, googleSatLayer, dop20ni_layer, baseDE_layer, osmTileGr, osmTileCr]
 });
 map.addLayer(BaseGroup);
 map.addLayer(GNAtlasGroup);
@@ -1327,7 +1325,7 @@ document.addEventListener('DOMContentLoaded', function () {
   popup.appendChild(container);
 });
 //--------------------------------------------Popup schließen
-/* document.getElementById('popup-closer').onclick = function () {
+document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
   return false;
 };
@@ -1343,7 +1341,8 @@ const dims = {
 };
 
 document.getElementById('print-button').addEventListener('click', function() {
-  document.getElementById('print-button').disabled = true;
+  //document.getElementById('print-button').disabled = true;
+  alert('Erstmal bitte nur mit OSM als Hintergrund');
   document.body.style.cursor = 'progress';
   const format = 'a4';//document.getElementById('format').value;
   const resolution = '72' //document.getElementById('resolution').value;
@@ -1404,4 +1403,3 @@ document.getElementById('print-button').addEventListener('click', function() {
 },
 false,
 );
- */
