@@ -94,11 +94,11 @@ function getStyleForArtUmn(feature) {
             
 //einmalige Mahd
     case 11:
-        width: 1.5
+        
         strokeColor = 'green';
         break;
     case 12:
-        width: 1.5
+        
         strokeColor = 'green';
         break;
     case 13:
@@ -164,11 +164,11 @@ function getStyleForArtUmn(feature) {
 //Mahd an Bauwerken
     case 200:
         
-        strokeColor = 'rgba(205, 205, 205, 0.5';
+        strokeColor = 'rgba(205, 205, 205, 1';
         break;  
     case 201:
         
-        strokeColor = 'rgba(205, 205, 205, 0.5';
+        strokeColor = 'rgba(205, 205, 205, 1';
         break; 
         
 //Schilfkrautung
@@ -179,7 +179,7 @@ function getStyleForArtUmn(feature) {
 //Bauwerksunterhaltung
     case 400:
         
-        strokeColor = 'rgba(130, 130, 130, 0';
+        strokeColor = 'rgba(130, 130, 130, 1';
         break;  
 
 //beobachtende Unterhaltung
