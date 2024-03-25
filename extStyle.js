@@ -53,150 +53,72 @@ const gehoelz_vecStyle = new Style({
 
 function getStyleForArtUmn(feature) {
     const mnIdValue = feature.get('Massn_ID');
-    let fillColor, strokeColor;
+    let strokeColor;
   
     switch (mnIdValue) {
- //keine Mahd
-    case 3:
-        
-        strokeColor = 'blue';
-        break;
-    case 4:
-        
-        strokeColor = 'blue';
-        break;
-    case 5:
-        
-        strokeColor = 'blue';
-        break;
-
-//zweimalige Mahd
-    case 6:
-        
-        strokeColor = 'black';
-        break;
-    case 7:
-        
-        strokeColor = 'black';
-        break;
-    case 8:
-        
-        strokeColor = 'black';
-        break;
-    case 9:
-        
-        strokeColor = 'black';
-        break;
-    case 10:
-        
-        strokeColor = 'black';
-        break;
-            
-//einmalige Mahd
-    case 11:
-        
-        strokeColor = 'green';
-        break;
-    case 12:
-        
-        strokeColor = 'green';
-        break;
-    case 13:
-        
-        strokeColor = 'green';
-        break;
-    case 14:
-        
-        strokeColor = 'green';
-        break;
-    case 15:
-        
-        strokeColor = 'green';
-        break;
-    case 16:
-    
-        strokeColor = 'green';
-        break;
-    case 17:
-        
-        strokeColor = 'green';
-        break;
-    case 18:
-        
-        strokeColor = 'green';
-        break;
-    case 26:
-        
-        strokeColor = 'green';
-        break;
-    case 27:
-        
-        strokeColor = 'green';
-        break;                                                
-   
-//Schilfsaum belassen
-    case 22:
-        
-        strokeColor = 'rgba(255, 190, 190, 0.5';
-        break;  
-
-//Mahd, Schilfsaum belassen
-    case 23:
-        
-        strokeColor = 'rgba(255, 190, 190, 0.5';
-        break;  
-
-//keine Mahd am der unteren Böschung
-    case 24:
-        
-        strokeColor = 'rgba(115, 38, 0, 0.5';
-        break;  
-//keine Mahd am der unteren Böschung
-    case 50:
-        
-        strokeColor = 'rgba(230, 152, 0, 0.5';
-        break;  
-    case 2:
-        
-        strokeColor = 'rgba(230, 152, 0, 0.5';
-        break;  
-
-//Mahd an Bauwerken
-    case 200:
-        
-        strokeColor = 'rgba(205, 205, 205, 1';
-        break;  
-    case 201:
-        
-        strokeColor = 'rgba(205, 205, 205, 1';
-        break; 
-        
-//Schilfkrautung
-    case 300:
-        
-        strokeColor = 'rgba(230, 230, 0, 0.5';
-        break;  
-//Bauwerksunterhaltung
-    case 400:
-        
-        strokeColor = 'rgba(130, 130, 130, 1';
-        break;  
-
-//beobachtende Unterhaltung
-    default:
-        //fillColor = 'rgba(255, 255, 255, 1)';
-        strokeColor = 'grey';
+        // keine Mahd
+        case 3:
+        case 4:
+        case 5:
+            strokeColor = 'blue';
+            break;
+        // zweimalige Mahd
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+            strokeColor = 'black';
+            break;
+        // einmalige Mahd
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+        case 26:
+        case 27:
+            strokeColor = 'green';
+            break;
+        // Schilfsaum belassen
+        case 22:
+        case 23:
+            strokeColor = 'rgba(255, 190, 190, 0.5)';
+            break;
+        // keine Mahd am der unteren Böschung
+        case 24:
+        case 50:
+        case 2:
+            strokeColor = 'rgba(230, 152, 0, 0.5)';
+            break;
+        // Mahd an Bauwerken
+        case 200:
+        case 201:
+            strokeColor = 'rgba(205, 205, 205, 1)';
+            break;
+        // Schilfkrautung
+        case 300:
+            strokeColor = 'rgba(230, 230, 0, 0.5)';
+            break;
+        // Bauwerksunterhaltung
+        case 400:
+            strokeColor = 'rgba(130, 130, 130, 1)';
+            break;
+        // beobachtende Unterhaltung
+        default:
+            strokeColor = 'grey';
     }
     return new Style({
-        //fill: new Fill({
-        //    color: fillColor
-        //}),
         stroke: new Stroke({
             color: strokeColor,
             width: 5
         })
     });
 };
+
 function getStyleForArtSonLin(feature) {   
     const artValue = feature.get('bauart');
     let strokeColor;

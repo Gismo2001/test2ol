@@ -125,7 +125,6 @@ function removeTempMarker() {
   });
 }
 
-
 const attribution = new Attribution({
   collapsible: false,
   html: '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'

@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="format-detection" content="telephone=no"> <!-- Telefonnummernerkunnung /> -->
-  <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />  <!-- Kompatibilität mit älteren IE /> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="format-detection" content="telephone=no">
+  <meta http-equiv="X-UA-Compatible" content="IE=EDGE" /> 
   <title>GB 1 web map</title>
   <link rel="favicon" href="/assets/favicon-gKskFQmk.ico">
   <style>
@@ -14,20 +13,25 @@
        margin: 0;
     }
    </style>
-  <script type="module" crossorigin src="/assets/index-iLbnPJ1x.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-aowgO67d.css">
+  <script type="module" crossorigin src="/assets/index-eZKqAak7.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-9y-mlFeV.css">
 </head>
 <body>
   <div class="map-container">
     <div id="map" class="map"></div>
     <div id="custom-controls" class="custom-controls"></div>
-    <div id="searchBox">
-      <input type="text" id="addressInput" placeholder="Adresse eingeben"/>
-      <button onclick="searchAddress()">Suchen</button>
+    <div id="searchBox" class="searchBox">
+        <input type="text" id="addressInput" placeholder="Artdresse/FSK"/>
+        <button onclick="searchAddress()"><span>🔍</span></button>
+        <select id="searchSelect">
+          <option value="" disabled selected>Art</option>
+          <option value="adresse">Adresse</option>
+          <option value="fsk">FSK</option>
+      </select>
     </div>
     <div id="popup" class="ol-popup">
-      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-      <div id="popup-content"></div>
+        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+        <div id="popup-content"></div>
     </div>
   </div>
   <div class="controls hidden">
@@ -36,7 +40,7 @@
       <option value="EPSG:4326">EPSG:4326</option>
       <option value="EPSG:3857">EPSG:3857</option>
       <option value="EPSG:32632">EPSG:32632</option>
-     </select>
+    </select>
     <input type="checkbox" id="toggle-checkbox">
     <div id="mouse-position" class="custom-mouse-position"></div>
   </div>
