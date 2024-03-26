@@ -181,6 +181,7 @@ function getStyleForArtEin(feature) {
         })
     });
 };
+
 function getStyleForArtSonPun(feature) {   
     const artValue = feature.get('bauart');
     let iconSrc;
@@ -241,47 +242,52 @@ function getStyleForArtFSK(feature) {
     });
 };
 
-const km100scalStyle = function(feature, text, resolution) {
+const km100scalStyle = function(feature, km, resolution) {
     var minResolution = 0;
     var maxResolution = 5; 
+    var kmInKilometer = km / 1000;
+    var kmFormatted = kmInKilometer.toFixed(2);
+    
     if (resolution > minResolution && resolution < maxResolution) {
-      return new Style({
-        text: new Text({
-          text: text,
-          font: 'normal 18px "Arial Light", "Helvetica Neue Light", Arial, sans-serif',
-          offsetX: -10,
-          offsetY: 10,        
-        }),
-        stroke: new Stroke({
-          color: 'black', // oder eine andere Linienfarbe
-          width: 1 // oder eine andere Linienbreite  
-        })
-      });
+        return new Style({
+            text: new Text({
+                text: kmFormatted.toString(), // Verwenden Sie den Wert von km als Text
+                font: 'normal 18px "Arial Light", "Helvetica Neue Light", Arial, sans-serif',
+                offsetX: -10,
+                offsetY: 10,        
+            }),
+            stroke: new Stroke({
+                color: 'black', // oder eine andere Linienfarbe
+                width: 1 // oder eine andere Linienbreite  
+            })
+        });
     } else {
-      return null;
+        return null;
     }
 };
-const km500scalStyle = function(feature, text, resolution) {
+const km500scalStyle = function(feature, km, resolution) {
     var minResolution = 0;
     var maxResolution = 10; 
+    var kmInKilometer = km / 1000;
+    var kmFormatted = kmInKilometer.toFixed(2);
     if (resolution > minResolution && resolution < maxResolution) {
-      return new Style({
-        text: new Text({
-          text: text,
-          font: 'normal 20px "Arial Light", "Helvetica Neue Light", Arial, sans-serif',
-          offsetX: -10,
-          offsetY: 10,
-          fill: new Fill({
-            color: 'rgba(0, 0, 0, 1)'
-          }),
-        }),
-        stroke: new Stroke({
-          color: 'black', // oder eine andere Linienfarbe
-          width: 2 // oder eine andere Linienbreite  
-        })
-      });
+        return new Style({
+            text: new Text({
+                text: kmFormatted.toString(), // Verwenden Sie den Wert von km als Text
+                font: 'bold 20px "Arial Light", "Helvetica Neue Light", Arial, sans-serif', // Fett formatierter Text
+                offsetX: -10,
+                offsetY: 10,
+                fill: new Fill({
+                    color: 'rgba(0, 0, 0, 1)'
+                }),
+            }),
+            stroke: new Stroke({
+                color: 'black', // oder eine andere Linienfarbe
+                width: 2 // oder eine andere Linienbreite  
+            })
+        });
     } else {
-      return null;
+        return null;
     }
 };
 

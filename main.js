@@ -397,7 +397,7 @@ const km100scal_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_100_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'km100scal', // Titel für den Layer-Switcher
   style: function(feature, resolution) {
-    return km100scalStyle(feature, feature.get('TextString'), resolution);
+    return km100scalStyle(feature, feature.get('km'), resolution);
   },
   visible: true,
   minResolution: 0,
@@ -407,7 +407,7 @@ const km500scal_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_500_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'km500scal', // Titel für den Layer-Switcher
   style: function(feature, resolution) {
-    return km500scalStyle(feature, feature.get('TextString'), resolution);
+    return km500scalStyle(feature, feature.get('km'), resolution);
   },
   visible: true,
   minResolution: 0,
