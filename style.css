@@ -40,13 +40,17 @@ html {
   height: 25px; /* Anpassung der Höhe */
   z-index: 1001; 
 }
-#searchBox input[type="text"], /* Selektiert das Eingabefeld */
+#searchBox input[type="text"] {
+  width: 125px; /* Ändern Sie diese Zahl entsprechend Ihrer gewünschten Breite */
+  height: 100%;
+}
 #searchBox button { /* Selektiert den Button */
   height: 100%; /* Die Höhe von Eingabefeld und Button wird auf die Höhe des searchBox-Elements angepasst */
 }
 
 #searchSelect {
   height: 25px; /* Hier können Sie die gewünschte Höhe angeben */
+  width: 10%;
 }
 
  #notification {
