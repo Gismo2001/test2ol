@@ -29,6 +29,13 @@ import {createStringXY} from 'ol/coordinate.js';
 import { register } from 'ol/proj/proj4';
 import proj4 from 'proj4';
 
+
+import SearchNominatim from 'ol-ext/control/SearchNominatim';
+
+var searchControl = new SearchNominatim({
+  // Konfigurationsoptionen hier angeben, z.B. die Position der Steuerung auf der Karte
+});
+
 //projektion definieren und registrieren
 proj4.defs('EPSG:32632', '+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs');
 register(proj4);
@@ -55,7 +62,7 @@ import {
   machWasMitFSK,
   getStyleForArtSonLin
 } from './extStyle';
-import { schreibeInnerHtml } from './myFunc.js';
+
 
 
 //------------------------------------------------------------Adresssuche
@@ -147,6 +154,8 @@ const map = new Map({
   ]),
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
+
+
 //------------------------------------Attribution collapse
 function checkSize() {
   const small = map.getSize()[0] < 600;
@@ -389,7 +398,7 @@ const km10scal_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_10_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'km10scal', // Titel für den Layer-Switcher
   style: km10scalStyle,
-  visible: true,
+  visible: false,
   minResolution: 0,
   maxResolution: 1 
 });

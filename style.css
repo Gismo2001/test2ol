@@ -76,6 +76,11 @@ html {
   text-decoration: underline;
 }
 
+
+
+
+
+
  /* Beim Start OSM in Grautönen*/ 
 .bw {
   filter: grayscale(100%);
