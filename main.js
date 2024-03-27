@@ -400,7 +400,7 @@ const km10scal_layer = new VectorLayer({
   style: km10scalStyle,
   visible: false,
   minResolution: 0,
-  maxResolution: 1 
+  maxResolution: 1
 });
 const km100scal_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_100_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
@@ -418,9 +418,7 @@ const km500scal_layer = new VectorLayer({
   style: function(feature, resolution) {
     return km500scalStyle(feature, feature.get('km'), resolution);
   },
-  visible: true,
-  minResolution: 0,
-  maxResolution: 10 
+  visible: true  
 });
 
 const wmsNsgLayer = new TileLayer({

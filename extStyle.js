@@ -38,12 +38,6 @@ const queStyle = new Style({
     })
 });
 
-const km10scalStyle = new Style({
-    stroke: new Stroke({
-        color: 'grey',
-        width: .5
-    })
-});
 const gehoelz_vecStyle = new Style({
     stroke: new Stroke({
     color: 'rgba(173, 114, 3, 1)',
@@ -180,14 +174,14 @@ function getStyleForArtEin(feature) {
             scale: .9 
         })
     });
-};
+}
 
 function getStyleForArtSonPun(feature) {   
     const artValue = feature.get('bauart');
     let iconSrc;
     switch (artValue) {
         case 'Bootsanleger':
-            iconSrc = './data/sonPunBoot.svg';
+            iconSrc = './data/bwSonPun_Anleger.svg';
             break;
         case 'Betriebsgebäude':
             iconSrc = './data/sonPunBetrieb.svg';
@@ -201,7 +195,13 @@ function getStyleForArtSonPun(feature) {
         case 'Furt':
             iconSrc = './data/bwSonPun_Furt.svg';
             break;
-        case 'Betriebspegel':
+        case 'Tor':
+            iconSrc = './data/bwSonPun_Tor.svg';
+            break;
+        case 'Überfahrt':
+            iconSrc = './data/bwSonPun_Ueberfahrt.svg';
+            break;
+                case 'Betriebspegel':
             iconSrc = './data/bwSonPun_Betriebspegel.svg';
             break;
         default:
@@ -248,6 +248,12 @@ function getStyleForArtFSK(feature) {
     });
 };
 
+const km10scalStyle = new Style({
+    stroke: new Stroke({
+        color: 'grey',
+        width: .5
+    })
+});
 const km100scalStyle = function(feature, km, resolution) {
     var minResolution = 0;
     var maxResolution = 5; 
@@ -259,7 +265,7 @@ const km100scalStyle = function(feature, km, resolution) {
             text: new Text({
                 text: kmFormatted.toString(), // Verwenden Sie den Wert von km als Text
                 font: 'normal 18px "Arial Light", "Helvetica Neue Light", Arial, sans-serif',
-                offsetX: -10,
+                offsetX: -20,
                 offsetY: 10,        
             }),
             stroke: new Stroke({
@@ -273,7 +279,7 @@ const km100scalStyle = function(feature, km, resolution) {
 };
 const km500scalStyle = function(feature, km, resolution) {
     var minResolution = 0;
-    var maxResolution = 10; 
+    var maxResolution = 14; 
     var kmInKilometer = km / 1000;
     var kmFormatted = kmInKilometer.toFixed(2);
     if (resolution > minResolution && resolution < maxResolution) {
@@ -281,7 +287,7 @@ const km500scalStyle = function(feature, km, resolution) {
             text: new Text({
                 text: kmFormatted.toString(), // Verwenden Sie den Wert von km als Text
                 font: 'bold 20px "Arial Light", "Helvetica Neue Light", Arial, sans-serif', // Fett formatierter Text
-                offsetX: -10,
+                offsetX: -35,
                 offsetY: 10,
                 fill: new Fill({
                     color: 'rgba(0, 0, 0, 1)'
