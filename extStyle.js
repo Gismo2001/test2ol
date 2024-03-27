@@ -198,6 +198,12 @@ function getStyleForArtSonPun(feature) {
         case 'Auskolkung':
             iconSrc = './data/sonPunKolk.svg';
             break;
+        case 'Furt':
+            iconSrc = './data/bwSonPun_Furt.svg';
+            break;
+        case 'Betriebspegel':
+            iconSrc = './data/bwSonPun_Betriebspegel.svg';
+            break;
         default:
             iconSrc = './data/sonPunSonstige.svg';
     }
