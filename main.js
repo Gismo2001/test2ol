@@ -30,6 +30,7 @@ import { register } from 'ol/proj/proj4';
 import proj4 from 'proj4';
 
 import SearchNominatim from 'ol-ext/control/SearchNominatim';
+import Icon from 'ol/style/Icon'; // Hinzufügen Sie diesen Import
 
 
 
