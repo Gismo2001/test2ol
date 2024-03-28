@@ -10,7 +10,7 @@ import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
 import {circular} from 'ol/geom/Polygon';
 import Geolocation from 'ol/Geolocation.js';
 import { jsPDF } from "jspdf";
-import {Circle as CircleStyle, Fill, Stroke,Style} from 'ol/style.js';
+import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import TileWMS from 'ol/source/TileWMS.js';
@@ -29,12 +29,9 @@ import {createStringXY} from 'ol/coordinate.js';
 import { register } from 'ol/proj/proj4';
 import proj4 from 'proj4';
 
-
 import SearchNominatim from 'ol-ext/control/SearchNominatim';
 
-var searchControl = new SearchNominatim({
-  // Konfigurationsoptionen hier angeben, z.B. die Position der Steuerung auf der Karte
-});
+
 
 //projektion definieren und registrieren
 proj4.defs('EPSG:32632', '+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs');
@@ -64,73 +61,6 @@ import {
 } from './extStyle';
 
 
-
-//------------------------------------------------------------Adresssuche
-window.searchAddress = function searchAddress() {
-  var address = document.getElementById('addressInput').value;
-  // Direktes Setzen des API-Schlüssels, falls process.env.API_KEY nicht definiert ist
-  var apiKey = 'c592a3d99b8d43878cf7d727d44187ce';
-  var apiUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(address)}&key=${apiKey}`;
-
-  fetch(apiUrl)
-    .then(response => response.json())
-    .then(data => {
-      if (data.results.length > 0) {
-        var location = data.results[0].geometry;
-        // Karte auf die gefundenen Koordinaten zentrieren
-        map.getView().setCenter(proj.fromLonLat([location.lng, location.lat]));
-        map.getView().setZoom(17); // Zoom-Level anpassen
-
-        // Temporären Marker hinzufügen
-        
-        addTempMarker([location.lng, location.lat]);
-      } else {
-        // Adresse nicht gefunden, Meldung ausgeben
-        alert('Adresse nicht gefunden');
-      }
-    })
-    .catch(error => {
-      alert('Geokodierung-Fehler:', error);
-      
-      removeTempMarker();
-    });
-}
-// Event-Listener für die Enter-Taste hinzufügen
-var inputElement = document.getElementById('addressInput');
-inputElement.addEventListener('keydown', function (event) {
-  if (event.key === 'Enter') {
-    searchAddress();
-  }
-});
-// Marker für Positionsmarkierung zur Adresssuche
-function addTempMarker(coordinates) {
-  var tempMarkerLayer = new VectorLayer({
-    sourceL: new VectorSource({
-      features: [new Feature({
-        geometry: new Point(coordinates),
-      })]
-    }),
-    styleL: new Style({
-      image: new Circle({
-        radius: 20, // Radius des Kreises
-        fill: new Fill({ color: 'red' }), // Ändern Sie die Füllfarbe des Kreises auf Rot
-        stroke: new Stroke({ color: 'black', width: 2 }) // Randfarbe und -breite des Kreises bleiben unverändert
-      })
-    })
-  });
-
-  // Fügen Sie den temporären Marker-Layer zur Karte hinzu
-  map.addLayer(tempMarkerLayer);
-}
-function removeTempMarker() {
-  // Durchlaufen Sie alle Karten-Layer und entfernen Sie alle, die als temporärer Marker markiert sind
-  alert('xxmarker ');
-  map.getLayers().getArray().forEach(function (layer) {
-    if (layer.get('tempMarker')) {
-      map.removeLayer(layerL);
-    }
-  });
-}
 
 const attribution = new Attribution({
   collapsible: false,
@@ -1409,3 +1339,81 @@ document.getElementById('print-button').addEventListener('click', function() {
 },
 false,
 );
+
+
+
+// Current selection
+var sLayer = new VectorLayer({
+  source: new VectorSource(),
+  style: new Style({ image: new CircleStyle({radius: 5,stroke: new Stroke ({color: 'rgb(255,165,0)', width: 3 }),fill: new Fill({color: 'rgba(255,165,0,.3)' })      }),
+      stroke: new Stroke ({
+          color: 'rgb(255,165,0)',
+          width: 3
+      }),
+      fill: new Fill({
+          color: 'rgba(255,165,0,.3)'
+      })
+  })
+});
+map.addLayer(sLayer);
+
+// Set the search control 
+var search = new SearchNominatim (
+  {   //target: $(".options").get(0),
+    
+      polygon: $("#polygon").prop("checked"),
+      //placeholder: 'Suche nach Adresse', // Platzhaltertext für das Suchfeld
+      position: true,  // Search, with priority to geo position
+      reverse: true,
+      
+  });
+map.addControl (search);
+
+
+// Select feature when click on the reference index
+search.on('select', function(e)
+  {   // console.log(e);
+      sLayer.getSource().clear();
+      // Check if we get a geojson to describe the search
+      if (e.search.geojson) {
+          var format = new ol.format.GeoJSON();
+          var f = format.readFeature(e.search.geojson, { dataProjection: "EPSG:4326", featureProjection: map.getView().getProjection() });
+          sLayer.getSource().addFeature(f);
+          var view = map.getView();
+          var resolution = view.getResolutionForExtent(f.getGeometry().getExtent(), map.getSize());
+          var zoom = view.getZoomForResolution(resolution);
+          var center = ol.extent.getCenter(f.getGeometry().getExtent());
+          // redraw before zoom
+          setTimeout(function(){
+                  view.animate({
+                  center: center,
+                  zoom: Math.min (zoom, 16)
+              });
+          }, 100);
+      }
+      else {
+          map.getView().animate({
+              center:e.coordinate,
+              zoom: Math.max (map.getView().getZoom(),16)
+          });
+      }
+      // Füge den Marker hinzu
+      addMarker(e.coordinate);
+  });
+
+// Funktion zum Hinzufügen eines Markers
+function addMarker(coordinates) {
+  var marker = new Feature({
+    geometry: new Point(coordinates)
+  });
+  var markerStyle = new Style({
+    image: new Icon({
+      src: 'data/marker.svg', // Pfad zur Bilddatei
+      //scale: 0.5 // Skalierung des Bildes
+    })
+  });
+  marker.setStyle(markerStyle);
+  sLayer.getSource().clear(); // Löscht vorherige Marker
+  sLayer.getSource().addFeature(marker);
+};
+

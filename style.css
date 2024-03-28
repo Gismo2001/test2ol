@@ -32,27 +32,6 @@ html {
   border: 1px solid #ccc;
   border-radius: 2px;
 }
-#searchBox {
-  position: absolute;
-  top: 10px; 
-  left: 50px; 
-  font-size: 12px; 
-  height: 25px; /* Anpassung der Höhe */
-  z-index: 1001; 
-}
-#searchBox input[type="text"] {
-  width: 125px; /* Ändern Sie diese Zahl entsprechend Ihrer gewünschten Breite */
-  height: 100%;
-}
-#searchBox button { /* Selektiert den Button */
-  height: 100%; /* Die Höhe von Eingabefeld und Button wird auf die Höhe des searchBox-Elements angepasst */
-}
-
-#searchSelect {
-  height: 25px; /* Hier können Sie die gewünschte Höhe angeben */
-  width: 10%;
-}
-
  #notification {
   display: none;
   position: fixed;
@@ -76,16 +55,10 @@ html {
   text-decoration: underline;
 }
 
-
-
-
-
-
  /* Beim Start OSM in Grautönen*/ 
 .bw {
   filter: grayscale(100%);
 }
-
 
 .map:-webkit-full-screen {
   height: 100%;
@@ -217,7 +190,7 @@ html {
   bottom: 150px;
   width: 100%;
   left: 0px;
-   font-size: 25px;
+   font-size: 20px;
      z-index: 1005;
 }
 
@@ -319,4 +292,34 @@ html {
 .hidden {
   display: none;
 }
+
+
+.ol-search ul {
+  color: #333;
+  font-size:0.85em;
+  max-width: 21em;
+  z-index: 20000;
+}
+.ol-search ul i {
+  display: block;
+  color: #333;
+  font-size:0.85em;
+}
+.ol-search input[type="search"] {
+  font-size: 14px; /* Ändere die Textgröße nach Bedarf */
+}
+
+.info {
+  display: inline-block;
+  font-size: 14px;
+  width: 150px; /* Ändere die Breite nach Bedarf */
+}
+
+
+.info a img {
+  height: 100px;
+  margin-right: .5em;
+  float: left;
+}
+
 
