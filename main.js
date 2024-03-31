@@ -33,6 +33,10 @@ import proj4 from 'proj4';
 import SearchNominatim from 'ol-ext/control/SearchNominatim';
 import Icon from 'ol/style/Icon'; // Hinzufügen Sie diesen Import
 
+import Bar from 'ol-ext/control/Bar';
+import Toggle from 'ol-ext/control/Toggle'; // Importieren Sie Toggle
+import TextButton from 'ol-ext/control/TextButton';
+
 //projektion definieren und registrieren
 proj4.defs('EPSG:32632', '+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs');
 register(proj4);
@@ -1421,3 +1425,45 @@ function addMarker(coordinates) {
   sLayer.getSource().addFeature(marker);
 };
 
+/* Nested subbar */
+var sub2 = new Bar({
+  toggleOne: true,
+  controls: [
+    new TextButton({
+      html:"2.1", 
+      handleClick: function(b) {  } 
+    }),
+    new TextButton({
+      html:"2.2", 
+      handleClick: function(b) {  } 
+    })
+  ]
+});
+var sub1 = new Bar({
+  toggleOne: true,
+  controls:[
+    new Toggle({
+      html:"1", 
+      autoActivate: true,
+      onToggle: function(b) { console.log("Button 1 "+(b?"activated":"deactivated")); } 
+    }),
+    new Toggle({
+      html:"2", 
+      onToggle: function(b) { console.log("Button 2 "+(b?"activated":"deactivated")); },
+      // Second level nested control bar
+      bar: sub2
+    })
+  ]
+});
+var mainbar = new Bar({
+  controls: [
+    new Toggle({
+      html: '0',
+      // First level nested control bar
+      bar: sub1,
+      onToggle: function() { console.log(); },
+      //setPosition: 'right',
+    })
+  ]
+});
+map.addControl ( mainbar );

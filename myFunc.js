@@ -1,7 +1,5 @@
 //myFunc.js
 
-function schreibeInnerHtml(irgendwas) {
- 
-}
+export   function yourFunctionName(evt) {
 
-export { schreibeInnerHtml };
+};
