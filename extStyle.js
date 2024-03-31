@@ -118,20 +118,27 @@ function getStyleForArtSonLin(feature) {
     let strokeColor;
     let strokeWidth;
     let lineDash;
-    
-    switch (artValue) {
-        case 'Anlegehilfe':
-            strokeColor = 'blue';
-            strokeWidth = 3;
-            break;
-        case 'Sohlgleite':
-            strokeColor = 'red';
-            strokeWidth = 10;
-            lineDash = [10, 5]; // Array mit Längen der Striche und Lücken
-            break;
-        default:
-            strokeColor = 'black';
-            lineDash = undefined; // Keine gestrichelte Linie für den Standardfall
+
+    if (artValue === 'Anlegehilfe') {
+        strokeColor = 'blue';
+        strokeWidth = 5;
+    } else if (artValue === 'Sohlgleite') {
+        strokeColor = 'red';
+        strokeWidth = 5;
+        lineDash = [10, 15];
+    } else if (/fuß|rad/i.test(artValue)) {
+        strokeColor = 'green';
+        strokeWidth = 5;
+        lineDash = [20, 10];
+    } else if (/strasse|Straße/i.test(artValue)) {
+        strokeColor = 'Black';
+        strokeWidth = 5;
+        lineDash = [12.5, 10];
+
+    } else {
+        strokeColor = 'blue';
+        strokeWidth = 5;
+        lineDash = undefined;
     }
     
     return new Style({
@@ -145,6 +152,7 @@ function getStyleForArtSonLin(feature) {
         })
     });
 }
+
 function getStyleForArtEin(feature) {   
     const artValue = feature.get('Ein_ord');
     let iconSrc;

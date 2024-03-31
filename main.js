@@ -7,6 +7,7 @@ import Feature from 'ol/Feature';
 import Overlay from 'ol/Overlay.js';
 import Draw from 'ol/interaction/Draw.js';
 import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
+
 import {circular} from 'ol/geom/Polygon';
 import Geolocation from 'ol/Geolocation.js';
 import { jsPDF } from "jspdf";
@@ -31,8 +32,6 @@ import proj4 from 'proj4';
 
 import SearchNominatim from 'ol-ext/control/SearchNominatim';
 import Icon from 'ol/style/Icon'; // Hinzufügen Sie diesen Import
-
-
 
 //projektion definieren und registrieren
 proj4.defs('EPSG:32632', '+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs');
@@ -61,8 +60,6 @@ import {
   getStyleForArtSonLin
 } from './extStyle';
 
-
-
 const attribution = new Attribution({
   collapsible: false,
   html: '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
@@ -79,8 +76,8 @@ const map = new Map({
   controls: defaultControls().extend([
     new FullScreen(),
     new ZoomToExtent({
-      extent: [727361, 6839277, 858148, 6990951] // Geben Sie hier das Ausdehnungsintervall an
-    }),
+       extent: [727361, 6839277, 858148, 6990951] // Geben Sie hier das Ausdehnungsintervall an
+     }),
     attribution // Fügen Sie hier Ihre benutzerdefinierte Attribution-Steuerung hinzu
   ]),
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
@@ -1255,7 +1252,15 @@ document.addEventListener('DOMContentLoaded', function () {
   link.addEventListener('click', function(event) {
     event.preventDefault(); // Verhindert die Standardaktion des Links
     var newWindow = window.open('', '_blank');
-    newWindow.document.body.innerHTML = '<p>Hallo neue Welt</p>';
+    newWindow.document.body.innerHTML = 
+      '<p>Hallo neue Welt</p>'
+      /* + 
+      '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
+      '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
+      '<p>' + foto1Html +  
+      '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
+      '<p>' + beschreibLangHtml + '</p>' +
+      '</div>'; */
   });
   container.appendChild(link);
   container.appendChild(popupCloser);
@@ -1340,8 +1345,6 @@ document.getElementById('print-button').addEventListener('click', function() {
 },
 false,
 );
-
-
 
 // Current selection
 var sLayer = new VectorLayer({
