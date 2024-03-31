@@ -105,91 +105,8 @@ let watchId = null; // Variable, um die Watch-ID der Geolokalisierung zu speiche
 
 //Button für Positionierung
 const locateP = document.createElement('div');
-locateP.className = 'ol-control ol-unselectable locate';
-locateP.innerHTML = '<button title="Locate me">◎</button>';
 let isActive = false; // Variable, um den Aktivierungsstatus der Geolokalisierung zu verfolgen
 
-// Funktion zum Aktualisieren des Aussehens des Buttons basierend auf dem Aktivierungsstatus
-function updateButtonAppearance() {
-  if (isActive) {
-    locateP.classList.add('active'); // Füge die Klasse 'active' hinzu, um den aktiven Zustand anzuzeigen
-    isFirstZoom = true; 
-  } else {
-    locateP.classList.remove('active'); // Entferne die Klasse 'active', um den deaktivierten Zustand anzuzeigen
-    isFirstZoom = false;
-  }
-}
-
-locateP.addEventListener('click', function () {
-  if (!watchId) {
-    // Starte die Geolokalisierung, wenn sie nicht aktiv ist
-    isActive = true; // Richtiges Zuweisen von isActive
-    watchId = navigator.geolocation.watchPosition(
-      function (pos) {
-        const coords = [pos.coords.longitude, pos.coords.latitude];
-        const accuracy = circular(coords, pos.coords.accuracy);
-        sourceP.clear(true);
-        sourceP.addFeatures([
-          new Feature(accuracy.transform('EPSG:4326', map.getView().getProjection())),
-          new Feature(new Point(proj.fromLonLat(coords) ) ),
-          
-        ]);
-
-        // Führe den Zoom nur beim ersten Mal aus
-        if (isFirstZoom) {
-          map.getView().fit(sourceP.getExtent(), { maxZoom: 13, duration: 500 }); 
-          isFirstZoom = false; // Setze isFirstZoom auf false, um zukünftige Zooms zu verhindern
-        }
-        // Füge den Layer hinzu, um die Position anzuzeigen
-        if (!layerP) {
-          layerP = new VectorLayer({
-            displayInLayerSwitcher: false,
-            style: new Style({
-              image: new CircleStyle({
-                radius: 8,
-                opacity: 0.5,
-                fill: new Fill({
-                  color: 'red'
-                }),
-                stroke: new Stroke({
-                  color: 'black',
-                  width: 2
-                })
-              })
-            }),
-            source: sourceP,
-            title: 'Null',
-            name: 'Null',
-            zIndex: 9999,
-          });
-          map.addLayer(layerP);
-          }
-        },
-      function (error) {
-        alert(`ERROR: ${error.message}`);
-      },
-      {
-        enableHighAccuracy: true,
-      }
-    );
-  } else {
-    // Beende die Geolokalisierung, wenn sie bereits aktiv ist
-    navigator.geolocation.clearWatch(watchId);
-    watchId = null; // Setze die Watch-ID auf null, um anzuzeigen, dass die Geolokalisierung deaktiviert ist
-    isActive = false; // Richtiges Zuweisen von isActive
-       // Entferne den Layer, um die Position nicht mehr anzuzeigen
-    if (layerP) {
-      map.removeLayer(layerP);
-      layerP = null;
-    }
-  }
-  updateButtonAppearance(); // Aktualisieren Sie das Erscheinungsbild des Buttons basierend auf dem aktualisierten isActive-Status
-});
-map.addControl(
-  new Control({
-    element: locateP,
-  })
-);
 
 const gehoelz_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
@@ -785,7 +702,7 @@ function removeMeasureResult() {
 } */
 
 
-//------------------------------------Custom Controls 1 ........................
+//------------------------------------Custom Controls 1 für Linie und für Fläche ........................
 class CustomControls1 extends Control {
   constructor(options) {
     const element = document.createElement('div');
@@ -951,7 +868,20 @@ map.on('click', function (evt) {
     console.log('es gibt einen Marker');
     map.removeOverlay(markerCoordOverlay);
   };
-  console.log(globalCoordAnOderAus);
+ 
+
+  var featuresAtPixel = []; // Initialisierung des Arrays außerhalb der if-Bedingung
+  if (globalCoordAnOderAus === false) {
+    map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+      var layname = layer.get('name');
+            
+      featuresAtPixel.push(layname + " " + feature.get('bw_id')); // Hinzufügen des layname zum Array featuresAtPixel
+    });
+  } else if (globalCoordAnOderAus === true) {
+    
+  }
+  console.log(featuresAtPixel);
+
   if (globalCoordAnOderAus===false){
     var coordinates = evt.coordinate;
     var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
@@ -1365,7 +1295,9 @@ var sLayer = new VectorLayer({
 });
 map.addLayer(sLayer);
 
-// Set the search control 
+
+
+//----------------------------------------------------------- Set the search control 
 var search = new SearchNominatim (
   {   //target: $(".options").get(0),
     
@@ -1376,7 +1308,6 @@ var search = new SearchNominatim (
       
   });
 map.addControl (search);
-
 
 // Select feature when click on the reference index
 search.on('select', function(e)
@@ -1425,45 +1356,120 @@ function addMarker(coordinates) {
   sLayer.getSource().addFeature(marker);
 };
 
+
+
+
+
+
 /* Nested subbar */
 var sub2 = new Bar({
   toggleOne: true,
   controls: [
     new TextButton({
       html:"2.1", 
-      handleClick: function(b) {  } 
+      handleClick: function(b) { alert("Bar 2 Button 2.1"); } 
     }),
     new TextButton({
       html:"2.2", 
-      handleClick: function(b) {  } 
+      handleClick: function(b) { alert("Bar 2 Button 2.2"); } 
     })
   ]
 });
+//GPS-Postionn
 var sub1 = new Bar({
   toggleOne: true,
   controls:[
     new Toggle({
-      html:"1", 
-      autoActivate: true,
-      onToggle: function(b) { console.log("Button 1 "+(b?"activated":"deactivated")); } 
+      html: "<button title='Locate me'>◎</button>",
+      //autoActivate: true,
+      onToggle: 
+      function () {
+        if (!watchId) {
+          // Starte die Geolokalisierung, wenn sie nicht aktiv ist
+          isActive = true; // Richtiges Zuweisen von isActive
+          watchId = navigator.geolocation.watchPosition(
+            function (pos) {
+              const coords = [pos.coords.longitude, pos.coords.latitude];
+              const accuracy = circular(coords, pos.coords.accuracy);
+              sourceP.clear(true);
+              sourceP.addFeatures([
+                new Feature(accuracy.transform('EPSG:4326', map.getView().getProjection())),
+                new Feature(new Point(proj.fromLonLat(coords) ) ),
+                
+              ]);
+      
+              // Führe den Zoom nur beim ersten Mal aus
+              if (isFirstZoom) {
+                map.getView().fit(sourceP.getExtent(), { maxZoom: 13, duration: 500 }); 
+                isFirstZoom = false; // Setze isFirstZoom auf false, um zukünftige Zooms zu verhindern
+              }
+              // Füge den Layer hinzu, um die Position anzuzeigen
+              if (!layerP) {
+                layerP = new VectorLayer({
+                  displayInLayerSwitcher: false,
+                  style: new Style({
+                    image: new CircleStyle({
+                      radius: 8,
+                      opacity: 0.5,
+                      fill: new Fill({
+                        color: 'red'
+                      }),
+                      stroke: new Stroke({
+                        color: 'black',
+                        width: 2
+                      })
+                    })
+                  }),
+                  source: sourceP,
+                  title: 'Null',
+                  name: 'Null',
+                  zIndex: 9999,
+                });
+                map.addLayer(layerP);
+                }
+              },
+            function (error) {
+              alert(`ERROR: ${error.message}`);
+            },
+            {
+              enableHighAccuracy: true,
+            }
+          );
+        } else {
+          // Beende die Geolokalisierung, wenn sie bereits aktiv ist
+          navigator.geolocation.clearWatch(watchId);
+          watchId = null; // Setze die Watch-ID auf null, um anzuzeigen, dass die Geolokalisierung deaktiviert ist
+          isActive = false; // Richtiges Zuweisen von isActive
+             // Entferne den Layer, um die Position nicht mehr anzuzeigen
+          if (layerP) {
+            map.removeLayer(layerP);
+            layerP = null;
+          }
+        }
+        updateButtonAppearance(); // Aktualisieren Sie das Erscheinungsbild des Buttons basierend auf dem aktualisierten isActive-Status
+      } ,
     }),
     new Toggle({
       html:"2", 
-      onToggle: function(b) { console.log("Button 2 "+(b?"activated":"deactivated")); },
+      onToggle: function(b) { alert("Button 2 "+(b?"activated":"deactivated")); },
       // Second level nested control bar
       bar: sub2
     })
   ]
 });
-var mainbar = new Bar({
+//Mainbar1
+var mainBar1 = new Bar({
   controls: [
     new Toggle({
-      html: '0',
+      html: "<button title='Main'>H</button>",
       // First level nested control bar
       bar: sub1,
-      onToggle: function() { console.log(); },
-      //setPosition: 'right',
+      onToggle: function() { },
+      
     })
   ]
+  
 });
-map.addControl ( mainbar );
+
+map.addControl ( mainBar1 );
+mainBar1.setPosition('left');
