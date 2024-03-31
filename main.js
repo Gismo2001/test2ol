@@ -869,7 +869,7 @@ map.on('click', function (evt) {
     map.removeOverlay(markerCoordOverlay);
   };
  
-
+/* 
   var featuresAtPixel = []; // Initialisierung des Arrays außerhalb der if-Bedingung
   if (globalCoordAnOderAus === false) {
     map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
@@ -881,7 +881,7 @@ map.on('click', function (evt) {
     
   }
   console.log(featuresAtPixel);
-
+ */
   if (globalCoordAnOderAus===false){
     var coordinates = evt.coordinate;
     var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
@@ -1380,7 +1380,7 @@ var sub1 = new Bar({
   toggleOne: true,
   controls:[
     new Toggle({
-      html: "<button title='Locate me'>◎</button>",
+      html: "1",
       //autoActivate: true,
       onToggle: 
       function () {
@@ -1461,7 +1461,7 @@ var sub1 = new Bar({
 var mainBar1 = new Bar({
   controls: [
     new Toggle({
-      html: "<button title='Main'>H</button>",
+      html: "H",
       // First level nested control bar
       bar: sub1,
       onToggle: function() { },
