@@ -122,14 +122,19 @@ function getStyleForArtSonLin(feature) {
     if (artValue === 'Anlegehilfe') {
         strokeColor = 'blue';
         strokeWidth = 5;
-    } else if (artValue === 'Sohlgleite') {
+    } else if (/sohlgl|umgehungs/i.test(artValue)) {
         strokeColor = 'red';
         strokeWidth = 5;
         lineDash = [10, 15];
     } else if (/fuß|rad/i.test(artValue)) {
-        strokeColor = 'green';
+        strokeColor = 'olive';
         strokeWidth = 5;
         lineDash = [20, 10];
+    } else if (/bio/i.test(artValue)) {
+        strokeColor = 'green';
+        strokeWidth = 5;
+        lineDash = [17.5, 10];
+
     } else if (/strasse|Straße/i.test(artValue)) {
         strokeColor = 'Black';
         strokeWidth = 5;

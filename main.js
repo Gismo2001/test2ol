@@ -30,7 +30,10 @@ import {createStringXY} from 'ol/coordinate.js';
 import { register } from 'ol/proj/proj4';
 import proj4 from 'proj4';
 
-import SearchNominatim from 'ol-ext/control/SearchNominatim';
+import SearchPhoton from 'ol-ext/control/SearchPhoton';
+//import SearchNominatim from 'ol-ext/control/SearchNominatim';
+import WMSCapabilities from'ol-ext/control/WMSCapabilities';
+
 import Icon from 'ol/style/Icon'; // Hinzufügen Sie diesen Import
 
 import Bar from 'ol-ext/control/Bar';
@@ -869,19 +872,35 @@ map.on('click', function (evt) {
     map.removeOverlay(markerCoordOverlay);
   };
  
-/* 
-  var featuresAtPixel = []; // Initialisierung des Arrays außerhalb der if-Bedingung
-  if (globalCoordAnOderAus === false) {
+ 
+var featuresAtPixel = []; // Initialisierung des Arrays außerhalb der if-Bedingung
+
+if (globalCoordAnOderAus === false) {
     map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-      var layname = layer.get('name');
-            
-      featuresAtPixel.push(layname + " " + feature.get('bw_id')); // Hinzufügen des layname zum Array featuresAtPixel
+        featuresAtPixel.push(feature.get('bw_id')); // Hinzufügen des layname zum Array featuresAtPixel
     });
-  } else if (globalCoordAnOderAus === true) {
-    
-  }
-  console.log(featuresAtPixel);
- */
+
+    // Dropdown-Menü erstellen
+    var select = document.createElement("select"); // Korrektur: Verwenden Sie "select" statt "selectF"
+    select.id = "featureSelect";
+
+    // Optionen für das Dropdown-Menü erstellen
+    featuresAtPixel.forEach(function(featureId) {
+        var option = document.createElement("option");
+        option.value = featureId;
+        option.text = featureId;
+        select.appendChild(option);
+    });
+
+    // Dropdown-Menü dem HTML-Dokument hinzufügen
+    document.body.appendChild(select);
+    alert("edrricht");
+
+} else if (globalCoordAnOderAus === true) {
+    // Hier könnten weitere Aktionen für den Fall ausgeführt werden, dass globalCoordAnOderAus true ist
+}
+
+  
   if (globalCoordAnOderAus===false){
     var coordinates = evt.coordinate;
     var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
@@ -1298,7 +1317,7 @@ map.addLayer(sLayer);
 
 
 //----------------------------------------------------------- Set the search control 
-var search = new SearchNominatim (
+/* var search = new SearchNominatim (
   {   //target: $(".options").get(0),
     
       polygon: $("#polygon").prop("checked"),
@@ -1308,6 +1327,15 @@ var search = new SearchNominatim (
       
   });
 map.addControl (search);
+ */
+var search = new SearchPhoton({
+  //target: $(".options").get(0),
+  lang:"de",		// Force preferred language
+  polygon: $("#polygon").prop("checked"),
+  reverse: true,
+  position: true	// Search, with priority to geo position
+});
+map.addControl (search);
 
 // Select feature when click on the reference index
 search.on('select', function(e)
@@ -1315,7 +1343,7 @@ search.on('select', function(e)
       sLayer.getSource().clear();
       // Check if we get a geojson to describe the search
       if (e.search.geojson) {
-          var format = new ol.format.GeoJSON();
+          var format = new GeoJSON();
           var f = format.readFeature(e.search.geojson, { dataProjection: "EPSG:4326", featureProjection: map.getView().getProjection() });
           sLayer.getSource().addFeature(f);
           var view = map.getView();
@@ -1367,11 +1395,15 @@ var sub2 = new Bar({
   controls: [
     new TextButton({
       html:"2.1", 
-      handleClick: function(b) { alert("Bar 2 Button 2.1"); } 
+      handleClick: function() {
+      //Aktionen
+      } 
     }),
     new TextButton({
       html:"2.2", 
-      handleClick: function(b) { alert("Bar 2 Button 2.2"); } 
+      handleClick: function() { 
+        //Aktionen
+      } 
     })
   ]
 });
@@ -1380,7 +1412,7 @@ var sub1 = new Bar({
   toggleOne: true,
   controls:[
     new Toggle({
-      html: "1",
+      html: "P",
       //autoActivate: true,
       onToggle: 
       function () {
@@ -1451,7 +1483,7 @@ var sub1 = new Bar({
     }),
     new Toggle({
       html:"2", 
-      onToggle: function(b) { alert("Button 2 "+(b?"activated":"deactivated")); },
+      onToggle: function(b) {  },
       // Second level nested control bar
       bar: sub2
     })
@@ -1473,3 +1505,29 @@ var mainBar1 = new Bar({
 
 map.addControl ( mainBar1 );
 mainBar1.setPosition('left');
+
+
+var cap = new WMSCapabilities({ 
+  // target: $('.options').get(0),
+  target: document.body,
+  srs: ['EPSG:4326', 'EPSG:3857','EPSG:32632' ], 
+  cors: true,
+  popupLayer: true,
+  placeholder: 'WMS link hier einfügen...',
+  title: 'WMS-Service',
+  searchLabel: 'Suche',
+  optional: 'token',
+  services: {
+    'OSM': 'https://wms.openstreetmap.fr/wms',
+    'Umweeltkarten NI, Hydrographie': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Hydro_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
+    
+  },
+  // Show trace in the console
+  trace: true
+});
+map.addControl(cap);
+
+cap.on('load', function(e) {
+  map.addLayer(e.layer);
+  e.layer.set('legend', e.options.data.legend);
+});
