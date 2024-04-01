@@ -243,7 +243,8 @@ const exp_bw_sle_layer = new VectorLayer({
   title: 'Schleuse', // Titel für den Layer-Switcher
   name: 'sle', // Titel für den Layer-Switcher
   style: sleStyle,
-  visible: true
+  visible: true,
+  trash: false,
 });
 
 const km10scal_layer = new VectorLayer({
@@ -547,7 +548,7 @@ const osmTileCr = new TileLayer({
   opacity: 0.75
 });
 
-const layerSwitcher = new LayerSwitcher({ });
+const layerSwitcher = new LayerSwitcher({  });
 map.addControl(layerSwitcher);
 
 //------------------------------------ Layer für Messung
@@ -740,8 +741,8 @@ map.addControl(new CustomControls1({
 const BwGroupP = new LayerGroup({
   title: "Bauw.(P)",
   fold: true,
-  fold: 'close',  
-  layers: [ exp_bw_son_pun_layer, exp_bw_ein_layer, exp_bw_bru_andere_layer, exp_bw_bru_nlwkn_layer, exp_bw_que_layer, exp_bw_due_layer, exp_bw_weh_layer, exp_bw_sle_layer]
+  fold: 'close',
+  layers: [ exp_bw_son_pun_layer, exp_bw_ein_layer, exp_bw_bru_andere_layer, exp_bw_bru_nlwkn_layer, exp_bw_que_layer, exp_bw_due_layer, exp_bw_weh_layer, exp_bw_sle_layer],
 });
 const BwGroupL = new LayerGroup({
   title: "Bauw.(L)",
@@ -1314,8 +1315,6 @@ var sLayer = new VectorLayer({
 });
 map.addLayer(sLayer);
 
-
-
 //----------------------------------------------------------- Set the search control 
 /* var search = new SearchNominatim (
   {   //target: $(".options").get(0),
@@ -1385,10 +1384,7 @@ function addMarker(coordinates) {
 };
 
 
-
-
-
-
+//-----------------------------------------Menü mit Submenü
 /* Nested subbar */
 var sub2 = new Bar({
   toggleOne: true,
@@ -1500,34 +1496,14 @@ var mainBar1 = new Bar({
       
     })
   ]
-  
 });
-
 map.addControl ( mainBar1 );
 mainBar1.setPosition('left');
 
+// Inhalt von main.js
 
-var cap = new WMSCapabilities({ 
-  // target: $('.options').get(0),
-  target: document.body,
-  srs: ['EPSG:4326', 'EPSG:3857','EPSG:32632' ], 
-  cors: true,
-  popupLayer: true,
-  placeholder: 'WMS link hier einfügen...',
-  title: 'WMS-Service',
-  searchLabel: 'Suche',
-  optional: 'token',
-  services: {
-    'OSM': 'https://wms.openstreetmap.fr/wms',
-    'Umweeltkarten NI, Hydrographie': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Hydro_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
-    
-  },
-  // Show trace in the console
-  trace: true
+//------------------------WMS-Control aus myFunc.js hinzufügen
+document.addEventListener('DOMContentLoaded', function() {
+  initializeWMS(WMSCapabilities, map ); // Aufrufen der initializeWMS-Funktion aus myFunc.js
 });
-map.addControl(cap);
 
-cap.on('load', function(e) {
-  map.addLayer(e.layer);
-  e.layer.set('legend', e.options.data.legend);
-});

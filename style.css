@@ -120,6 +120,12 @@ html {
   z-index: 9999;
 }
 
+.ol-popup h1 {
+  font-size: 1em;
+  background-size: 2em;
+  padding-left: 3em;
+}
+
 #popup-content {
   user-select: text;
 }
