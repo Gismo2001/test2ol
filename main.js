@@ -845,6 +845,8 @@ function removeExistingInfoDiv() {
 }
 
 //---------------------------------------------------Funktionen für Popup
+//var popup = new OpenLayers.Popup.FramedCloud("popup",
+
 var container = document.getElementById('popup');
 var content = document.getElementById('popup-content');
 var closer = document.getElementById('popup-closer');
@@ -857,6 +859,7 @@ var popup = new Overlay({
   }
 });
 map.addOverlay(popup);
+
 closer.onclick = function()
 {
   popup.setPosition(undefined);
