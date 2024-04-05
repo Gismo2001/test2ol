@@ -1539,4 +1539,3 @@ mainBar1.setPosition('left');
 document.addEventListener('DOMContentLoaded', function() {
   initializeWMS(WMSCapabilities, map ); // Aufrufen der initializeWMS-Funktion aus myFunc.js
 });
-

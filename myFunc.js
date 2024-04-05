@@ -11,7 +11,8 @@ function initializeWMS(WMSCapabilities,map ) {
         optional: 'token',
         services: {
             'OSM': 'https://wms.openstreetmap.fr/wms',
-            'Umweeltkarten NI, Hydrographie': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Hydro_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
+            'Hydro, Umweltkarten NI ': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Hydro_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
+            'WRRL, Umweltkarten NI ': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/WRRL_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
         },
         trace: true
     });
@@ -21,3 +22,4 @@ function initializeWMS(WMSCapabilities,map ) {
         e.layer.set('legend', e.options.data.legend);
    });
 }
+
