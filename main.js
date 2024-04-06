@@ -778,7 +778,7 @@ const BaseGroup = new LayerGroup({
 });
 map.addLayer(BaseGroup);
 map.addLayer(GNAtlasGroup);
-map.addLayer (exp_allgm_fsk_layer);
+map.addLayer(exp_allgm_fsk_layer);
 map.addLayer(gew_layer_layer);
 map.addLayer(wmsLayerGroup);
 map.addLayer(kmGroup);
@@ -799,7 +799,9 @@ map.on('singleclick', function (evt) {
     ];
     const viewResolution = map.getView().getResolution();
     const viewProjection = map.getView().getProjection();
-    layersToCheck.forEach(({ layer, name }) => {
+    layersToCheck.forEach(
+      ({ layer, name }) => 
+      {
        if (layer.getVisible()) {
         const url = layer.getSource().getFeatureInfoUrl(evt.coordinate, viewResolution, viewProjection, {'INFO_FORMAT': 'text/html'});
         if (url) {
@@ -813,12 +815,13 @@ map.on('singleclick', function (evt) {
               }
             })
             .catch((error) => {
-              alert('Position nicht gefunden, Standortermittlung aktiv??');
+              alert('Kein Feature gefunden');
               
             });
         }
       }
-    });
+      }
+    );
   } else {
     
   }
@@ -1507,12 +1510,17 @@ var sub1 = new Bar({
             layerP = null;
           }
         }
-        updateButtonAppearance(); // Aktualisieren Sie das Erscheinungsbild des Buttons basierend auf dem aktualisierten isActive-Status
+        //updateButtonAppearance(); // Aktualisieren Sie das Erscheinungsbild des Buttons basierend auf dem aktualisierten isActive-Status
+        
       } ,
+      
+
     }),
     new Toggle({
       html:"2", 
-      onToggle: function(b) {  },
+      onToggle: function(b) { 
+        //test();
+       },
       // Second level nested control bar
       bar: sub2
     })

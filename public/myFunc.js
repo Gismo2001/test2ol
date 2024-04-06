@@ -1,3 +1,5 @@
+
+
 // Inhalt von myFunc.js
 function initializeWMS(WMSCapabilities,map ) {
     var cap = new WMSCapabilities({
@@ -21,5 +23,4 @@ function initializeWMS(WMSCapabilities,map ) {
         map.addLayer(e.layer);
         e.layer.set('legend', e.options.data.legend);
    });
-}
-
+};
