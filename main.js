@@ -548,7 +548,12 @@ const osmTileCr = new TileLayer({
   opacity: 0.75
 });
 
-const layerSwitcher = new LayerSwitcher({  });
+const layerSwitcher = new LayerSwitcher({ 
+  activationMode: 'click', 
+  reverse: true, 
+  trash: true, 
+  tipLabel: 'Legende', 
+ });
 map.addControl(layerSwitcher);
 
 //------------------------------------ Layer für Messung
