@@ -792,45 +792,72 @@ map.addLayer(BwGroupP);
 map.addLayer(vector); 
 
 //--------------------------------------------------Info für WMS-Layer
+
+
+// Funktion zum Durchsuchen aller Layer in einem LayerGroup-Objekt
+function getLayersInGroup(layerGroup) {
+  const layers = [];
+  layerGroup.getLayers().forEach(layer => {
+      if (layer instanceof LayerGroup) {
+          // Wenn der Layer ein LayerGroup ist, rufe die Funktion rekursiv auf
+          layers.push(...getLayersInGroup(layer));
+      } else {
+          // Füge den Layer zur Liste hinzu, wenn er ein TileLayer ist
+          layers.push(layer);
+      }
+  });
+  return layers;
+}
+
 map.on('singleclick', function (evt) {
-  const isWmsLayerGroupVisible = map.getLayers().getArray().some(layer => layer.get('name') === 'WMS-Lay' && layer.getVisible());
-  if (isWmsLayerGroupVisible) {
-    const layersToCheck = [
-      { layer: wmsGewWmsFgLayer, name: 'GewWms' },
-      { layer: wmsWrrlFgLayer, name: 'WRRL' },
-      { layer: wmsUesgLayer, name: 'ÜSG' },
-      { layer: wmsNsgLayer, name: 'NSG' },
-      { layer: wmsLsgLayer, name: 'LSG' },
-    ];
-    const viewResolution = map.getView().getResolution();
-    const viewProjection = map.getView().getProjection();
-    layersToCheck.forEach(
-      ({ layer, name }) => 
-      {
-       if (layer.getVisible()) {
-        const url = layer.getSource().getFeatureInfoUrl(evt.coordinate, viewResolution, viewProjection, {'INFO_FORMAT': 'text/html'});
-        if (url) {
-          fetch(url)
-            .then((response) => response.text())
-            .then((html) => {
-              if (html.trim() !== '') {
-                removeExistingInfoDiv();
-                const infoDiv = createInfoDiv(name, html);
-                document.body.appendChild(infoDiv);
-              }
-            })
-            .catch((error) => {
-              alert('Kein Feature gefunden');
-              
-            });
+const visibleLayers = [];
+map.getLayers().forEach(layer => {
+    if (layer.getVisible()) {
+        if (layer instanceof LayerGroup) {
+            visibleLayers.push(...getLayersInGroup(layer));
+        } else {
+            visibleLayers.push(layer);
         }
-      }
-      }
-    );
-  } else {
-    
-  }
+    }
 });
+
+const viewResolution = map.getView().getResolution();
+const viewProjection = map.getView().getProjection();
+
+visibleLayers.forEach(layer => {
+    const layerName = layer.get('name');
+    if (layer.getVisible()) {
+        const source = layer.getSource();
+        if (source instanceof TileWMS && typeof source.getFeatureInfoUrl === 'function') {
+            const url = source.getFeatureInfoUrl(evt.coordinate, viewResolution, viewProjection, {'INFO_FORMAT': 'text/html'});
+            if (url) {
+                fetch(url)
+                    .then((response) => response.text())
+                    .then((html) => {
+                        if (html.trim() !== '') {
+                            removeExistingInfoDiv();
+                            var bodyIsEmpty = /<body[^>]*>\s*<\/body>/i.test(html);
+                            if (bodyIsEmpty === false) {
+                                const infoDiv = createInfoDiv(layerName, html);
+                                console.log(html);
+                                document.body.appendChild(infoDiv);
+                            } else {
+                                console.log(html);
+                            }
+                        }
+                    })
+                    .catch((error) => {
+                        alert('Kein Feature gefunden');
+                    });
+            }
+        }
+    }
+});
+
+});
+
+
+
 function createInfoDiv(name, html) {
   const infoDiv = document.createElement('div');
   infoDiv.id = 'info';
@@ -845,8 +872,17 @@ function createInfoDiv(name, html) {
   });
 
   infoDiv.appendChild(closeIcon);
+
+  // Hier wird der Inhalt direkt als Hyperlink formatiert
+  const linkElement = document.createElement('a');
+  linkElement.setAttribute('href', html.trim()); // HTML-Inhalt als Link-URL verwenden
+  linkElement.textContent = 'Link zum VO-Text';
+  infoDiv.appendChild(linkElement);
+
   return infoDiv;
+
 }
+
 function removeExistingInfoDiv() {
   const existingInfoDiv = document.getElementById('info');
   if (existingInfoDiv) { existingInfoDiv.remove(); }
@@ -880,7 +916,6 @@ var closer = document.getElementById('popup-closer');
 map.on('click', function (evt) {
  /*  //gibt es schon einen Marker
   if (markerCoordOverlay) {
-    console.log('es gibt einen Marker');
     map.removeOverlay(markerCoordOverlay);
   };
  
@@ -1039,8 +1074,7 @@ document.body.appendChild(overlayDiv);
       coordinates = evt.coordinate; 
       popup.setPosition(coordinates);
       var foto1Value = feature.get('foto1');
-      console.log (foto1Value);
-      var foto1Html = '';
+        var foto1Html = '';
         var foto2Value = feature.get('foto2');
         var foto2Html = '';
         var foto3Value = feature.get('foto3');
@@ -1115,9 +1149,7 @@ document.body.appendChild(overlayDiv);
     
     });
   } else if(globalCoordAnOderAus===true) {  
-  console.log ("funktion für marker setzen aufrufen");
-  console.log (markerCoordOverlay);
-  placeMarkerAndShowCoordinates(evt);
+    placeMarkerAndShowCoordinates(evt);
   }
 }
 );
@@ -1146,7 +1178,6 @@ projectionSelect.addEventListener('change', function (event) {
     mousePositionControl.setProjection(event.target.value);
 
   } else if (projectionSelect.value === 'EPSG:32632') {
-    console.log('32632')
     const format = createStringXY(1);
     mousePositionControl.setCoordinateFormat(format);
     mousePositionControl.setProjection(event.target.value);
@@ -1174,7 +1205,6 @@ function placeMarkerAndShowCoordinates(event) {
       const transformedCoordinate = transformCoordinateToMousePosition4326(event.coordinate);
       mousePositionElement.innerHTML = `Coordinates: ${format(transformedCoordinate)}`;
     } else if (projectionSelect.value === 'EPSG:32632') {
-      console.log('32632')
       const format = createStringXY(1);
       const transformedCoordinate = transformCoordinateToMousePosition32632(event.coordinate);
       mousePositionElement.innerHTML = `Coordinates: ${format(transformedCoordinate)}`;
@@ -1190,14 +1220,11 @@ toggleCheckbox.addEventListener('change', function() {
     document.getElementById('mouse-position').innerHTML = "";
     map.removeControl(mousePositionControl); 
     globalCoordAnOderAus=true;
-    console.log(globalCoordAnOderAus);
   } else {
     if (markerCoordOverlay) {
-      console.log('es gibt einen Marker');
       map.removeOverlay(markerCoordOverlay);
     };
     globalCoordAnOderAus=false;
-    console.log(globalCoordAnOderAus);
     map.addControl(mousePositionControl);
   }
 });
@@ -1266,6 +1293,7 @@ document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
   return false;
 };
+
 
 //----------------------------------------------Print
 const dims = {
@@ -1357,17 +1385,6 @@ var sLayer = new VectorLayer({
 map.addLayer(sLayer);
 
 //----------------------------------------------------------- Set the search control 
-/* var search = new SearchNominatim (
-  {   //target: $(".options").get(0),
-    
-      polygon: $("#polygon").prop("checked"),
-      //placeholder: 'Suche nach Adresse', // Platzhaltertext für das Suchfeld
-      position: true,  // Search, with priority to geo position
-      reverse: true,
-      
-  });
-map.addControl (search);
- */
 var search = new SearchPhoton({
   //target: $(".options").get(0),
   lang:"de",		// Force preferred language
@@ -1379,8 +1396,7 @@ map.addControl (search);
 
 // Select feature when click on the reference index
 search.on('select', function(e)
-  {   // console.log(e);
-      sLayer.getSource().clear();
+  {   sLayer.getSource().clear();
       // Check if we get a geojson to describe the search
       if (e.search.geojson) {
           var format = new GeoJSON();
@@ -1423,7 +1439,6 @@ function addMarker(coordinates) {
   sLayer.getSource().clear(); // Löscht vorherige Marker
   sLayer.getSource().addFeature(marker);
 };
-
 
 //-----------------------------------------Menü mit Submenü
 /* Nested subbar */
