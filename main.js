@@ -745,12 +745,14 @@ map.addControl(new CustomControls1({
 //---------------------------------------------Layergruppen
 const BwGroupP = new LayerGroup({
   title: "Bauw.(P)",
+  name: "bauwP",
   fold: true,
   fold: 'close',
   layers: [ exp_bw_son_pun_layer, exp_bw_ein_layer, exp_bw_bru_andere_layer, exp_bw_bru_nlwkn_layer, exp_bw_que_layer, exp_bw_due_layer, exp_bw_weh_layer, exp_bw_sle_layer],
 });
 const BwGroupL = new LayerGroup({
   title: "Bauw.(L)",
+  name: "BauwL",
   fold: true,
   fold: 'close',  
   layers: [ gehoelz_vecLayer, exp_gew_umn_layer, exp_bw_son_lin_layer, exp_gew_info_layer ]
@@ -810,8 +812,8 @@ function getLayersInGroup(layerGroup) {
 }
 
 map.on('singleclick', function (evt) {
-const visibleLayers = [];
-map.getLayers().forEach(layer => {
+  const visibleLayers = [];
+  map.getLayers().forEach(layer => {
     if (layer.getVisible()) {
         if (layer instanceof LayerGroup) {
             visibleLayers.push(...getLayersInGroup(layer));
@@ -819,12 +821,12 @@ map.getLayers().forEach(layer => {
             visibleLayers.push(layer);
         }
     }
-});
+  });
 
-const viewResolution = map.getView().getResolution();
-const viewProjection = map.getView().getProjection();
+  const viewResolution = map.getView().getResolution();
+  const viewProjection = map.getView().getProjection();
 
-visibleLayers.forEach(layer => {
+  visibleLayers.forEach(layer => {
     const layerName = layer.get('name');
     if (layer.getVisible()) {
         const source = layer.getSource();
@@ -838,11 +840,13 @@ visibleLayers.forEach(layer => {
                             removeExistingInfoDiv();
                             var bodyIsEmpty = /<body[^>]*>\s*<\/body>/i.test(html);
                             if (bodyIsEmpty === false) {
-                                const infoDiv = createInfoDiv(layerName, html);
-                                console.log(html);
+
+                                var modifiedHTML = checkForLinkInTH(html);
+                                console.log(modifiedHTML)
+                                const infoDiv = createInfoDiv(layerName, modifiedHTML);
                                 document.body.appendChild(infoDiv);
                             } else {
-                                console.log(html);
+                                console.log('nichts verwertbares gefunden');
                             }
                         }
                     })
@@ -862,25 +866,15 @@ function createInfoDiv(name, html) {
   const infoDiv = document.createElement('div');
   infoDiv.id = 'info';
   infoDiv.classList.add('info-container');
-  infoDiv.innerHTML = `<strong>${name} Layer</strong><br>${html}`;
-
+  infoDiv.innerHTML = '<br>' + html + '<br>' ;
   const closeIcon = document.createElement('span');
   closeIcon.innerHTML = '&times;';
   closeIcon.classList.add('close-icon');
   closeIcon.addEventListener('click', function () {
     infoDiv.style.display = 'none';
   });
-
   infoDiv.appendChild(closeIcon);
-
-  // Hier wird der Inhalt direkt als Hyperlink formatiert
-  const linkElement = document.createElement('a');
-  linkElement.setAttribute('href', html.trim()); // HTML-Inhalt als Link-URL verwenden
-  linkElement.textContent = 'Link zum VO-Text';
-  infoDiv.appendChild(linkElement);
-
   return infoDiv;
-
 }
 
 function removeExistingInfoDiv() {
