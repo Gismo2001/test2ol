@@ -10,7 +10,6 @@ import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
 
 import {circular} from 'ol/geom/Polygon';
 import Geolocation from 'ol/Geolocation.js';
-import { singleClick } from 'ol/events/condition';
 import { jsPDF } from "jspdf";
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
 import {OSM, Vector as VectorSource} from 'ol/source.js';
@@ -24,6 +23,7 @@ import {unByKey} from 'ol/Observable.js';
 import { FullScreen, Attribution, defaults as defaultControls, ZoomToExtent, Control } from 'ol/control.js';
 import { DragRotateAndZoom } from 'ol/interaction.js';
 import { defaults as defaultInteractions } from 'ol/interaction.js';
+import { singleClick } from 'ol/events/condition';
 
 import MousePosition from 'ol/control/MousePosition.js';
 import { transform } from 'ol/proj';
@@ -34,8 +34,6 @@ import proj4 from 'proj4';
 import SearchPhoton from 'ol-ext/control/SearchPhoton';
 //import SearchNominatim from 'ol-ext/control/SearchNominatim';
 import WMSCapabilities from'ol-ext/control/WMSCapabilities';
-import kompas from 'kompas';
-
 
 import Icon from 'ol/style/Icon'; // Hinzufügen Sie diesen Import
 
@@ -68,8 +66,7 @@ import {
   km500scalStyle,
   combinedStyle,
   machWasMitFSK,
-  getStyleForArtSonLin,
-  gpsStyle
+  getStyleForArtSonLin
 } from './extStyle';
 
 const attribution = new Attribution({
@@ -800,6 +797,9 @@ map.addLayer(vector);
 
 //--------------------------------------------------Info für WMS-Layer
 
+
+//Ende Layer hinzufügen---------------------------------------
+
 var toggleButtonU = new Toggle({
   html: '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>',
   className: "select",
@@ -832,8 +832,6 @@ toggleButtonU.element.classList.add('active');
 toggleButtonU.element.querySelector('.icon').classList.add('active');
 map.addControl(toggleButtonU);
 
-//Vektorlayer für Featureauswahl
-
 var selectInteraction = new Select({
   layers: [vector],
   hitTolerance: 5,
@@ -864,7 +862,7 @@ selectFeat.on('select', function (e) {
 });
 
 map.addInteraction(selectFeat);
-
+//map.addOverlay(popup);
 
 // -------------------------------------------------------WMS
 function getLayersInGroup(layerGroup) {
@@ -888,9 +886,9 @@ function singleClickHandler(evt) {
       const layerName = layer.get('name');
       
       if (layer.getVisible()) {
-          if (layer instanceof LayerGroup) {
+          if (layer instanceof LayerGroup && layerName !== 'NOH-Sat') {
               
-            console.log(layerName);
+            
             if (layerName !== 'NOH-Sat' && layerName !== 'Base'){
               visibleLayers.push(...getLayersInGroup(layer));
             }
@@ -905,6 +903,7 @@ function singleClickHandler(evt) {
 
   visibleLayers.forEach(layer => {
     const layerName = layer.get('name');
+    
    
     if (layer.getVisible()) {
         const source = layer.getSource();
@@ -1514,111 +1513,29 @@ function addMarker(coordinates) {
   sLayer.getSource().addFeature(marker);
 };
 
+/* 
 const gpsPosToggleButton = new Toggle({
   //html: '<i class="icon fa-solid fa-location-dot" aria-hidden="true"></i>',
   html: '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>',
   className: "classGPSSelect",
   title: "Standorterkennung an, aus",
-  interaction: new Select(),  
+  interaction: new Select(),
   active:false,
   onToggle: function(active) {
     
     if (active) {
-      // Starte die Geolokalisierung, wenn sie nicht aktiv ist
-      isActive = true; // Richtiges Zuweisen von isActive
-      this.element.classList.add('active'); // Füge die Klasse 'active' hinzu, wenn der Button aktiviert ist
       console.log('GPS ist aktiviert');
       alert("GPS ist aktiviert");
-      navigator.geolocation.watchPosition(
-        function (pos) {
-          const coords = [pos.coords.longitude, pos.coords.latitude];
-          const accuracy = circular(coords, pos.coords.accuracy);
-          sourceP.clear(true);
-          sourceP.addFeatures([
-            new Feature(accuracy.transform('EPSG:4326', map.getView().getProjection())),
-            new Feature(new Point(proj.fromLonLat(coords))),
-          ]);
-            
-          // Führe den Zoom nur beim ersten Mal aus
-          if (isFirstZoom) {
-            map.getView().fit(sourceP.getExtent(), { maxZoom: 13, duration: 500 }); 
-            isFirstZoom = false; // Setze isFirstZoom auf false, um zukünftige Zooms zu verhindern
-          }
-          if (!layerP) {
-            layerP = new VectorLayer({
-              displayInLayerSwitcher: false,
-              style: gpsStyle,
-              source: sourceP,
-              title: 'Null',
-              name: 'Null',
-              zIndex: 9999,
-            });
-            map.addLayer(layerP);
-          }
-        },
-        function (error) {
-          alert(`ERROR: ${error.message}`);
-        },
-        {
-          enableHighAccuracy: true,
-        }
-      );
-      startCompass(); // Starte den Kompass, wenn die GPS-Positionstoggle aktiviert wird
-      
     } else {
-      this.element.classList.remove('active'); // Entferne die Klasse 'active', wenn der Button deaktiviert ist
       console.log('GPS ist deaktiviert');
       alert("GPS ist deaktiviert");
-      // Beende die Geolokalisierung, wenn sie bereits aktiv ist
-      navigator.geolocation.clearWatch(watchId);
-      watchId = null; // Setze die Watch-ID auf null, um anzuzeigen, dass die Geolokalisierung deaktiviert ist
-      isActive = false; // Richtiges Zuweisen von isActive
-         // Entferne den Layer, um die Position nicht mehr anzuzeigen
-      if (layerP) {
-        map.removeLayer(layerP);
-        layerP = null;
-      }
     }
   }
 });
 
 gpsPosToggleButton.element.classList.add('active');
 gpsPosToggleButton.element.querySelector('.icon').classList.add('active');
-map.addControl(gpsPosToggleButton);
-
-// Die Funktion startCompass() wird in die GPS-Positionstoggle integriert
-function startCompass() {
-  kompas()
-    .watch()
-    .on('heading', function (heading) {
-      style.getImage().setRotation((Math.PI / 180) * heading);
-      console.log ('aktiviert')
-    });
-}
-
-// Die Bedingungen für die Initialisierung der Geolokalisierung werden in die GPS-Positionstoggle integriert
-if (
-  window.DeviceOrientationEvent &&
-  typeof DeviceOrientationEvent.requestPermission === 'function'
-) {
-  gpsPosToggleButton.on('change', function () {
-    if (gpsPosToggleButton.isActive()) {
-      DeviceOrientationEvent.requestPermission()
-        .then(startCompass)
-        .catch(function (error) {
-          alert(`ERROR: ${error.message}`);
-        });
-    }
-  });
-} else if ('ondeviceorientationabsolute' in window) {
-  gpsPosToggleButton.on('change', function () {
-    if (gpsPosToggleButton.isActive()) {
-      startCompass();
-    }
-  });
-} else {
-  alert('No device orientation provided by device');
-}
+map.addControl(gpsPosToggleButton); */
 
 
 
@@ -1652,7 +1569,7 @@ var sub1 = new Bar({
       //autoActivate: true,
       onToggle: 
       function () {
-        /* if (!watchId) {
+        if (!watchId) {
           // Starte die Geolokalisierung, wenn sie nicht aktiv ist
           isActive = true; // Richtiges Zuweisen von isActive
           watchId = navigator.geolocation.watchPosition(
@@ -1713,7 +1630,7 @@ var sub1 = new Bar({
             map.removeLayer(layerP);
             layerP = null;
           }
-        } */
+        }
         //updateButtonAppearance(); // Aktualisieren Sie das Erscheinungsbild des Buttons basierend auf dem aktualisierten isActive-Status
         
       } ,
@@ -1722,7 +1639,7 @@ var sub1 = new Bar({
     }),
     new Toggle({
       html:"2", 
-      onToggle: function() { 
+      onToggle: function(b) { 
         //test();
        },
       // Second level nested control bar
@@ -1745,6 +1662,8 @@ var mainBar1 = new Bar({
 });
 map.addControl ( mainBar1 );
 mainBar1.setPosition('left');
+
+
 
 //------------------------WMS-Control aus myFunc.js hinzufügen
 document.addEventListener('DOMContentLoaded', function() {

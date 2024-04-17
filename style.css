@@ -325,26 +325,16 @@ html {
   float: left;
 }
 
+
 .select {
+  position: absolute;
   left: 8px;
-  top: 250px;
+  top: 220px;
   z-index: 1007;
 }
 
 .active {
   /* Styling für den aktiven Zustand des Buttons */
   background-color: #4CAF50; /* Beispielhafte Hintergrundfarbe */
-  color: white; /* Beispielhafte Textfarbe */
-}
-
-.classGPSSelect {
-  left: 8px;
-  top: 220px;
-  z-index: 1008;
-}
-
-.classGPSSelect.active {
-  /* Styling für den aktiven Zustand des Buttons */
-  background-color: #4CAF50; /* Neue Hintergrundfarbe im aktiven Zustand */
   color: white; /* Beispielhafte Textfarbe */
 }
