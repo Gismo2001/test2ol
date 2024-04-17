@@ -30,6 +30,8 @@ function initializeWMS(WMSCapabilities,map ) {
    });
 };
 
+   
+
 function checkForLinkInTH(html) {
     const table = document.createElement('table');
     table.innerHTML = html;
@@ -62,4 +64,15 @@ function checkForLinkInTH(html) {
 
 
 
-function test( ) {};
+   
+
+function checkForWhat(uebergabe) {
+    alert('check');
+        //return table.outerHTML;
+    uebergabe = "geändert";
+    return uebergabe;
+}
+
+function test() {
+    alert('test aufgerufen');
+};

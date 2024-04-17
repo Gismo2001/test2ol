@@ -10,6 +10,7 @@ import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
 
 import {circular} from 'ol/geom/Polygon';
 import Geolocation from 'ol/Geolocation.js';
+import { singleClick } from 'ol/events/condition';
 import { jsPDF } from "jspdf";
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
 import {OSM, Vector as VectorSource} from 'ol/source.js';
@@ -33,11 +34,14 @@ import proj4 from 'proj4';
 import SearchPhoton from 'ol-ext/control/SearchPhoton';
 //import SearchNominatim from 'ol-ext/control/SearchNominatim';
 import WMSCapabilities from'ol-ext/control/WMSCapabilities';
+import kompas from 'kompas';
+
 
 import Icon from 'ol/style/Icon'; // Hinzufügen Sie diesen Import
 
 import Bar from 'ol-ext/control/Bar';
 import Toggle from 'ol-ext/control/Toggle'; // Importieren Sie Toggle
+import { Modify, Select } from 'ol/interaction'; // Importieren Sie Draw
 import TextButton from 'ol-ext/control/TextButton';
 
 //projektion definieren und registrieren
@@ -64,7 +68,8 @@ import {
   km500scalStyle,
   combinedStyle,
   machWasMitFSK,
-  getStyleForArtSonLin
+  getStyleForArtSonLin,
+  gpsStyle
 } from './extStyle';
 
 const attribution = new Attribution({
@@ -795,8 +800,73 @@ map.addLayer(vector);
 
 //--------------------------------------------------Info für WMS-Layer
 
+var toggleButtonU = new Toggle({
+  html: '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>',
+  className: "select",
+  title: "Select Info",
+  active: true, // Button wird beim Start als aktiv gesetzt
+  interaction: selectInteraction,
+  onToggle: function(active) {
+    alert("Select is " + (active ? "activated" : "deactivated"));
+    selectInteraction.setActive(active);
 
-// Funktion zum Durchsuchen aller Layer in einem LayerGroup-Objekt
+    // Auswahl löschen, wenn deaktiviert
+    if (!active) selectInteraction.getFeatures().clear();
+
+    // FeaturPopup hinzufügen oder entfernen
+    if (active) map.addOverlay(popup);
+    else map.removeOverlay(popup);
+
+    // Klasse 'active' je nach Zustand des Buttons setzen
+    toggleButtonU.element.classList.toggle('active', active);
+    toggleButtonU.element.querySelector('.icon').classList.toggle('active', active);
+
+    // Ein- und Ausschalten der Interaktion
+    
+    if (active) map.un('singleclick', singleClickHandler);
+    else map.on('singleclick', singleClickHandler);
+  }
+});
+// Klasse 'active' zum Button hinzufügen, um sicherzustellen, dass er beim Start als aktiv dargestellt wird
+toggleButtonU.element.classList.add('active');
+toggleButtonU.element.querySelector('.icon').classList.add('active');
+map.addControl(toggleButtonU);
+
+//Vektorlayer für Featureauswahl
+
+var selectInteraction = new Select({
+  layers: [vector],
+  hitTolerance: 5,
+});
+
+var selectFeat = new Select({
+  hitTolerance: 5,
+  multi: true,
+  condition: singleClick,
+});
+
+let layer_selected = null; // Setze layer_selected auf null, um sicherzustellen, dass es immer definiert ist
+
+
+selectFeat.on('select', function (e) {
+  e.selected.forEach(function (featureSelected) {
+      const layerName = selectFeat.getLayer(featureSelected).get('name');
+
+      if (layerName !== 'gew') {
+          // Setze layer_selected nur, wenn das layerName nicht 'gew' ist
+          layer_selected = selectFeat.getLayer(featureSelected);
+          console.log(layer_selected);
+      } else {
+          selectFeat.getFeatures().clear(); // Hebt die Selektion auf
+          layer_selected = null; // Setze layer_selected auf null, da die Selektion aufgehoben wurde
+      }
+  });
+});
+
+map.addInteraction(selectFeat);
+
+
+// -------------------------------------------------------WMS
 function getLayersInGroup(layerGroup) {
   const layers = [];
   layerGroup.getLayers().forEach(layer => {
@@ -811,63 +881,73 @@ function getLayersInGroup(layerGroup) {
   return layers;
 }
 
-map.on('singleclick', function (evt) {
+function singleClickHandler(evt) {
+//map.on('singleclick', function (evt) {
   const visibleLayers = [];
   map.getLayers().forEach(layer => {
-    if (layer.getVisible()) {
-        if (layer instanceof LayerGroup) {
-            visibleLayers.push(...getLayersInGroup(layer));
-        } else {
-            visibleLayers.push(layer);
-        }
-    }
+      const layerName = layer.get('name');
+      
+      if (layer.getVisible()) {
+          if (layer instanceof LayerGroup) {
+              
+            console.log(layerName);
+            if (layerName !== 'NOH-Sat' && layerName !== 'Base'){
+              visibleLayers.push(...getLayersInGroup(layer));
+            }
+          } else {
+              visibleLayers.push(layer);
+              
+          }
+      }
   });
-
   const viewResolution = map.getView().getResolution();
   const viewProjection = map.getView().getProjection();
 
   visibleLayers.forEach(layer => {
     const layerName = layer.get('name');
+   
     if (layer.getVisible()) {
         const source = layer.getSource();
         if (source instanceof TileWMS && typeof source.getFeatureInfoUrl === 'function') {
+            
             const url = source.getFeatureInfoUrl(evt.coordinate, viewResolution, viewProjection, {'INFO_FORMAT': 'text/html'});
             if (url) {
                 fetch(url)
                     .then((response) => response.text())
                     .then((html) => {
                         if (html.trim() !== '') {
-                            removeExistingInfoDiv();
+                            //removeExistingInfoDiv();
                             var bodyIsEmpty = /<body[^>]*>\s*<\/body>/i.test(html);
                             if (bodyIsEmpty === false) {
-
-                                var modifiedHTML = checkForLinkInTH(html);
-                                console.log(modifiedHTML)
-                                const infoDiv = createInfoDiv(layerName, modifiedHTML);
-                                document.body.appendChild(infoDiv);
+                              var modifiedHTML = checkForLinkInTH(html);
+                              
+                              const infoDiv = createInfoDiv(layerName, modifiedHTML);
+                              document.body.appendChild(infoDiv);
                             } else {
                                 console.log('nichts verwertbares gefunden');
+                                //alert('nichts verwertbares gefunden');
                             }
                         }
                     })
                     .catch((error) => {
-                        alert('Kein Feature gefunden');
+                      console.error('Fehler beim Abrufen der Daten:', error);
+                      alert('Es ist ein Fehler aufgetreten');
                     });
             }
         }
+      }   
     }
-});
-
-});
-
-
+  );
+};
 
 function createInfoDiv(name, html) {
-  const infoDiv = document.createElement('div');
+  const infoDiv = document.createElement('p');
   infoDiv.id = 'info';
   infoDiv.classList.add('info-container');
-  infoDiv.innerHTML = '<br>' + html + '<br>' ;
-  const closeIcon = document.createElement('span');
+  
+  //infoDiv.innerHTML = `<strong>${name} Layer</strong><br>${html}`;
+  infoDiv.innerHTML = `${html}`;
+  const closeIcon = document.createElement('p');
   closeIcon.innerHTML = '&times;';
   closeIcon.classList.add('close-icon');
   closeIcon.addEventListener('click', function () {
@@ -1434,6 +1514,118 @@ function addMarker(coordinates) {
   sLayer.getSource().addFeature(marker);
 };
 
+const gpsPosToggleButton = new Toggle({
+  //html: '<i class="icon fa-solid fa-location-dot" aria-hidden="true"></i>',
+  html: '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>',
+  className: "classGPSSelect",
+  title: "Standorterkennung an, aus",
+  interaction: new Select(),  
+  active:false,
+  onToggle: function(active) {
+    
+    if (active) {
+      // Starte die Geolokalisierung, wenn sie nicht aktiv ist
+      isActive = true; // Richtiges Zuweisen von isActive
+      this.element.classList.add('active'); // Füge die Klasse 'active' hinzu, wenn der Button aktiviert ist
+      console.log('GPS ist aktiviert');
+      alert("GPS ist aktiviert");
+      navigator.geolocation.watchPosition(
+        function (pos) {
+          const coords = [pos.coords.longitude, pos.coords.latitude];
+          const accuracy = circular(coords, pos.coords.accuracy);
+          sourceP.clear(true);
+          sourceP.addFeatures([
+            new Feature(accuracy.transform('EPSG:4326', map.getView().getProjection())),
+            new Feature(new Point(proj.fromLonLat(coords))),
+          ]);
+            
+          // Führe den Zoom nur beim ersten Mal aus
+          if (isFirstZoom) {
+            map.getView().fit(sourceP.getExtent(), { maxZoom: 13, duration: 500 }); 
+            isFirstZoom = false; // Setze isFirstZoom auf false, um zukünftige Zooms zu verhindern
+          }
+          if (!layerP) {
+            layerP = new VectorLayer({
+              displayInLayerSwitcher: false,
+              style: gpsStyle,
+              source: sourceP,
+              title: 'Null',
+              name: 'Null',
+              zIndex: 9999,
+            });
+            map.addLayer(layerP);
+          }
+        },
+        function (error) {
+          alert(`ERROR: ${error.message}`);
+        },
+        {
+          enableHighAccuracy: true,
+        }
+      );
+      startCompass(); // Starte den Kompass, wenn die GPS-Positionstoggle aktiviert wird
+      
+    } else {
+      this.element.classList.remove('active'); // Entferne die Klasse 'active', wenn der Button deaktiviert ist
+      console.log('GPS ist deaktiviert');
+      alert("GPS ist deaktiviert");
+      // Beende die Geolokalisierung, wenn sie bereits aktiv ist
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null; // Setze die Watch-ID auf null, um anzuzeigen, dass die Geolokalisierung deaktiviert ist
+      isActive = false; // Richtiges Zuweisen von isActive
+         // Entferne den Layer, um die Position nicht mehr anzuzeigen
+      if (layerP) {
+        map.removeLayer(layerP);
+        layerP = null;
+      }
+    }
+  }
+});
+
+//gpsPosToggleButton.element.classList.toggle('classGPSSelect', gpsPosToggleButton.active);
+//gpsPosToggleButton.element.querySelector('.icon').classList.toggle('classGPSSelect', gpsPosToggleButton.active);
+
+
+gpsPosToggleButton.element.classList.add(gpsPosToggleButton.active);
+gpsPosToggleButton.element.querySelector('.icon').classList.add('classGPSSelect');
+map.addControl(gpsPosToggleButton);
+
+// Die Funktion startCompass() wird in die GPS-Positionstoggle integriert
+function startCompass() {
+  kompas()
+    .watch()
+    .on('heading', function (heading) {
+      style.getImage().setRotation((Math.PI / 180) * heading);
+      console.log ('aktiviert')
+    });
+}
+
+// Die Bedingungen für die Initialisierung der Geolokalisierung werden in die GPS-Positionstoggle integriert
+if (
+  window.DeviceOrientationEvent &&
+  typeof DeviceOrientationEvent.requestPermission === 'function'
+) {
+  gpsPosToggleButton.on('change', function () {
+    if (gpsPosToggleButton.isActive()) {
+      DeviceOrientationEvent.requestPermission()
+        .then(startCompass)
+        .catch(function (error) {
+          alert(`ERROR: ${error.message}`);
+        });
+    }
+  });
+} else if ('ondeviceorientationabsolute' in window) {
+  gpsPosToggleButton.on('change', function () {
+    if (gpsPosToggleButton.isActive()) {
+      startCompass();
+    }
+  });
+} else {
+  alert('No device orientation provided by device');
+}
+
+
+
 //-----------------------------------------Menü mit Submenü
 /* Nested subbar */
 var sub2 = new Bar({
@@ -1453,7 +1645,9 @@ var sub2 = new Bar({
     })
   ]
 });
-//GPS-Postionn
+
+
+//GPS-Postionn durch "P"
 var sub1 = new Bar({
   toggleOne: true,
   controls:[
@@ -1462,7 +1656,7 @@ var sub1 = new Bar({
       //autoActivate: true,
       onToggle: 
       function () {
-        if (!watchId) {
+        /* if (!watchId) {
           // Starte die Geolokalisierung, wenn sie nicht aktiv ist
           isActive = true; // Richtiges Zuweisen von isActive
           watchId = navigator.geolocation.watchPosition(
@@ -1523,7 +1717,7 @@ var sub1 = new Bar({
             map.removeLayer(layerP);
             layerP = null;
           }
-        }
+        } */
         //updateButtonAppearance(); // Aktualisieren Sie das Erscheinungsbild des Buttons basierend auf dem aktualisierten isActive-Status
         
       } ,
@@ -1532,7 +1726,7 @@ var sub1 = new Bar({
     }),
     new Toggle({
       html:"2", 
-      onToggle: function(b) { 
+      onToggle: function() { 
         //test();
        },
       // Second level nested control bar
@@ -1540,6 +1734,7 @@ var sub1 = new Bar({
     })
   ]
 });
+
 //Mainbar1
 var mainBar1 = new Bar({
   controls: [
@@ -1554,8 +1749,6 @@ var mainBar1 = new Bar({
 });
 map.addControl ( mainBar1 );
 mainBar1.setPosition('left');
-
-// Inhalt von main.js
 
 //------------------------WMS-Control aus myFunc.js hinzufügen
 document.addEventListener('DOMContentLoaded', function() {

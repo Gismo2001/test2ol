@@ -42,7 +42,7 @@ html {
   padding: 10px;
   border: 1px solid #ccc;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1002;
+  z-index: 1000;
 }
 #notification p {
   margin: 0;
@@ -117,7 +117,7 @@ html {
   left: 20px;  
   top: -20px; 
   min-width: 280px;
-  z-index: 9999;
+  z-index: 1001;
 }
 
 .ol-popup h1 {
@@ -183,7 +183,7 @@ html {
   left: .5em;
   height: 1.375em; 
   width: 1.375em;
-  z-index: 1003;
+  z-index: 1002;
 }
 
 /* Stil für den Container der Infodiv */
@@ -198,7 +198,7 @@ html {
   width: 85%;
   left: 5px;
   font-size: 18px;
-  z-index: 1005;
+  z-index: 1003;
 }
 
 /* Stil für das Schließen-Symbol */
@@ -236,7 +236,7 @@ html {
   bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1006;
+  z-index: 1004;
   background-color: white;
   padding: 5px;
   border-radius: 5px;
@@ -274,7 +274,7 @@ html {
   bottom: 15px;
   left: 40px;
   transform: translateX(-50%);
-  z-index: 1007;
+  z-index: 1005;
   font-size: 16px;
   font-weight: bold; 
 }
@@ -301,7 +301,7 @@ html {
   color: #333;
   font-size:0.85em;
   max-width: 21em;
-  z-index: 20000;
+  z-index: 1006;
 }
 .ol-search ul i {
   display: block;
@@ -325,4 +325,26 @@ html {
   float: left;
 }
 
+.select {
+  left: 8px;
+  top: 250px;
+  z-index: 1007;
+}
 
+.active {
+  /* Styling für den aktiven Zustand des Buttons */
+  background-color: #4CAF50; /* Beispielhafte Hintergrundfarbe */
+  color: white; /* Beispielhafte Textfarbe */
+}
+
+.classGPSSelect {
+  left: 8px;
+  top: 220px;
+  z-index: 1008;
+}
+
+.classGPSSelect.active {
+  /* Styling für den aktiven Zustand des Buttons */
+  background-color: #4CAF50; /* Neue Hintergrundfarbe im aktiven Zustand */
+  color: white; /* Beispielhafte Textfarbe */
+}
