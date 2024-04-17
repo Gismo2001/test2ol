@@ -1516,8 +1516,8 @@ function addMarker(coordinates) {
 
 const gpsPosToggleButton = new Toggle({
   //html: '<i class="icon fa-solid fa-location-dot" aria-hidden="true"></i>',
-  html: '<button title="Locate me">◎</button>',
-  className: "ol-control ol-unselectable locate",
+  html: '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>',
+  className: "classGPSSelect",
   title: "Standorterkennung an, aus",
   interaction: new Select(),  
   active:false,
@@ -1582,12 +1582,8 @@ const gpsPosToggleButton = new Toggle({
   }
 });
 
-//gpsPosToggleButton.element.classList.toggle('classGPSSelect', gpsPosToggleButton.active);
-//gpsPosToggleButton.element.querySelector('.icon').classList.toggle('classGPSSelect', gpsPosToggleButton.active);
-
-
-//gpsPosToggleButton.element.classList.add(gpsPosToggleButton.active);
-//gpsPosToggleButton.element.querySelector('.icon').classList.add('classGPSSelect');
+gpsPosToggleButton.element.classList.add('active');
+gpsPosToggleButton.element.querySelector('.icon').classList.add('active');
 map.addControl(gpsPosToggleButton);
 
 // Die Funktion startCompass() wird in die GPS-Positionstoggle integriert
@@ -1595,12 +1591,8 @@ function startCompass() {
   kompas()
     .watch()
     .on('heading', function (heading) {
-      if (gpsStyle && gpsStyle.getImage()) {
-        // Setze die Rotation des Bildsymbols entsprechend der Kompassrichtung
-        gpsStyle.getImage().setRotation((Math.PI / 180) * heading);
-        console.log('aktiviert');
-      }
-        
+      style.getImage().setRotation((Math.PI / 180) * heading);
+      console.log ('aktiviert')
     });
 }
 

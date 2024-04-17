@@ -379,13 +379,15 @@ const combinedStyle = [arrowStyle, endpointStyle];
 const gpsStyle = new Style({
     fill: new Fill({
       color: 'rgba(0, 0, 255, 0.2)',
+      opacity: 0.5,
+      
     }),
     image: new Icon({
       src: './data/location-heading.svg',
       imgSize: [27, 55],
       rotateWithView: true,
     }),
-    
+  
   });
 
 
