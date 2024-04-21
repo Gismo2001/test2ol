@@ -159,7 +159,7 @@ function getStyleForArtSonLin(feature) {
     if (artValue === 'Anlegehilfe') {
         strokeColor = 'blue';
         strokeWidth = 5;
-    } else if (/sohlgl|umgehungs/i.test(artValue)) {
+    } else if (/sohlgl|umgehungs|fisch/i.test(artValue)) {
         strokeColor = 'red';
         strokeWidth = 5;
         lineDash = [10, 15];

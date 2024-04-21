@@ -42,6 +42,8 @@ import Toggle from 'ol-ext/control/Toggle'; // Importieren Sie Toggle
 import { Modify, Select } from 'ol/interaction'; // Importieren Sie Draw
 import TextButton from 'ol-ext/control/TextButton';
 
+
+
 //projektion definieren und registrieren
 proj4.defs('EPSG:32632', '+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs');
 register(proj4);
@@ -68,6 +70,16 @@ import {
   machWasMitFSK,
   getStyleForArtSonLin
 } from './extStyle';
+
+
+// Funktion zum Verschieben des DIVs
+function dragInfo() {
+  dragElement(document.getElementById("Info"));  
+}
+
+
+
+
 
 const attribution = new Attribution({
   collapsible: false,
@@ -275,7 +287,6 @@ const km500scal_layer = new VectorLayer({
   },
   visible: true  
 });
-
 const wmsNsgLayer = new TileLayer({
   title: "NSG",
   name: "NSG",
@@ -336,8 +347,6 @@ const wmsWrrlFgLayer = new TileLayer({
   visible: true,
   opacity: 1,
 });
-
-
 const wmsGewWmsFgLayer = new TileLayer({
   title: "GewWms",
   name: "GewWms",
@@ -541,6 +550,7 @@ const osmTileGr = new TileLayer({
 });
 const osmTileCr = new TileLayer({
   title: "osm-color",
+  name: "osm-color",
   type: 'base',
   source: new OSM({
       url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -747,7 +757,7 @@ map.addControl(new CustomControls1({
 //---------------------------------------------Layergruppen
 const BwGroupP = new LayerGroup({
   title: "Bauw.(P)",
-  name: "bauwP",
+  name: "BauwP",
   fold: true,
   fold: 'close',
   layers: [ exp_bw_son_pun_layer, exp_bw_ein_layer, exp_bw_bru_andere_layer, exp_bw_bru_nlwkn_layer, exp_bw_que_layer, exp_bw_due_layer, exp_bw_weh_layer, exp_bw_sle_layer],
@@ -768,7 +778,8 @@ const wmsLayerGroup = new LayerGroup({
   layers: [ wmsLsgLayer, wmsNsgLayer, wmsUesgLayer, wmsWrrlFgLayer, wmsGewWmsFgLayer ]
 });
 const GNAtlasGroup = new LayerGroup({
-  title: "GN-DOP's",
+  title: "GN-DOPs",
+  title: "GN-DOPs",
   fold: true,
   fold: 'close',
   layers: [ gnAtlas2023, gnAtlas2020, gnAtlas2017, gnAtlas2014, gnAtlas2012, gnAtlas2010, gnAtlas2009, gnAtlas2002, gnAtlas1970, gnAtlas1957, gnAtlas1937]
@@ -781,6 +792,7 @@ const kmGroup = new LayerGroup({
 });
 const BaseGroup = new LayerGroup({
   title: "Base",
+  name: "Base",
   fold: true,
   fold: 'close',
   layers: [ESRIWorldImagery, ESRIWorldGrey, googleHybLayer, googleSatLayer, dop20ni_layer, baseDE_layer, osmTileGr, osmTileCr]
@@ -807,9 +819,9 @@ var toggleButtonU = new Toggle({
   active: true, // Button wird beim Start als aktiv gesetzt
   interaction: selectInteraction,
   onToggle: function(active) {
-    alert("Select is " + (active ? "activated" : "deactivated"));
+    alert("Jetzt ist BW-Abfrage " + (active ? "activated" : "deactivated"));
     selectInteraction.setActive(active);
-
+    
     // Auswahl löschen, wenn deaktiviert
     if (!active) selectInteraction.getFeatures().clear();
 
@@ -849,18 +861,18 @@ let layer_selected = null; // Setze layer_selected auf null, um sicherzustellen,
 selectFeat.on('select', function (e) {
   e.selected.forEach(function (featureSelected) {
       const layerName = selectFeat.getLayer(featureSelected).get('name');
+      //console.log('SelcetFeat='+ layerName);
 
       if (layerName !== 'gew') {
           // Setze layer_selected nur, wenn das layerName nicht 'gew' ist
           layer_selected = selectFeat.getLayer(featureSelected);
-          console.log(layer_selected);
+          
       } else {
           selectFeat.getFeatures().clear(); // Hebt die Selektion auf
           layer_selected = null; // Setze layer_selected auf null, da die Selektion aufgehoben wurde
       }
   });
 });
-
 map.addInteraction(selectFeat);
 //map.addOverlay(popup);
 
@@ -871,8 +883,10 @@ function getLayersInGroup(layerGroup) {
       if (layer instanceof LayerGroup) {
           // Wenn der Layer ein LayerGroup ist, rufe die Funktion rekursiv auf
           layers.push(...getLayersInGroup(layer));
+          //console.log('layers in group: '+ layers);
       } else {
-          // Füge den Layer zur Liste hinzu, wenn er ein TileLayer ist
+          // Füge den Layer zur Liste hinzu, wenn e ein TileLayer ist
+          //console.log('layers nicht in group: '+ layer);
           layers.push(layer);
       }
   });
@@ -886,63 +900,58 @@ function singleClickHandler(evt) {
       const layerName = layer.get('name');
       
       if (layer.getVisible()) {
-          if (layer instanceof LayerGroup && layerName !== 'NOH-Sat') {
-              
-            
-            if (layerName !== 'NOH-Sat' && layerName !== 'Base'){
-              visibleLayers.push(...getLayersInGroup(layer));
-            }
-          } else {
-              visibleLayers.push(layer);
-              
+        if (layer instanceof LayerGroup) {
+          if (layerName !== 'GN-DOPs' && layerName !== 'Base' && layerName !== 'Station' && layerName !== 'BauwP' && layerName !== 'BauwL' && layerName !== undefined){
+            visibleLayers.push(...getLayersInGroup(layer));
           }
+        } else if (layerName !== 'fsk')
+        {
+          visibleLayers.push(layer);
+        }
       }
   });
   const viewResolution = map.getView().getResolution();
   const viewProjection = map.getView().getProjection();
-
   visibleLayers.forEach(layer => {
-    const layerName = layer.get('name');
-    
-   
     if (layer.getVisible()) {
-        const source = layer.getSource();
-        if (source instanceof TileWMS && typeof source.getFeatureInfoUrl === 'function') {
-            
-            const url = source.getFeatureInfoUrl(evt.coordinate, viewResolution, viewProjection, {'INFO_FORMAT': 'text/html'});
-            if (url) {
-                fetch(url)
-                    .then((response) => response.text())
-                    .then((html) => {
-                        if (html.trim() !== '') {
-                            //removeExistingInfoDiv();
-                            var bodyIsEmpty = /<body[^>]*>\s*<\/body>/i.test(html);
-                            if (bodyIsEmpty === false) {
-                              var modifiedHTML = checkForLinkInTH(html);
-                              
-                              const infoDiv = createInfoDiv(layerName, modifiedHTML);
-                              document.body.appendChild(infoDiv);
-                            } else {
-                                console.log('nichts verwertbares gefunden');
-                                //alert('nichts verwertbares gefunden');
-                            }
-                        }
-                    })
-                    .catch((error) => {
-                      console.error('Fehler beim Abrufen der Daten:', error);
-                      alert('Es ist ein Fehler aufgetreten');
-                    });
+    const source = layer.getSource();
+      if (source instanceof TileWMS && typeof source.getFeatureInfoUrl === 'function') {
+        const layerName = layer.get('name');      
+        const url = source.getFeatureInfoUrl(evt.coordinate, viewResolution, viewProjection, {'INFO_FORMAT': 'text/html'});
+        if (url) {
+          fetch(url)
+                
+          .then((response) => response.text())
+          .then((html) => {
+            if (html.trim() !== '') {
+             //removeExistingInfoDiv();
+              var bodyIsEmpty = /<body[^>]*>\s*<\/body>/i.test(html);
+              if (bodyIsEmpty === false) {
+                var modifiedHTML = checkForLinkInTH(html);
+                const infoDiv = createInfoDiv(layerName, modifiedHTML);
+                document.body.appendChild(infoDiv);
+                // Funktion zum Verschieben des DIVs
+                //dragInfo();
+              } else {
+                console.log('nichts verwertbares gefunden');
+                //alert('nichts verwertbares gefunden');
+              }
             }
+          })
+          .catch((error) => {
+            console.error('Fehler beim Abrufen der Daten:', error);
+            alert('Es ist ein Fehler aufgetreten');
+          });
         }
-      }   
-    }
-  );
-};
+      }
+    }   
+  }
+)};
 
 function createInfoDiv(name, html) {
   const infoDiv = document.createElement('p');
   infoDiv.id = 'info';
-  infoDiv.classList.add('info-container');
+  infoDiv.classList.add('Info');
   
   //infoDiv.innerHTML = `<strong>${name} Layer</strong><br>${html}`;
   infoDiv.innerHTML = `${html}`;
@@ -962,13 +971,11 @@ function removeExistingInfoDiv() {
 }
 
 //---------------------------------------------------Funktionen für Popup
-//var popup = new OpenLayers.Popup.FramedCloud("popup",
-
 var container = document.getElementById('popup');
 var content = document.getElementById('popup-content');
 var closer = document.getElementById('popup-closer');
 var popup = new Overlay({
-  element: container,//document.getElementById('popup'),
+  element: container,
   id: '1',
   autoPan: true,
   autoPanAnimation: {
@@ -1051,10 +1058,12 @@ document.body.appendChild(overlayDiv);
 }
 
   */ 
-  if (globalCoordAnOderAus===false){
+  
+  if (globalCoordAnOderAus===false ){
     var coordinates = evt.coordinate;
     var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
     var layname = layer.get('name');
+    
     var beschreibLangValue = feature.get('beschreib_lang');
     var beschreibLangHtml = '';
     if (beschreibLangValue && beschreibLangValue.trim() !== '') {
@@ -1468,34 +1477,36 @@ var search = new SearchPhoton({
 map.addControl (search);
 
 // Select feature when click on the reference index
-search.on('select', function(e)
-  {   sLayer.getSource().clear();
-      // Check if we get a geojson to describe the search
-      if (e.search.geojson) {
-          var format = new GeoJSON();
-          var f = format.readFeature(e.search.geojson, { dataProjection: "EPSG:4326", featureProjection: map.getView().getProjection() });
-          sLayer.getSource().addFeature(f);
-          var view = map.getView();
-          var resolution = view.getResolutionForExtent(f.getGeometry().getExtent(), map.getSize());
-          var zoom = view.getZoomForResolution(resolution);
-          var center = ol.extent.getCenter(f.getGeometry().getExtent());
-          // redraw before zoom
-          setTimeout(function(){
-                  view.animate({
-                  center: center,
-                  zoom: Math.min (zoom, 16)
-              });
-          }, 100);
-      }
-      else {
-          map.getView().animate({
-              center:e.coordinate,
-              zoom: Math.max (map.getView().getZoom(),16)
-          });
-      }
-      // Füge den Marker hinzu
-      addMarker(e.coordinate);
-  });
+search.on('select', function(e){
+  sLayer.getSource().clear();
+  console.log('aufgerufen')
+  // Check if we get a geojson to describe the search
+  if (e.search.geojson) {
+    var format = new GeoJSON();
+    var f = format.readFeature(e.search.geojson, { dataProjection: "EPSG:4326", featureProjection: map.getView().getProjection() });
+    sLayer.getSource().addFeature(f);
+    var view = map.getView();
+    var resolution = view.getResolutionForExtent(f.getGeometry().getExtent(), map.getSize());
+    var zoom = view.getZoomForResolution(resolution);
+    var center = ol.extent.getCenter(f.getGeometry().getExtent());
+    // redraw before zoom
+    setTimeout(function(){
+      view.animate({
+        center: center,
+        zoom: Math.min (zoom, 16)
+      });
+    }, 100);
+  }
+  else 
+  {
+    map.getView().animate({
+    center:e.coordinate,
+    zoom: Math.max (map.getView().getZoom(),16)
+    });
+  }
+  // Füge den Marker hinzu
+  addMarker(e.coordinate);
+});
 
 // Funktion zum Hinzufügen eines Markers
 function addMarker(coordinates) {
@@ -1662,7 +1673,6 @@ var mainBar1 = new Bar({
 });
 map.addControl ( mainBar1 );
 mainBar1.setPosition('left');
-
 
 
 //------------------------WMS-Control aus myFunc.js hinzufügen

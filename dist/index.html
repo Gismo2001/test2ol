@@ -20,14 +20,14 @@
     <script type="text/javascript" src="https://cdn.rawgit.com/eligrey/FileSaver.js/aa9f4e0e/FileSaver.min.js"></script>
     <script src="myFunc.js"></script> <!-- Einbinden von myFunc.js -->
     
-  <script type="module" crossorigin src="/assets/index-TZfNOjNZ.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-JbbdgRyS.css">
+  <script type="module" crossorigin src="/assets/index-zPhVyUoQ.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-AVdi-Mso.css">
 </head>
 <body>
-  <div class="map-container">
-    <div id="map" class="map"></div>
-    <div id="custom-controls" class="custom-controls"></div>
-    <div id="searchBox" class="searchBox">
+    
+  <div id="map" class="map"></div>
+  <div id="custom-controls" class="custom-controls"></div>
+  <div id="searchBox" class="searchBox">
         <input type="text" id="addressInput" placeholder="Artdresse/FSK"/>
         <button onclick="searchAddress()"><span>🔍</span></button>
         <select id="searchSelect">
@@ -35,12 +35,13 @@
           <option value="adresse">Adresse</option>
           <option value="fsk">FSK</option>
       </select>
-    </div>
-    <div id="popup" class="ol-popup">
+  </div>
+  <div id="popup" class="ol-popup">
         <a href="#" id="popup-closer" class="ol-popup-closer"></a>
         <div id="popup-content"></div>
-    </div>
   </div>
+   
+  
   <div class="controls hidden">
     <label for="projecSelect">Coord.:</label>
     <select id="projecSelect">
@@ -59,6 +60,7 @@
     <p>Es gab einen Fehler bei der Standortbestimmung.</p>
     <p>Möchten Sie es erneut versuchen? <span id="retryButton">Erneut versuchen</span></p>
   </div>
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
   
 </body>
