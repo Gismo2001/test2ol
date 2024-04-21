@@ -20,13 +20,42 @@
     <script type="text/javascript" src="https://cdn.rawgit.com/eligrey/FileSaver.js/aa9f4e0e/FileSaver.min.js"></script>
     <script src="myFunc.js"></script> <!-- Einbinden von myFunc.js -->
     
-  <script type="module" crossorigin src="/assets/index-zPhVyUoQ.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-AVdi-Mso.css">
+  <script type="module" crossorigin src="/assets/index-vnAvqEll.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-cUhVx8CX.css">
 </head>
 <body>
-    
-  <div id="map" class="map"></div>
-  <div id="custom-controls" class="custom-controls"></div>
+  
+  
+ 
+  <div id="map" class="map">
+
+
+  <div class="addQueryDiv" id="addQueryDiv">
+    <div class="hearderDiv" id="headerDiv">
+      <label for="">Attribute Query</label>
+    </div><br>
+    <label for="">Select Layer</label>
+    <select name="selectLayer" id="selectLayer">
+    </select><br><br>
+
+    <label for="">Select Attribute</label>
+    <select name="selectAttribut" id="selectAttribut">
+    </select><br><br>
+
+    <label for="">Select Operator</label>
+    <select name="selectOperator" id="selectOperator">
+    </select><br><br>
+
+    <label for="">Enter Value</label>
+    <input type="text" name="enterValue" id="enterValue">
+    </select><br><br>
+
+    <button type="button" id="addQryRun" class="addQryRun" onclick="attributeQuery()">Run</button>
+  </div>
+
+  <div id="custom-controls" class="custom-controls">
+  </div>
+
   <div id="searchBox" class="searchBox">
         <input type="text" id="addressInput" placeholder="Artdresse/FSK"/>
         <button onclick="searchAddress()"><span>🔍</span></button>
@@ -36,12 +65,12 @@
           <option value="fsk">FSK</option>
       </select>
   </div>
+  
   <div id="popup" class="ol-popup">
         <a href="#" id="popup-closer" class="ol-popup-closer"></a>
         <div id="popup-content"></div>
   </div>
-   
-  
+    
   <div class="controls hidden">
     <label for="projecSelect">Coord.:</label>
     <select id="projecSelect">
@@ -52,15 +81,19 @@
     <input type="checkbox" id="toggle-checkbox">
     <div id="mouse-position" class="custom-mouse-position"></div>
   </div>
+  
   <div class="button-container">
     <button id="hide-button"><b>C</b></button>
     <button id="print-button"><b>P</b></button>
   </div>
+  
   <div id="notification">
     <p>Es gab einen Fehler bei der Standortbestimmung.</p>
     <p>Möchten Sie es erneut versuchen? <span id="retryButton">Erneut versuchen</span></p>
   </div>
   
+</div> 
+ 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
   
 </body>

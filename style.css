@@ -325,8 +325,10 @@ html {
   position: absolute;
   display: block;
   margin: 70px auto auto 45px;
+  padding: 10px;
   width: 250px;
-  background-color: white;
+  height: 250px;
+  background-color: rgba(255,255,255,0.9);
   font-family: inherit;
   font-size: 1em;
   line-height: 1.45;
@@ -334,24 +336,32 @@ html {
   border: 1px solid white;
   box-shadow: 0px 0px 15px grey;
   z-index: 1012;
+  overflow: scroll;
 }
 
-#headerDiv {
+#headerDiv  {
   background-color: midnightblue;
   height: 35px;
-  width: 300px;
 }
 
 #headerDiv label {
   color: white;
 }
 
+.addQueryDiv select {
+  width: 225px;
+  height: 35px;
+  border: 1px solid lightgrey;
+  border-radius: 3px;
+  margin: 0px auto 0px 10px;
+}
+
 .addQueryDiv input {
 width: 225px;
 height: 35px;
 border: 1px solid lightgrey;
-border-radius: 2px;
-margin: 0px auto 0px auto 10px;
+border-radius: 3px;
+margin: 0px auto 0px 10px;
 }
 
 .addQueryDiv label {
@@ -367,6 +377,7 @@ margin: 0px auto 0px auto 10px;
 .addQryRun {
   color: white;
   background-color: green;
+  border-radius: 3px;
   border: 1px solid darkgreen;
   height: 35px;
   width: 50px;
