@@ -79,6 +79,19 @@ html {
   top: calc(100vh - 100px)
 }
 
+.lengthButtonDiv {
+  position: relative;
+  display: block;
+  margin: 1px auto auto 10px;
+}
+
+.areaButtonDiv {
+  position: relative;
+  display: block;
+  margin: 1px auto auto 10px;
+}
+
+
 .locate {
   top: 125px;
   left: 8px;
@@ -167,10 +180,10 @@ html {
   background-color: #005a9e;
 }
 .custom-controls1 {
-  top: 10em;
-  left: .5em;
-  height: 1.375em; 
-  width: 1.375em;
+  top: 150px;
+  left: 7px;
+  height: 17px; 
+  width: 17px;
   z-index: 1011;
 }
 /* Marker für Koordinatenanzeige */
@@ -192,6 +205,7 @@ html {
   background-color: #000; /* Farbe des Punktes */
   border-radius: 50%; /* Macht den Punkt */
 }
+
 .controls * {
   font-size: 12px; /* Hier kannst du die gewünschte Größe für alle Elemente innerhalb des Div-Containers angeben */
 }
@@ -320,7 +334,7 @@ html {
 #popup-content {
   user-select: text;
 }
-
+/* 
 .addQueryDiv {
   position: absolute;
   display: block;
@@ -382,4 +396,4 @@ margin: 0px auto 0px 10px;
   height: 35px;
   width: 50px;
   margin: 10px;
-}
+} */

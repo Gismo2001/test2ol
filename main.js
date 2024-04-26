@@ -42,8 +42,6 @@ import Toggle from 'ol-ext/control/Toggle'; // Importieren Sie Toggle
 import { Modify, Select } from 'ol/interaction'; // Importieren Sie Draw
 import TextButton from 'ol-ext/control/TextButton';
 
-
-
 //projektion definieren und registrieren
 proj4.defs('EPSG:32632', '+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs');
 register(proj4);
@@ -71,15 +69,10 @@ import {
   getStyleForArtSonLin
 } from './extStyle';
 
-
 // Funktion zum Verschieben des DIVs
 function dragInfo() {
   dragElement(document.getElementById("Info"));  
 }
-
-
-
-
 
 const attribution = new Attribution({
   collapsible: false,
@@ -104,7 +97,6 @@ const map = new Map({
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
 
-
 //------------------------------------Attribution collapse
 function checkSize() {
   const small = map.getSize()[0] < 600;
@@ -123,7 +115,6 @@ let watchId = null; // Variable, um die Watch-ID der Geolokalisierung zu speiche
 //Button für Positionierung
 const locateP = document.createElement('div');
 let isActive = false; // Variable, um den Aktivierungsstatus der Geolokalisierung zu verfolgen
-
 
 const gehoelz_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
@@ -579,7 +570,7 @@ const vector = new VectorLayer({
     'stroke-width': 2,
     'circle-radius': 7,
     'circle-fill-color': '#ffcc33',
-  },
+  }, 
 });
 let sketch;
 let measureTooltipElement;
@@ -587,6 +578,7 @@ let measureTooltip;
 
 //-------------------------------------------Funktionen für Messung----------------- //
 const pointerMoveHandler = function (evt) {
+  
   if (evt.pointerType === 'touch') {
     if (evt.dragging) {
        return;
@@ -638,7 +630,7 @@ const style = new Style({
   }),
 });
 function addInteraction(type) {
-  draw = new Draw({
+    draw = new Draw({
     source: source,
     type: type,
     style: function (feature) {
@@ -698,7 +690,6 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
   evt.preventDefault(); // Verhindert das Standardkontextmenü
   if (draw) {
     source.clear(); // Löscht alle Vektoren aus der Quelle
-    
     draw.finishDrawing(); // Beendet die laufende Messung
     map.removeInteraction(draw); // Entfernt die Zeicheninteraktion
     map.un('pointermove', pointerMoveHandler); // Entfernt den Event-Listener für 'pointermove'
@@ -806,12 +797,9 @@ map.addLayer(kmGroup);
 map.addLayer(BwGroupL);
 map.addLayer(BwGroupP);
 map.addLayer(vector); 
-
-//--------------------------------------------------Info für WMS-Layer
-
-
 //Ende Layer hinzufügen---------------------------------------
 
+//--------------------------------------------------Info für WMS-Layer
 var toggleButtonU = new Toggle({
   html: '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>',
   className: "select",
@@ -856,7 +844,6 @@ var selectFeat = new Select({
 });
 
 let layer_selected = null; // Setze layer_selected auf null, um sicherzustellen, dass es immer definiert ist
-
 
 selectFeat.on('select', function (e) {
   e.selected.forEach(function (featureSelected) {
@@ -1062,6 +1049,7 @@ document.body.appendChild(overlayDiv);
   if (globalCoordAnOderAus===false ){
     var coordinates = evt.coordinate;
     var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+    console.log(layer);
     var layname = layer.get('name');
     
     var beschreibLangValue = feature.get('beschreib_lang');
@@ -1331,11 +1319,9 @@ document.getElementById('hide-button').addEventListener('click', function() {
   }
 });
 
-//Umrechnung geclickter Kartenpositionen in mousePositionControl-Format
-//für EPSG:4326
+//Umrechnung geclickter Kartenpositionen in mousePositionControl-Format für EPSG:4326
 function transformCoordinateToMousePosition4326(coordinate) {
-  // Koordinaten in das Format von mousePositionControl (EPSG:4326) umwandeln
-  return transform(coordinate, map.getView().getProjection(), 'EPSG:4326');
+   return transform(coordinate, map.getView().getProjection(), 'EPSG:4326');
 }
 //für EPSG:32632
 function transformCoordinateToMousePosition32632(coordinate) {
@@ -1375,7 +1361,6 @@ document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
   return false;
 };
-
 
 //----------------------------------------------Print
 const dims = {
@@ -1479,11 +1464,13 @@ map.addControl (search);
 // Select feature when click on the reference index
 search.on('select', function(e){
   sLayer.getSource().clear();
-  console.log('aufgerufen')
+ 
   // Check if we get a geojson to describe the search
   if (e.search.geojson) {
+    
     var format = new GeoJSON();
     var f = format.readFeature(e.search.geojson, { dataProjection: "EPSG:4326", featureProjection: map.getView().getProjection() });
+    //console.log(f)
     sLayer.getSource().addFeature(f);
     var view = map.getView();
     var resolution = view.getResolutionForExtent(f.getGeometry().getExtent(), map.getSize());
@@ -1523,33 +1510,6 @@ function addMarker(coordinates) {
   sLayer.getSource().clear(); // Löscht vorherige Marker
   sLayer.getSource().addFeature(marker);
 };
-
-/* 
-const gpsPosToggleButton = new Toggle({
-  //html: '<i class="icon fa-solid fa-location-dot" aria-hidden="true"></i>',
-  html: '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>',
-  className: "classGPSSelect",
-  title: "Standorterkennung an, aus",
-  interaction: new Select(),
-  active:false,
-  onToggle: function(active) {
-    
-    if (active) {
-      console.log('GPS ist aktiviert');
-      alert("GPS ist aktiviert");
-    } else {
-      console.log('GPS ist deaktiviert');
-      alert("GPS ist deaktiviert");
-    }
-  }
-});
-
-gpsPosToggleButton.element.classList.add('active');
-gpsPosToggleButton.element.querySelector('.icon').classList.add('active');
-map.addControl(gpsPosToggleButton); */
-
-
-
 //-----------------------------------------Menü mit Submenü
 /* Nested subbar */
 var sub2 = new Bar({
@@ -1569,7 +1529,6 @@ var sub2 = new Bar({
     })
   ]
 });
-
 
 //GPS-Postionn durch "P"
 var sub1 = new Bar({
@@ -1679,3 +1638,64 @@ mainBar1.setPosition('left');
 document.addEventListener('DOMContentLoaded', function() {
   initializeWMS(WMSCapabilities, map ); // Aufrufen der initializeWMS-Funktion aus myFunc.js
 });
+
+/* const mySearch = document.getElementById('searchBox');
+mySearch.addEventListener('change', function(event){
+  console.log('Eingabe erfolgt');
+}); */
+
+/* const searchSelect = document.getElementById('searchSelect');
+searchSelect.addEventListener('change', function(event) {
+    const selectedValue = event.target.value;
+    console.log('Auswahl geändert: ' + selectedValue);
+    // Hier kannst du weitere Aktionen basierend auf der ausgewählten Option durchführen
+}); */
+
+/* document.addEventListener('DOMContentLoaded', function() {
+  const searchButton = document.querySelector('.searchBox button');
+
+  if(searchButton) {
+    searchButton.addEventListener('click', function(event) {
+      searchAddress(event); // Hier wird die Funktion searchAddress() aufgerufen, die du bereits im HTML definiert hast
+    });
+  } else {
+    console.error("Button in '.searchBox' nicht gefunden.");
+  }
+}); */
+
+/* function searchAddress(e) {
+  console.log('angekommen')
+  sLayer.getSource().clear();
+  if (e.search.geojson) {
+    
+    var format = new GeoJSON();
+    var f = format.readFeature(e.search.geojson, { dataProjection: "EPSG:4326", featureProjection: map.getView().getProjection() });
+    //console.log(f)
+    sLayer.getSource().addFeature(f);
+    var view = map.getView();
+    var resolution = view.getResolutionForExtent(f.getGeometry().getExtent(), map.getSize());
+    var zoom = view.getZoomForResolution(resolution);
+    var center = ol.extent.getCenter(f.getGeometry().getExtent());
+    // redraw before zoom
+    setTimeout(function(){
+      view.animate({
+        center: center,
+        zoom: Math.min (zoom, 16)
+      });
+    }, 100);
+  }
+  else 
+  {
+    map.getView().animate({
+    center:e.coordinate,
+    zoom: Math.max (map.getView().getZoom(),16)
+    });
+  }
+  // Füge den Marker hinzu
+  addMarker(e.coordinate);
+} */
+
+/* searchBox.addEventListener('input', function() {
+ 
+  console.log(searchBox.value);
+}); */

@@ -21,17 +21,13 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL,Object.assign"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/eligrey/FileSaver.js/aa9f4e0e/FileSaver.min.js"></script>
-    <script src="myFunc.js"></script> <!-- Einbinden von myFunc.js -->
+    <script type="module" src="myFunc.js"></script> <!-- Einbinden von myFunc.js -->
     <script type="module" src="main.js"></script>
     
 </head>
 <body>
-  
-  
- 
   <div id="map" class="map">
-
-<!-- 
+<!--   
   <div class="addQueryDiv" id="addQueryDiv">
     <div class="hearderDiv" id="headerDiv">
       <label for="">Attribute Query</label>
@@ -54,17 +50,16 @@
 
     <button type="button" id="addQryRun" class="addQryRun" onclick="attributeQuery()">Run</button>
   </div>
-
-  -->
-  <div id="searchBox" class="searchBox">
-        <input type="text" id="addressInput" placeholder="Artdresse/FSK"/>
-        <button onclick="searchAddress()"><span>🔍</span></button>
-        <select id="searchSelect">
-          
-          <option value="adresse">Adresse</option>
-          <option value="fsk">FSK</option>
-      </select>
-  </div>
+   -->
+  <!-- <div id="searchBox" class="searchBox">
+    <input type="text" id="addressInput" placeholder="Adresse/FSK"/>
+    <button><span>🔍</span></button>
+    <select id="searchSelect">
+      <option value="adresse">Adresse</option>
+      <option value="fsk">FSK</option>
+    </select>
+  </div> -->
+  
   <div id="custom-controls" class="custom-controls">
   </div>
   
