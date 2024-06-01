@@ -881,7 +881,6 @@ function getLayersInGroup(layerGroup) {
 }
 
 function singleClickHandler(evt) {
-//map.on('singleclick', function (evt) {
   const visibleLayers = [];
   map.getLayers().forEach(layer => {
       const layerName = layer.get('name');
@@ -1099,6 +1098,7 @@ document.body.appendChild(overlayDiv);
           '<div style="max-height: 200px; overflow-y: auto;">' +
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
           '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
+          '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
           '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
            '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
            '<p>' + beschreibLangHtml + '</p>' +
@@ -1269,18 +1269,22 @@ function placeMarkerAndShowCoordinates(event) {
     
     if (projectionSelect.value === 'EPSG:3857') {
       const format = createStringXY(2);
-      mousePositionElement.innerHTML = `Coordinates: ${format(event.coordinate)}`;
+      const swappedCoordinate = [event.coordinate[1], event.coordinate[0]]; // Swap x and y
+      mousePositionElement.innerHTML = `Coordinates: ${format(swappedCoordinate)}`;
     } else if (projectionSelect.value === 'EPSG:4326') {
       const format = createStringXY(6);
       const transformedCoordinate = transformCoordinateToMousePosition4326(event.coordinate);
-      mousePositionElement.innerHTML = `Coordinates: ${format(transformedCoordinate)}`;
+      const swappedCoordinate = [transformedCoordinate[1], transformedCoordinate[0]]; // Swap x and y
+      mousePositionElement.innerHTML = `Coordinates: ${format(swappedCoordinate)}`;
     } else if (projectionSelect.value === 'EPSG:32632') {
       const format = createStringXY(1);
       const transformedCoordinate = transformCoordinateToMousePosition32632(event.coordinate);
-      mousePositionElement.innerHTML = `Coordinates: ${format(transformedCoordinate)}`;
-      //const googleMapsLink = `https://maps.app.goo.gl/?q=${transformedCoordinate[0]},${transformedCoordinate[1]}`;
-      //console.log(googleMapsLink);
+      const swappedCoordinate = [transformedCoordinate[1], transformedCoordinate[0]]; // Swap x and y
+      mousePositionElement.innerHTML = `Coordinates: ${format(swappedCoordinate)}`;
+      // const googleMapsLink = `https://maps.app.goo.gl/?q=${swappedCoordinate[0]},${swappedCoordinate[1]}`;
+      // console.log(googleMapsLink);
     }
+    
   }
 };
 // Checkbox, wenn an kann der Marker gesetzt werden und die Koordinaten werden ausgegeben
