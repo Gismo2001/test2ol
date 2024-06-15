@@ -486,10 +486,12 @@ var dop20ni_layer = new TileLayer({
   visible: false,
   type: 'base',
   source: new TileWMS({
-    url: "https://www.geobasisdaten.niedersachsen.de/doorman/noauth/wms_ni_dop",
+    //url: "https://www.geobasisdaten.niedersachsen.de/doorman/noauth/wms_ni_dop",
+    //https://opendata.lgln.niedersachsen.de/doorman/noauth/dop_wms
+    url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/dop_wms",
     attributions: 'Orthophotos Niedersachsen, LGLN',
     params: {
-      "LAYERS": "dop20",
+      "LAYERS": "ni_dop20",
       "TILED": true, // "true" sollte ohne Anführungszeichen sein
       "VERSION": "1.3.0"
     },
