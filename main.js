@@ -155,7 +155,6 @@ const exp_gew_info_layer = new VectorLayer({
   style: combinedStyle,
   visible: false
 });
-
 const gew_layer_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gew.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'gew', // Titel für den Layer-Switcher
@@ -278,6 +277,7 @@ const km500scal_layer = new VectorLayer({
   },
   visible: true  
 });
+
 const wmsNsgLayer = new TileLayer({
   title: "NSG",
   name: "NSG",
@@ -353,7 +353,6 @@ const wmsGewWmsFgLayer = new TileLayer({
   visible: false,
   opacity: 1,
 });
-
 
 const gnAtlas2023 = new TileLayer({
   source: new TileWMS(({
@@ -435,7 +434,6 @@ const gnAtlas2002 = new TileLayer({
   opacity: 1.000000,
   visible: false,
 });
-
 const gnAtlas1980 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -446,7 +444,6 @@ const gnAtlas1980 = new TileLayer({
   opacity: 1.000000,
   visible: false,
 });
-
 const gnAtlas1970 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -587,6 +584,7 @@ const vector = new VectorLayer({
     'circle-fill-color': '#ffcc33',
   }, 
 });
+
 let sketch;
 let measureTooltipElement;
 let measureTooltip;
@@ -1114,6 +1112,7 @@ document.body.appendChild(overlayDiv);
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
           '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
           '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
+          '<p>' + "Bauj. = " + feature.get('baujahr') + '</p>' +
           '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
            '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
            '<p>' + beschreibLangHtml + '</p>' +
@@ -1191,6 +1190,8 @@ document.body.appendChild(overlayDiv);
           '<div style="max-height: 200px; overflow-y: auto;">' +
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
           '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
+          '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
+          '<p>' + "Bauj. = " + feature.get('baujahr') + '</p>' +
           '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
            '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
            '<p>' + beschreibLangHtml + '</p>' +
@@ -1362,7 +1363,8 @@ document.addEventListener('DOMContentLoaded', function () {
     event.preventDefault(); // Verhindert die Standardaktion des Links
     var newWindow = window.open('', '_blank');
     newWindow.document.body.innerHTML = 
-      '<p>Hallo neue Welt</p>'
+      '<p>Hallo neue Welt 2</p>'
+      
       /* + 
       '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
       '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
