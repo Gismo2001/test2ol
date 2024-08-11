@@ -1070,7 +1070,7 @@ document.body.appendChild(overlayDiv);
     beschreibLangHtml = '<br>' + '<u>' + "Beschreib (lang): " + '</u>' + beschreibLangValue + '</p>';
     };
     // Popup soll nur für bestimmte Layernamen angezeigt werden
-    if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'son_lin') {
+    if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'sle' && layname !== 'weh' && layname !== 'son_lin' ) {
       
       if (feature) {
         coordinates = feature.getGeometry().getCoordinates();
@@ -1198,6 +1198,98 @@ document.body.appendChild(overlayDiv);
           '</div>';
       
     }
+    // Führen Sie Aktionen für den Layernamen 'exp_bw_sle' durch
+    if (layname === 'sle') {
+      coordinates = evt.coordinate; 
+      popup.setPosition(coordinates);
+      var foto1Value = feature.get('foto1');
+        var foto1Html = '';
+        var foto2Value = feature.get('foto2');
+        var foto2Html = '';
+        var foto3Value = feature.get('foto3');
+        var foto3Html = '';
+        var foto4Value = feature.get('foto4');
+        var foto4Html = '';
+        
+        if (foto1Value && foto1Value.trim() !== '') {
+          foto1Html = '<a href="' + foto1Value + '" onclick="window.open(\'' + foto1Value + '\', \'_blank\'); return false;">Foto 1</a>';
+        } else {
+          foto1Html =   " Foto 1 ";
+        }
+        if (foto2Value && foto2Value.trim() !== '') {
+          foto2Html = '<a href="' + foto2Value + '" onclick="window.open(\'' + foto2Value + '\', \'_blank\'); return false;">Foto 2</a>';
+        } else {
+          foto2Html = " Foto 2 ";
+        }
+        if (foto3Value && foto3Value.trim() !== '') {
+          foto3Html = '<a href="' + foto3Value + '" onclick="window.open(\'' + foto3Value + '\', \'_blank\'); return false;">Foto 3</a>';
+        } else {
+          foto3Html = " Foto 3 ";
+        }
+        if (foto4Value && foto4Value.trim() !== '') {
+          foto4Html = '<a href="' + foto4Value + '" onclick="window.open(\'' + foto4Value + '\', \'_blank\'); return false;">Foto 4</a>';
+        } else {
+          foto4Html = " Foto 4 ";
+        }
+        content.innerHTML =
+          '<div style="max-height: 200px; overflow-y: auto;">' +
+          '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
+          '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
+          '<p>' + "WSP (OW) = " + feature.get('WSP_OW') + " m" +  "  WSP (UW) = " + feature.get('WSP_UW') + " m" + '</p>' +
+          '<p>' + "Bauj. = " + feature.get('baujahr') + '</p>' +
+          '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
+           '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
+           '<p>' + beschreibLangHtml + '</p>' +
+          '</div>';
+      
+    }
+
+        // Führen Sie Aktionen für den Layernamen 'exp_bw_sle' durch
+        if (layname === 'weh') {
+          coordinates = evt.coordinate; 
+          popup.setPosition(coordinates);
+          var foto1Value = feature.get('foto1');
+            var foto1Html = '';
+            var foto2Value = feature.get('foto2');
+            var foto2Html = '';
+            var foto3Value = feature.get('foto3');
+            var foto3Html = '';
+            var foto4Value = feature.get('foto4');
+            var foto4Html = '';
+            
+            if (foto1Value && foto1Value.trim() !== '') {
+              foto1Html = '<a href="' + foto1Value + '" onclick="window.open(\'' + foto1Value + '\', \'_blank\'); return false;">Foto 1</a>';
+            } else {
+              foto1Html =   " Foto 1 ";
+            }
+            if (foto2Value && foto2Value.trim() !== '') {
+              foto2Html = '<a href="' + foto2Value + '" onclick="window.open(\'' + foto2Value + '\', \'_blank\'); return false;">Foto 2</a>';
+            } else {
+              foto2Html = " Foto 2 ";
+            }
+            if (foto3Value && foto3Value.trim() !== '') {
+              foto3Html = '<a href="' + foto3Value + '" onclick="window.open(\'' + foto3Value + '\', \'_blank\'); return false;">Foto 3</a>';
+            } else {
+              foto3Html = " Foto 3 ";
+            }
+            if (foto4Value && foto4Value.trim() !== '') {
+              foto4Html = '<a href="' + foto4Value + '" onclick="window.open(\'' + foto4Value + '\', \'_blank\'); return false;">Foto 4</a>';
+            } else {
+              foto4Html = " Foto 4 ";
+            }
+            content.innerHTML =
+              '<div style="max-height: 200px; overflow-y: auto;">' +
+              '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
+              '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
+              '<p>' + "WSP1 (OW) = " + feature.get('Ziel_OW1').toFixed(2) + " m" +  "  WSP2 (OW) = " + feature.get('Ziel_OW2').toFixed(2) + " m" + '</p>' +
+              '<p>' + "Bauj. = " + feature.get('baujahr') + '</p>' +
+              '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
+               '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
+               '<p>' + beschreibLangHtml + '</p>' +
+              '</div>';
+          
+        }
+
     // Führen Sie Aktionen für den Layernamen 'gehoelz_vecLayer' durch
     if (layname === 'gehoelz_vec') {
       coordinates = evt.coordinate; 
