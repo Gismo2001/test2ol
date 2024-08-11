@@ -764,7 +764,7 @@ const BwGroupP = new LayerGroup({
   name: "BauwP",
   fold: true,
   fold: 'close',
-  layers: [ exp_bw_son_pun_layer, exp_bw_ein_layer, exp_bw_bru_andere_layer, exp_bw_bru_nlwkn_layer, exp_bw_que_layer, exp_bw_due_layer, exp_bw_weh_layer, exp_bw_sle_layer],
+  layers: [ exp_bw_son_pun_layer, exp_bw_ein_layer, exp_bw_que_layer, exp_bw_due_layer, exp_bw_bru_andere_layer, exp_bw_bru_nlwkn_layer, exp_bw_weh_layer, exp_bw_sle_layer],
 });
 const BwGroupL = new LayerGroup({
   title: "Bauw.(L)",
