@@ -69,6 +69,8 @@ import {
   getStyleForArtSonLin
 } from './extStyle';
 
+//var popup; // Globale Variable für das Popup
+
 // Funktion zum Verschieben des DIVs
 function dragInfo() {
   dragElement(document.getElementById("Info"));  
@@ -993,71 +995,6 @@ var closer = document.getElementById('popup-closer');
 
 //--------------------------------------------------Funktionen für Text im Popup
 map.on('click', function (evt) {
- /*  //gibt es schon einen Marker
-  if (markerCoordOverlay) {
-    map.removeOverlay(markerCoordOverlay);
-  };
- 
- 
-var featuresAtPixel = []; // Initialisierung des Arrays außerhalb der if-Bedingung
-
-if (globalCoordAnOderAus === false) {
-    map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-        featuresAtPixel.push(feature.get('bw_id')); // Hinzufügen des layname zum Array featuresAtPixel
-    });
-
-    // Dropdown-Menü erstellen
-    var select = document.createElement("select"); // Korrektur: Verwenden Sie "select" statt "selectF"
-    select.id = "featureSelect";
-
-    // Optionen für das Dropdown-Menü erstellen
-    featuresAtPixel.forEach(function(featureId) {
-        var option = document.createElement("option");
-        option.value = featureId;
-        option.text = featureId;
-        select.appendChild(option);
-    });
-
-// Erstellen Sie das Overlay-Div
-const overlayDiv = document.createElement('div');
-overlayDiv.style.position = 'absolute'; // Ändern Sie die Position auf absolut
-overlayDiv.style.top = 'calc(50% + 100px)'; // Verschieben um 100px nach unten
-overlayDiv.style.left = 'calc(50% + 100px)'; // Verschieben um 100px nach rechts
-overlayDiv.style.backgroundColor = 'white';
-overlayDiv.style.padding = '20px';
-overlayDiv.style.border = '1px solid black';
-overlayDiv.style.zIndex = '999';
-
-// Erstellen Sie den select und fügen Sie ihn dem Overlay-Div hinzu
-overlayDiv.appendChild(select);
-
-// Erstellen Sie den Schließbutton
-const closeButton = document.createElement('span');
-closeButton.innerHTML = 'X';
-closeButton.style.position = 'absolute';
-closeButton.style.top = '5px';
-closeButton.style.right = '5px';
-closeButton.style.cursor = 'pointer';
-closeButton.addEventListener('click', function() {
-    // Schließen Sie das Overlay-Div, wenn das Schließsymbol angeklickt wird
-    document.body.removeChild(overlayDiv);
-});
-
-// Fügen Sie das Schließsymbol dem Overlay-Div hinzu
-overlayDiv.appendChild(closeButton);
-
-// Fügen Sie den select in das Overlay-Div ein
-overlayDiv.appendChild(select);
-
-// Fügen Sie das Overlay-Div dem Dokument hinzu
-document.body.appendChild(overlayDiv);
-
-} else if (globalCoordAnOderAus === true) {
-    // Hier könnten weitere Aktionen für den Fall ausgeführt werden, dass globalCoordAnOderAus true ist
-}
-
-  */ 
-  
   if (globalCoordAnOderAus===false ){
     var coordinates = evt.coordinate;
     var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
@@ -1445,6 +1382,7 @@ function transformCoordinateToMousePosition32632(coordinate) {
 //--------------------------------------------Hyerperlink um ein neues Browserfenster zu öffnen wird dem Popup hinzugefügt
 document.addEventListener('DOMContentLoaded', function () {
   var popup = document.getElementById('popup');
+  
   var popupCloser = document.getElementById('popup-closer');
   var container = document.createElement('div');
   var link = document.createElement('a');
