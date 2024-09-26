@@ -53,6 +53,7 @@ import {
   getStyleForArtEin,
   getStyleForArtSonPun,
   gehoelz_vecStyle, 
+  gew_fl_alle_vecStyle,
   sleStyle, 
   wehStyle, 
   bru_nlwknStyle, 
@@ -117,6 +118,16 @@ let watchId = null; // Variable, um die Watch-ID der Geolokalisierung zu speiche
 //Button für Positionierung
 const locateP = document.createElement('div');
 let isActive = false; // Variable, um den Aktivierungsstatus der Geolokalisierung zu verfolgen
+
+//*************neuer Layer
+const gew_fl_alle_vecLayer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gew_fl_alle.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'Gewässerflächen', // Titel für den Layer-Switcher
+  name: 'gew_fl_alle',
+  style: gew_fl_alle_vecStyle,
+  visible: false
+});
+//************
 
 const gehoelz_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
@@ -773,7 +784,7 @@ const BwGroupL = new LayerGroup({
   name: "BauwL",
   fold: true,
   fold: 'close',  
-  layers: [ gehoelz_vecLayer, exp_gew_umn_layer, exp_bw_son_lin_layer, exp_gew_info_layer ]
+  layers: [ gehoelz_vecLayer, gew_fl_alle_vecLayer, exp_gew_umn_layer, exp_bw_son_lin_layer, exp_gew_info_layer ]
 });
 const wmsLayerGroup = new LayerGroup({
   title: "WMS-Lay",
