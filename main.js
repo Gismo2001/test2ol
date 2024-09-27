@@ -53,7 +53,7 @@ import {
   getStyleForArtEin,
   getStyleForArtSonPun,
   gehoelz_vecStyle, 
-  gew_fl_alle_vecStyle,
+  exp_gew_fla_vecStyle,
   sleStyle, 
   wehStyle, 
   bru_nlwknStyle, 
@@ -120,11 +120,11 @@ const locateP = document.createElement('div');
 let isActive = false; // Variable, um den Aktivierungsstatus der Geolokalisierung zu verfolgen
 
 //*************neuer Layer
-const gew_fl_alle_vecLayer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gew_fl_alle.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+const exp_gew_fla_vecLayer = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_fla.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Gewässerflächen', // Titel für den Layer-Switcher
-  name: 'gew_fl_alle',
-  style: gew_fl_alle_vecStyle,
+  name: 'exp_gew_fla',
+  style: exp_gew_fla_vecStyle,
   visible: false
 });
 //************
@@ -784,7 +784,7 @@ const BwGroupL = new LayerGroup({
   name: "BauwL",
   fold: true,
   fold: 'close',  
-  layers: [ gehoelz_vecLayer, gew_fl_alle_vecLayer, exp_gew_umn_layer, exp_bw_son_lin_layer, exp_gew_info_layer ]
+  layers: [ gehoelz_vecLayer, exp_gew_fla_vecLayer, exp_gew_umn_layer, exp_bw_son_lin_layer, exp_gew_info_layer ]
 });
 const wmsLayerGroup = new LayerGroup({
   title: "WMS-Lay",
@@ -1018,7 +1018,7 @@ map.on('click', function (evt) {
     beschreibLangHtml = '<br>' + '<u>' + "Beschreib (lang): " + '</u>' + beschreibLangValue + '</p>';
     };
     // Popup soll nur für bestimmte Layernamen angezeigt werden
-    if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'sle' && layname !== 'weh' && layname !== 'son_lin' ) {
+    if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'sle' && layname !== 'weh' && layname !== 'son_lin' && layname !== 'exp_gew_fla' ) {
       
       if (feature) {
         coordinates = feature.getGeometry().getCoordinates();
@@ -1146,6 +1146,51 @@ map.on('click', function (evt) {
           '</div>';
       
     }
+    // Führen Sie Aktionen für den Layernamen 'exp_gew_fla' durch
+    if (layname === 'exp_gew_fla') {
+      coordinates = evt.coordinate; 
+      popup.setPosition(coordinates);
+      var foto1Value = feature.get('foto1');
+        var foto1Html = '';
+        var foto2Value = feature.get('foto2');
+        var foto2Html = '';
+        var foto3Value = feature.get('foto3');
+        var foto3Html = '';
+        var foto4Value = feature.get('foto4');
+        var foto4Html = '';
+        
+        if (foto1Value && foto1Value.trim() !== '') {
+          foto1Html = '<a href="' + foto1Value + '" onclick="window.open(\'' + foto1Value + '\', \'_blank\'); return false;">Foto 1</a>';
+        } else {
+          foto1Html =   " Foto 1 ";
+        }
+        if (foto2Value && foto2Value.trim() !== '') {
+          foto2Html = '<a href="' + foto2Value + '" onclick="window.open(\'' + foto2Value + '\', \'_blank\'); return false;">Foto 2</a>';
+        } else {
+          foto2Html = " Foto 2 ";
+        }
+        if (foto3Value && foto3Value.trim() !== '') {
+          foto3Html = '<a href="' + foto3Value + '" onclick="window.open(\'' + foto3Value + '\', \'_blank\'); return false;">Foto 3</a>';
+        } else {
+          foto3Html = " Foto 3 ";
+        }
+        if (foto4Value && foto4Value.trim() !== '') {
+          foto4Html = '<a href="' + foto4Value + '" onclick="window.open(\'' + foto4Value + '\', \'_blank\'); return false;">Foto 4</a>';
+        } else {
+          foto4Html = " Foto 4 ";
+        }
+        content.innerHTML =
+          '<div style="max-height: 200px; overflow-y: auto;">' +
+          '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
+          '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
+          '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
+          '<p>' + "Bauj. = " + feature.get('baujahr') + '</p>' +
+          '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
+           '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
+           '<p>' + beschreibLangHtml + '</p>' +
+          '</div>';
+      
+    }
     // Führen Sie Aktionen für den Layernamen 'exp_bw_sle' durch
     if (layname === 'sle') {
       coordinates = evt.coordinate; 
@@ -1229,7 +1274,8 @@ map.on('click', function (evt) {
               '<div style="max-height: 200px; overflow-y: auto;">' +
               '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
               '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
-              '<p>' + "WSP1 (OW) = " + feature.get('Ziel_OW1').toFixed(2) + " m" +  "  WSP2 (OW) = " + feature.get('Ziel_OW2').toFixed(2) + " m" + '</p>' +
+              //'<p>' + "WSP1 (OW) = " + feature.get('Ziel_OW1').toFixed(2) + " m" +  "  WSP2 (OW) = " + feature.get('Ziel_OW2').toFixed(2) + " m" + '</p>' +
+              '<p>' + "WSP1 (OW) = " + feature.get('Ziel_OW1') + " m" +  "  WSP2 (OW) = " + feature.get('Ziel_OW2') + " m" + '</p>' +
               '<p>' + "Bauj. = " + feature.get('baujahr') + '</p>' +
               '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
                '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +

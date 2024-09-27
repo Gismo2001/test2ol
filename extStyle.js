@@ -39,7 +39,7 @@ const queStyle = new Style({
 });
 
 // neuer Style für gew_fl
-const gew_fl_alle_vecStyle = new Style({
+const exp_gew_fla_vecStyle = new Style({
     stroke: new Stroke({
     color: 'rgba(173, 114, 3, 1)',
     width: 3
@@ -412,7 +412,7 @@ export {
     queStyle,
     getStyleForArtSonLin, 
     km10scalStyle,
-    gew_fl_alle_vecStyle,
+    exp_gew_fla_vecStyle,
     gehoelz_vecStyle,
     getStyleForArtFSK,
     getStyleForArtEin,
