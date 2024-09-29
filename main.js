@@ -1452,14 +1452,13 @@ document.addEventListener('DOMContentLoaded', function () {
     newWindow.document.body.innerHTML = 
       '<p>Hallo neue Welt 2</p>'
       
-      /* + 
-      '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
-      '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
-      '<p>' + foto1Html +  
-      '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
-      '<p>' + beschreibLangHtml + '</p>' +
-      '</div>'; */
   });
+  //***********************Alternativ einen Bericht öffnen
+  //link.addEventListener('click', function(event) {
+  //  event.preventDefault(); // Verhindert die Standardaktion des Links
+  //  var newWindow = window.open('https://nlwkn.hannit-share.de/index.php/apps/files/files/11334138?dir=/db/DIN/Rep&openfile=true', '_blank');
+  //});
+
   container.appendChild(link);
   container.appendChild(popupCloser);
   popup.appendChild(container);
