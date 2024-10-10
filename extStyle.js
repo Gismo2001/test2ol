@@ -47,9 +47,6 @@ const exp_gew_fla_vecStyle = new Style({
     
 });
 
-
-//
-
 const gehoelz_vecStyle = new Style({
     stroke: new Stroke({
     color: 'rgba(173, 114, 3, 1)',
@@ -145,7 +142,7 @@ function getStyleForArtGewInfo(feature) {
     } else {
         // Handle den Fall, wenn die Umwandlung fehlschlägt
         // Zum Beispiel: standardmäßige Farben und Stil für den Fehlerfall
-        strokeColor = 'gray';
+        strokeColor = 'grey';
         strokeWidth = 5;
     }
     
