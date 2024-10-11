@@ -32,10 +32,12 @@ import { register } from 'ol/proj/proj4';
 import proj4 from 'proj4';
 
 import SearchPhoton from 'ol-ext/control/SearchPhoton';
+import SearchFeature from 'ol-ext/control/SearchFeature';
 //import SearchNominatim from 'ol-ext/control/SearchNominatim';
 import WMSCapabilities from'ol-ext/control/WMSCapabilities';
 
 import Icon from 'ol/style/Icon'; // Hinzufügen Sie diesen Import
+
 
 import Bar from 'ol-ext/control/Bar';
 import Toggle from 'ol-ext/control/Toggle'; // Importieren Sie Toggle
@@ -1619,6 +1621,8 @@ function addMarker(coordinates) {
   sLayer.getSource().addFeature(marker);
 };
 //-----------------------------------------Menü mit Submenü
+
+
 /* Nested subbar */
 var sub2 = new Bar({
   toggleOne: true,
@@ -1626,6 +1630,7 @@ var sub2 = new Bar({
     new TextButton({
       html:"2.1", 
       handleClick: function() {
+        alert("2.1 wurde geclickt ");
       //Aktionen
       } 
     }),
