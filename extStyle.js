@@ -1,4 +1,5 @@
 import {Circle as CircleStyle, Fill, RegularShape, Icon, Stroke, Style, Text} from 'ol/style.js';
+import MultiPoint from 'ol/geom/MultiPoint';
 import { Point} from 'ol/geom.js';
 //extfunc.js
 const sleStyle = new Style({
@@ -122,41 +123,46 @@ function getStyleForArtUmn(feature) {
     });
 };
 function getStyleForArtGewInfo(feature) {
-    const uIdValue = parseInt(feature.get('U_NR')); // Wandelt die Zeichenkette in eine Zahl um
     const uArt = feature.get('Kat');
     let strokeColor;
-    let strokeWidth;
-    let lineDash;
+    let lineDash = [10, 15]; // Gilt für alle Linien
 
-    if (!isNaN(uIdValue)) { // Überprüfen, ob die Umwandlung erfolgreich war
-        if (uIdValue % 2 === 0) { // Überprüfen, ob die Zahl gerade ist
-            strokeColor = 'green'; // Beispiel: grüne Farbe für gerade Zahlen
-        } else {
-            strokeColor = 'red'; // Beispiel: rote Farbe für ungerade Zahlen
-        }
-        strokeWidth = 5;
-        // Überprüfen, ob "Kat" gleich "E" ist
-        if (uArt === 'E') {
-            lineDash = [10, 15]; // Gestrichelte Linie für "E"
-        }
+    // Linienfarbe festlegen abhängig von uArt
+    if (uArt === 'E') {
+        strokeColor = 'green'; // Grün für "E"
     } else {
-        // Handle den Fall, wenn die Umwandlung fehlschlägt
-        // Zum Beispiel: standardmäßige Farben und Stil für den Fehlerfall
-        strokeColor = 'grey';
-        strokeWidth = 5;
+        strokeColor = 'red'; // Rot für alles andere
     }
-    
-    return new Style({
-        fill: new Fill({
-            color: strokeColor
+
+    // Stil zurückgeben, der Linien und Punkte für Linienenden definiert
+    return [
+        new Style({
+            stroke: new Stroke({
+                color: strokeColor,
+                width: 5, // Feste Breite
+                lineDash: lineDash
+            }),
+            fill: new Fill({
+                color: strokeColor // Füllung abhängig von der Linienfarbe
+            })
         }),
-        stroke: new Stroke({
-            color: strokeColor,
-            width: strokeWidth,
-            lineDash: lineDash // Verwendung der lineDash-Eigenschaft für gestrichelte Linie, falls definiert
+        // Stil für die Kreise an den Linienenden
+        new Style({
+            geometry: function(feature) {
+                const coordinates = feature.getGeometry().getCoordinates(); // Koordinaten der Geometrie
+                return new MultiPoint([coordinates[0], coordinates[coordinates.length - 1]]); // Start- und Endpunkt
+            },
+            image: new CircleStyle({
+                radius: 5, // Größe des Kreises
+                fill: new Fill({
+                    color: 'black' // Schwarzer gefüllter Kreis
+                })
+            })
         })
-    });    
-};
+    ];
+}
+
+
 
 
 function getStyleForArtSonLin(feature) {   

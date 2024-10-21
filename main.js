@@ -69,7 +69,8 @@ import {
   km500scalStyle,
   combinedStyle,
   machWasMitFSK,
-  getStyleForArtSonLin
+  getStyleForArtSonLin,
+  getStyleForArtGewInfo
 } from './extStyle';
 
 //var popup; // Globale Variable für das Popup
@@ -167,7 +168,8 @@ const exp_gew_info_layer = new VectorLayer({
   url: function (extent) {return './myLayers/exp_gew_info.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Gew, Info', 
   name: 'gew_info',
-  style: combinedStyle,
+  style: getStyleForArtGewInfo,
+  //style: combinedStyle,
   visible: false
 });
 const gew_layer_layer = new VectorLayer({
@@ -1075,22 +1077,65 @@ map.on('click', function (evt) {
     }
     // Führen Sie Aktionen für den Layernamen 'gew_info' durch
     if (layname === 'gew_info') {
+      var foto1Value = feature.get('foto1');
+      var foto1Html = '';
+      var foto2Value = feature.get('foto2');
+      var foto2Html = '';
+      var foto3Value = feature.get('foto3');
+      var foto3Html = '';
+      var foto4Value = feature.get('foto4');
+      var foto4Html = '';
+      var urlWKDB = feature.get('URL_WKDB');
+      var urlWKDBHtml = '';
+
+      if (foto1Value && foto1Value.trim() !== '') {
+        foto1Html = '<a href="' + foto1Value + '" onclick="window.open(\'' + foto1Value + '\', \'_blank\'); return false;">Foto 1</a>';
+      } else {
+        foto1Html =   " Foto 1 ";
+      }
+      if (foto2Value && foto2Value.trim() !== '') {
+        foto2Html = '<a href="' + foto2Value + '" onclick="window.open(\'' + foto2Value + '\', \'_blank\'); return false;">Foto 2</a>';
+      } else {
+        foto2Html = " Foto 2 ";
+      }
+      if (foto3Value && foto3Value.trim() !== '') {
+        foto3Html = '<a href="' + foto3Value + '" onclick="window.open(\'' + foto3Value + '\', \'_blank\'); return false;">Foto 3</a>';
+      } else {
+        foto3Html = " Foto 3 ";
+      }
+      if (foto4Value && foto4Value.trim() !== '') {
+        foto4Html = '<a href="' + foto4Value + '" onclick="window.open(\'' + foto4Value + '\', \'_blank\'); return false;">Foto 4</a>';
+      } else {
+        foto4Html = " Foto 4 ";
+      }
+      if (foto4Value && foto4Value.trim() !== '') {
+        foto4Html = '<a href="' + foto4Value + '" onclick="window.open(\'' + foto4Value + '\', \'_blank\'); return false;">Foto 4</a>';
+      } else {
+        foto4Html = " Foto 4 ";
+      }
+      if (urlWKDB && urlWKDB.trim() !== '') {
+        urlWKDBHtml = '<a href="' + urlWKDB + '" onclick="window.open(\'' + urlWKDB + '\', \'_blank\'); return false;">WK-Datenblatt</a>';
+      } else {
+        urlWKDBHtml = "WK-Datenblatt";
+      }
       coordinates = evt.coordinate; 
       popup.setPosition(coordinates);
       content.innerHTML =
       '<div style="max-height: 300px; overflow-y: auto;">' +
       '<p>Name: ' + feature.get('IDUabschn') + '<br>' + "von " + feature.get('Bez_Anfang') + " bis " + feature.get('Bez_Ende')  + '</p>' +
-      '<p><a href="' + feature.get('U_Steckbrief') + '" onclick="window.open(\'' + feature.get('U_Steckbrief') + '\', \'_blank\'); return false;">NLWKN-SB</a> ' +
-      '<a href="' + feature.get('URL_WKDB') + '" onclick="window.open(\'' + feature.get('URL_WKDB') + '\', \'_blank\'); return false;">WK_DB</a> ' +
-      '<a href="' + feature.get('foto1') + '" onclick="window.open(\'' + feature.get('foto1') + '\', \'_blank\'); return false;">Karte</a> ' +
-      '<a href="' + feature.get('foto2') + '" onclick="window.open(\'' + feature.get('foto2') + '\', \'_blank\'); return false;">Foto</a><br>' +
+      '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
+      '<p><a href="' + feature.get('U_Steckbrief') + '" onclick="window.open(\'' + feature.get('U_Steckbrief') + '\', \'_blank\'); return false;">NLWKN-SB</a> '+
+      '<p>' + urlWKDBHtml +
+      //'<a href="' + feature.get('URL_WKDB') + '" onclick="window.open(\'' + feature.get('URL_WKDB') + '\', \'_blank\'); return false;">WK_DB</a> '+
+
+      //'<a href="' + feature.get('foto1') + '" onclick="window.open(\'' + feature.get('foto1') + '\', \'_blank\'); return false;">Karte</a> ' +
+      //'<a href="' + feature.get('foto2') + '" onclick="window.open(\'' + feature.get('foto2') + '\', \'_blank\'); return false;">Foto</a><br>' +
       '<p><a href="' + feature.get('BSB') + '" onclick="window.open(\'' + feature.get('BSB') + '\', \'_blank\'); return false;">BSB  </a>' +
       '<a href="' + feature.get('MNB') + '" onclick="window.open(\'' + feature.get('MNB') + '\', \'_blank\'); return false;">MNB</a><br> ' +
       'Kat: ' + feature.get('Kat') + '</a>' +
       ', KTR: ' + feature.get('KTR') + '</a>' +
-      '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
-      
-      '</div>';
+      '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p></div>';
+  
     }
     // Führen Sie Aktionen für den Layernamen 'gew_umn' durch
     if (layname === 'gew_umn') {
