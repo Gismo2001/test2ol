@@ -124,6 +124,7 @@ function getStyleForArtUmn(feature) {
 };
 function getStyleForArtGewInfo(feature) {
     const uArt = feature.get('Kat');
+    const txtIdUabschn = feature.get('IDUabschn')
     let strokeColor;
     let lineDash = [10, 15]; // Gilt für alle Linien
 
@@ -158,12 +159,25 @@ function getStyleForArtGewInfo(feature) {
                     color: 'black' // Schwarzer gefüllter Kreis
                 })
             })
+        }),
+        new Style({
+            text: new Text({
+                text: txtIdUabschn, // Text ist der Wert von IDUabschn
+                font: 'bold 14px Arial',
+                fill: new Fill({
+                    color: '#000' // Schwarze Schriftfarbe
+                }),
+                stroke: new Stroke({
+                    color: '#fff', // Weißer Rand um den Text
+                    width: 3
+                }),
+                overflow: true, // Text wird auch außerhalb des Features angezeigt
+                placement: 'point', // Text wird an einem Punkt und nicht entlang der Linie platziert
+                rotation: 0, // Rotation auf 0 setzen, damit der Text waagerecht bleibt
+            })
         })
     ];
 }
-
-
-
 
 function getStyleForArtSonLin(feature) {   
     const artValue = feature.get('bauart');
