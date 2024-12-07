@@ -375,7 +375,7 @@ const gnAtlas2023 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
-     params: {"LAYERS": "12", "TILED": "true", "VERSION": "1.3.0"},
+     params: {"LAYERS": "13", "TILED": "true", "VERSION": "1.3.0"},
     })),
   title: "2023",
   opacity: 1.000000,
@@ -385,7 +385,7 @@ const gnAtlas2020 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
-     params: {"LAYERS": "11", "TILED": "true", "VERSION": "1.3.0"},
+     params: {"LAYERS": "12", "TILED": "true", "VERSION": "1.3.0"},
     })),
   title: "2020",
   opacity: 1.000000,
@@ -395,7 +395,7 @@ const gnAtlas2017 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
-     params: {"LAYERS": "10", "TILED": "true", "VERSION": "1.3.0"},
+     params: {"LAYERS": "11", "TILED": "true", "VERSION": "1.3.0"},
     })),
   title: "2017",
   opacity: 1.000000,
@@ -405,7 +405,7 @@ const gnAtlas2014 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
-     params: {"LAYERS": "9", "TILED": "true", "VERSION": "1.3.0"},
+     params: {"LAYERS": "10", "TILED": "true", "VERSION": "1.3.0"},
     })),
   title: "2014",
   opacity: 1.000000,
@@ -415,7 +415,7 @@ const gnAtlas2012 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
-     params: {"LAYERS": "8", "TILED": "true", "VERSION": "1.3.0"},
+     params: {"LAYERS": "9", "TILED": "true", "VERSION": "1.3.0"},
     })),
   title: "2012",
   opacity: 1.000000,
@@ -425,7 +425,7 @@ const gnAtlas2010 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
-     params: {"LAYERS": "7", "TILED": "true", "VERSION": "1.3.0"},
+     params: {"LAYERS": "8", "TILED": "true", "VERSION": "1.3.0"},
     })),
   title: "2010",
   opacity: 1.000000,
@@ -435,7 +435,7 @@ const gnAtlas2009 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
-     params: {"LAYERS": "6", "TILED": "true", "VERSION": "1.3.0"},
+     params: {"LAYERS": "7", "TILED": "true", "VERSION": "1.3.0"},
     })),
   title: "2009",
   opacity: 1.000000,
@@ -445,12 +445,24 @@ const gnAtlas2002 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
-     params: {"LAYERS": "5", "TILED": "true", "VERSION": "1.3.0"},
+     params: {"LAYERS": "6", "TILED": "true", "VERSION": "1.3.0"},
     })),
   title: "2002",
   opacity: 1.000000,
   visible: false,
 });
+
+const gnAtlas1990 = new TileLayer({
+  source: new TileWMS(({
+      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+      attributions: ' ',
+     params: {"LAYERS": "5", "TILED": "true", "VERSION": "1.3.0"},
+    })),
+  title: "1990",
+  opacity: 1.000000,
+  visible: false,
+});
+
 const gnAtlas1980 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -803,7 +815,7 @@ const GNAtlasGroup = new LayerGroup({
   title: "GN-DOPs",
   fold: true,
   fold: 'close',
-  layers: [gnAtlas1937, gnAtlas1957, gnAtlas1970, gnAtlas1980, gnAtlas2002, gnAtlas2009, gnAtlas2010, gnAtlas2012, gnAtlas2014, gnAtlas2017, gnAtlas2020, gnAtlas2023]
+  layers: [gnAtlas1937, gnAtlas1957, gnAtlas1970, gnAtlas1980,  gnAtlas1990, gnAtlas2002, gnAtlas2009, gnAtlas2010, gnAtlas2012, gnAtlas2014, gnAtlas2017, gnAtlas2020, gnAtlas2023]
 });
 const kmGroup = new LayerGroup({
   title: "Station",
