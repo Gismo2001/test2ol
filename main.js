@@ -382,13 +382,12 @@ const wmsGewWmsFgLayer = new TileLayer({
 
 const gnAtlas2023 = new TileLayer({
   source: new TileWMS(({
-    url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-    attributions: ' ',
-    params: {"LAYERS": "13", "TILED": "true", "VERSION": "1.3.0"},
-
-   
+    url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/dop_wms",
+    attributions: 'Orthophotos Niedersachsen, LGLN',
+    params: {"LAYERS": "ni_dop20", "TILED": "true", "VERSION": "1.3.0"},
+        
   })),
-  title: "2023_NOH",
+  title: "2023_NI",
   opacity: 1.000000,
   visible: false,
 });
@@ -849,6 +848,7 @@ const wmsLayerGroup = new LayerGroup({
 });
 const GNAtlasGroup = new LayerGroup({
   title: "Luftbilder",
+  
   fold: true,
   fold: 'close',
   layers: [gnAtlas1937, gnAtlas1957, gnAtlas1970, gnAtlas1980,  gnAtlas1990, gnAtlas2002, gnAtlas2009, gnAtlas2010,gnAtlas2011, gnAtlas2012, gnAtlas2014, gnAtlas2017, gnAtlas2020, gnAtlas2023]
