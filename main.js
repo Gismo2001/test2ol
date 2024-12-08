@@ -124,12 +124,21 @@ let isActive = false; // Variable, um den Aktivierungsstatus der Geolokalisierun
 
 //*************neuer Layer
 const exp_gew_fla_vecLayer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_fla.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_info_fla.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Gewässerflächen', // Titel für den Layer-Switcher
   name: 'exp_gew_fla',
   style: exp_gew_fla_vecStyle,
   visible: false
 });
+
+const exp_gew_biotope_noh = new VectorLayer({
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_biotope_noh.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'Biotope_Noh', // Titel für den Layer-Switcher
+  name: 'exp_bw_biotope_noh',
+  style: exp_gew_fla_vecStyle,
+  visible: false
+});
+
 //************
 
 const gehoelz_vecLayer = new VectorLayer({
@@ -373,41 +382,55 @@ const wmsGewWmsFgLayer = new TileLayer({
 
 const gnAtlas2023 = new TileLayer({
   source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "13", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "2023",
+    url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+    attributions: ' ',
+    params: {"LAYERS": "13", "TILED": "true", "VERSION": "1.3.0"},
+
+   
+  })),
+  title: "2023_NOH",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas2020 = new TileLayer({
   source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "12", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "2020",
+    //url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+    //attributions: ' ',
+    //params: {"LAYERS": "12", "TILED": "true", "VERSION": "1.3.0"},
+    
+    url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/doph_wms?",
+    attributions: ' ',
+    params: {"LAYERS": "ni_dop20h_rgb_2020", "TILED": "true", "VERSION": "1.3.0"},
+  })),
+  title: "2020_NI",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas2017 = new TileLayer({
   source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "11", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "2017",
+    //url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+    //attributions: ' ',
+    //params: {"LAYERS": "11", "TILED": "true", "VERSION": "1.3.0"},
+
+    url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/doph_wms?",
+    attributions: ' ',
+    params: {"LAYERS": "ni_dop20h_rgb_2017", "TILED": "true", "VERSION": "1.3.0"},
+  })),
+  title: "2017_NI",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas2014 = new TileLayer({
   source: new TileWMS(({
-      url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-      attributions: ' ',
-     params: {"LAYERS": "10", "TILED": "true", "VERSION": "1.3.0"},
-    })),
-  title: "2014",
+    //url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+    //attributions: ' ',
+    //params: {"LAYERS": "10", "TILED": "true", "VERSION": "1.3.0"},
+
+    url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/doph_wms?",
+    attributions: ' ',
+    params: {"LAYERS": "ni_dop20h_rgb_2014", "TILED": "true", "VERSION": "1.3.0"},
+  })),
+  title: "2014_NI",
   opacity: 1.000000,
   visible: false,
 });
@@ -417,7 +440,21 @@ const gnAtlas2012 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "9", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "2012",
+  title: "2012_NOH",
+  opacity: 1.000000,
+  visible: false,
+});
+const gnAtlas2011 = new TileLayer({
+  source: new TileWMS(({
+    //url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
+    //attributions: ' ',
+    //params: {"LAYERS": "11", "TILED": "true", "VERSION": "1.3.0"},
+
+    url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/doph_wms?",
+    attributions: ' ',
+    params: {"LAYERS": "ni_dop20h_rgb_2011", "TILED": "true", "VERSION": "1.3.0"},
+  })),
+  title: "2011_NI",
   opacity: 1.000000,
   visible: false,
 });
@@ -427,7 +464,7 @@ const gnAtlas2010 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "8", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "2010",
+  title: "2010_NOH",
   opacity: 1.000000,
   visible: false,
 });
@@ -437,7 +474,7 @@ const gnAtlas2009 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "7", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "2009",
+  title: "2009_NOH",
   opacity: 1.000000,
   visible: false,
 });
@@ -447,7 +484,7 @@ const gnAtlas2002 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "6", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "2002",
+  title: "2002_NOH",
   opacity: 1.000000,
   visible: false,
 });
@@ -458,7 +495,7 @@ const gnAtlas1990 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "5", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "1990",
+  title: "1990_NOH",
   opacity: 1.000000,
   visible: false,
 });
@@ -469,7 +506,7 @@ const gnAtlas1980 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "4", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "1980",
+  title: "1980_NOH",
   opacity: 1.000000,
   visible: false,
 });
@@ -479,7 +516,7 @@ const gnAtlas1970 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "3", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "1970",
+  title: "1970_NOH",
   opacity: 1.000000,
   visible: false,
 });
@@ -489,7 +526,7 @@ const gnAtlas1957 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "2", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "1957",
+  title: "1957_NOH",
   opacity: 1.000000,
   visible: false,
 });
@@ -499,7 +536,7 @@ const gnAtlas1937 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "1", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "1937",
+  title: "1937_NOH",
   opacity: 1.000000,
   visible: false,
 });
@@ -800,7 +837,7 @@ const BwGroupL = new LayerGroup({
   name: "BauwL",
   fold: true,
   fold: 'close',  
-  layers: [ gehoelz_vecLayer, exp_gew_fla_vecLayer, exp_gew_umn_layer, exp_bw_son_lin_layer, exp_gew_info_layer ]
+  layers: [ gehoelz_vecLayer, exp_gew_biotope_noh, exp_gew_fla_vecLayer, exp_gew_umn_layer, exp_bw_son_lin_layer, exp_gew_info_layer ]
 });
 const wmsLayerGroup = new LayerGroup({
   title: "WMS-Lay",
@@ -811,11 +848,10 @@ const wmsLayerGroup = new LayerGroup({
   layers: [ wmsLsgLayer, wmsNsgLayer, wmsUesgLayer, wmsWrrlFgLayer, wmsGewWmsFgLayer ]
 });
 const GNAtlasGroup = new LayerGroup({
-  title: "GN-DOPs",
-  title: "GN-DOPs",
+  title: "Luftbilder",
   fold: true,
   fold: 'close',
-  layers: [gnAtlas1937, gnAtlas1957, gnAtlas1970, gnAtlas1980,  gnAtlas1990, gnAtlas2002, gnAtlas2009, gnAtlas2010, gnAtlas2012, gnAtlas2014, gnAtlas2017, gnAtlas2020, gnAtlas2023]
+  layers: [gnAtlas1937, gnAtlas1957, gnAtlas1970, gnAtlas1980,  gnAtlas1990, gnAtlas2002, gnAtlas2009, gnAtlas2010,gnAtlas2011, gnAtlas2012, gnAtlas2014, gnAtlas2017, gnAtlas2020, gnAtlas2023]
 });
 const kmGroup = new LayerGroup({
   title: "Station",
