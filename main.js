@@ -281,7 +281,7 @@ const km10scal_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_10_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'km10scal', // Titel für den Layer-Switcher
   style: km10scalStyle,
-  visible: false,
+  visible: true,
   minResolution: 0,
   maxResolution: 1
 });
@@ -1074,7 +1074,6 @@ map.on('click', function (evt) {
       
       if (feature) {
         coordinates = feature.getGeometry().getCoordinates();
-        
         popup.setPosition(coordinates);
         // HTML-Tag Foto1
         var foto1Value = feature.get('foto1');
@@ -1106,19 +1105,16 @@ map.on('click', function (evt) {
         } else {
           foto4Html = " Foto 4 ";
         }
-      
-        content.innerHTML =
+         content.innerHTML =
           '<div style="max-height: 200px; overflow-y: auto;">' +
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
-          '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
+          '<p>' + "Id = " + feature.get('bw_id') +  ' (' + (feature.get('KTR') ? feature.get('KTR') : 'k.A.') + ')' +  '</p>' +
           '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
-          '<p>' + "Bauj. = " + feature.get('baujahr') + '</p>' +
+          '<p>' + "Bauj. = " + (feature.get('baujahr') ? feature.get('baujahr') : 'k.A.') + '</p>' +
           '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
            '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
            '<p>' + beschreibLangHtml + '</p>' +
           '</div>';
-          
-         
       } else {
         popup.setPosition(undefined);
       }
@@ -1333,7 +1329,7 @@ map.on('click', function (evt) {
       
     }
 
-        // Führen Sie Aktionen für den Layernamen 'exp_bw_sle' durch
+        // Führen Sie Aktionen für den Layernamen 'exp_bw_weh' durch
         if (layname === 'weh') {
           coordinates = evt.coordinate; 
           popup.setPosition(coordinates);
@@ -1541,19 +1537,20 @@ document.addEventListener('DOMContentLoaded', function () {
   var link = document.createElement('a');
   //schreibeInnerHtml(layer);
   link.textContent = 'Weitere Infos';
-  link.href = '#'; // Verhindert, dass der Link die Seite neu lädt
-  link.addEventListener('click', function(event) {
-    event.preventDefault(); // Verhindert die Standardaktion des Links
-    var newWindow = window.open('', '_blank');
-    newWindow.document.body.innerHTML = 
-      '<p>Hallo neue Welt 2</p>'
-      
-  });
-  //***********************Alternativ einen Bericht öffnen
+  //link.href = '#'; // Verhindert, dass der Link die Seite neu lädt
   //link.addEventListener('click', function(event) {
   //  event.preventDefault(); // Verhindert die Standardaktion des Links
-  //  var newWindow = window.open('https://nlwkn.hannit-share.de/index.php/apps/files/files/11334138?dir=/db/DIN/Rep&openfile=true', '_blank');
+  //  var newWindow = window.open('', '_blank');
+  //  newWindow.document.body.innerHTML = 
+  //    '<p>Hallo neue Welt 2</p>'
+  
   //});
+  
+  //***********************Alternativ einen Bericht öffnen
+  link.addEventListener('click', function(event) {
+  event.preventDefault(); // Verhindert die Standardaktion des Links
+  var newWindow = window.open('https://nlwkn.hannit-share.de/index.php/apps/files/files/11334138?dir=/db/DIN/Rep&openfile=true', '_blank');
+  });
 
   container.appendChild(link);
   container.appendChild(popupCloser);
@@ -1564,6 +1561,8 @@ document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
   return false;
 };
+
+
 
 //----------------------------------------------Print
 const dims = {
@@ -1905,3 +1904,5 @@ searchSelect.addEventListener('change', function(event) {
  
   console.log(searchBox.value);
 }); */
+
+
