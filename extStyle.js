@@ -255,7 +255,7 @@ function getStyleForArtEin(feature) {
     });
 };
 
-function getStyleForArtSonPun(feature) {   
+/* function getStyleForArtSonPun(feature) {   
     const artValue = feature.get('bauart');
     let iconSrc;
     switch (artValue) {
@@ -292,7 +292,42 @@ function getStyleForArtSonPun(feature) {
             scale: .9 
         })
     });
-};
+}; */
+
+function getStyleForArtSonPun(feature) {
+    const artValue = feature.get('bauart');
+    let iconSrc;
+
+    if (/boots/i.test(artValue)) {
+        iconSrc = './data/bwSonPun_Anleger.svg';
+    
+    }else if (/betriebs/i.test(artValue)) {
+        iconSrc = './data/sonPunBetrieb.svg';
+    
+    } else if (artValue === 'Infotafel') {
+        iconSrc = './data/sonPunInfo.svg';
+    } else if (artValue === 'Auskolkung') {
+        iconSrc = './data/sonPunKolk.svg';
+    } else if (artValue === 'Furt') {
+        iconSrc = './data/bwSonPun_Furt.svg';
+    } else if (artValue === 'Tor') {
+        iconSrc = './data/bwSonPun_Tor.svg';
+    } else if (artValue === 'Überfahrt') {
+        iconSrc = './data/bwSonPun_Ueberfahrt.svg';
+    } else if (artValue === 'Betriebspegel') {
+        iconSrc = './data/bwSonPun_Betriebspegel.svg';
+    } else {
+        iconSrc = './data/sonPunSonstige.svg';
+    }
+
+    return new Style({
+        image: new Icon({
+            src: iconSrc,
+            scale: 0.9
+        })
+    });
+}
+
 function machWasMitFSK(feature){
     console.log (feature.get('Art'));
 };
