@@ -1730,9 +1730,6 @@ var sub2 = new Bar({
     } else {
       // Fordere den Nutzer zur Eingabe auf
       userInput = prompt("Bitte geben Sie einen Text ein:", "");
-      
-      console.log("Eingegebener Text:", userInput); // Optional: Kontrolle in der Konsole
-
       if (userInput) {
         highlightFeature(userInput);
       }
@@ -1756,9 +1753,6 @@ function highlightFeature(searchText) {
 
  features.some(feature => {
    let searchValue = feature.get("Suche");
-   
-   alert("Feature-Wert im Feld 'Suche': " + searchValue);
-
    if (searchValue === searchText) {
      feature.setStyle(highlightStyle);
      map.getView().fit(feature.getGeometry().getExtent(), { duration: 1000 });
@@ -1768,10 +1762,8 @@ function highlightFeature(searchText) {
      found = true; 
      return true; 
    }
-
    return false; 
  });
-
  if (!found) {
    alert("Kein passendes Feature gefunden!");
  }
