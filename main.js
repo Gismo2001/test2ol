@@ -154,8 +154,8 @@ const exp_allgm_fsk_layer = new VectorLayer({
   name: 'fsk', 
   style: getStyleForArtFSK,
   visible: false,
-  minResolution: 0,
-  maxResolution: 4
+  //minResolution: 0,
+  //maxResolution: 4
 })
 const exp_bw_son_lin_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_son_lin.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }), 
@@ -1713,26 +1713,79 @@ function addMarker(coordinates) {
   sLayer.getSource().addFeature(marker);
 };
 //-----------------------------------------Menü mit Submenü
-
+var userInput = ""; // Globale Variable zur Speicherung der Nutzereingabe
+var currentlyHighlightedFeature = null; // Variable zur Verfolgung des aktuell markierten Features
 
 /* Nested subbar */
 var sub2 = new Bar({
-  toggleOne: true,
-  controls: [
-    new TextButton({
-      html:"2.1", 
-      handleClick: function() {
-        alert("2.1 wurde geclickt ");
-      //Aktionen
-      } 
-    }),
-    new TextButton({
-      html:"2.2", 
-      handleClick: function() { 
-        //Aktionen
-      } 
-    })
-  ]
+ toggleOne: true,
+ controls: [
+ new TextButton({
+  html: "2.1",
+  handleClick: function () {
+    if (currentlyHighlightedFeature) {
+      // Wenn ein Feature bereits markiert wurde, hebe die Markierung auf und setze zurück
+      currentlyHighlightedFeature.setStyle(null); 
+      currentlyHighlightedFeature = null; 
+    } else {
+      // Fordere den Nutzer zur Eingabe auf
+      userInput = prompt("Bitte geben Sie einen Text ein:", "");
+      
+      console.log("Eingegebener Text:", userInput); // Optional: Kontrolle in der Konsole
+
+      if (userInput) {
+        highlightFeature(userInput);
+      }
+    }
+  }
+ }),
+ new TextButton({
+  html: "2.2",
+  handleClick: function () {
+   // Aktionen
+  }
+ })
+ ]
+});
+
+// Funktion zur Suche und Markierung im Layer "exp_allgm_fsk_layer"
+function highlightFeature(searchText) {
+ const source = exp_allgm_fsk_layer.getSource();
+ const features = source.getFeatures();
+ let found = false;
+
+ features.some(feature => {
+   let searchValue = feature.get("Suche");
+   
+   alert("Feature-Wert im Feld 'Suche': " + searchValue);
+
+   if (searchValue === searchText) {
+     feature.setStyle(highlightStyle);
+     map.getView().fit(feature.getGeometry().getExtent(), { duration: 1000 });
+     
+     currentlyHighlightedFeature = feature; // Speichere das aktuell angeklickte Feature
+ 
+     found = true; 
+     return true; 
+   }
+
+   return false; 
+ });
+
+ if (!found) {
+   alert("Kein passendes Feature gefunden!");
+ }
+}
+
+// Markierungsstil für das gefundene Feature
+const highlightStyle = new Style({
+ stroke: new Stroke({
+ color: 'red',
+ width: 3
+ }),
+ fill: new Fill({
+ color: 'rgba(255, 0, 0, 0.3)'
+ })
 });
 
 //GPS-Postionn durch "P"
