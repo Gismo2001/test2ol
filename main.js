@@ -385,11 +385,10 @@ const gnAtlas2023 = new TileLayer({
     url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/dop_wms",
     attributions: 'Orthophotos Niedersachsen, LGLN',
     params: {"LAYERS": "ni_dop20", "TILED": "true", "VERSION": "1.3.0"},
-        
   })),
   title: "2023_NI",
   opacity: 1.000000,
-  visible: false,
+  visible: true,
 });
 const gnAtlas2020 = new TileLayer({
   source: new TileWMS(({
@@ -848,9 +847,9 @@ const wmsLayerGroup = new LayerGroup({
 });
 const GNAtlasGroup = new LayerGroup({
   title: "Luftbilder",
-  
   fold: true,
   fold: 'close',
+  visible: false,
   layers: [gnAtlas1937, gnAtlas1957, gnAtlas1970, gnAtlas1980,  gnAtlas1990, gnAtlas2002, gnAtlas2009, gnAtlas2010,gnAtlas2011, gnAtlas2012, gnAtlas2014, gnAtlas2017, gnAtlas2020, gnAtlas2023]
 });
 const kmGroup = new LayerGroup({
@@ -1549,7 +1548,9 @@ document.addEventListener('DOMContentLoaded', function () {
   //***********************Alternativ einen Bericht öffnen
   link.addEventListener('click', function(event) {
   event.preventDefault(); // Verhindert die Standardaktion des Links
-  var newWindow = window.open('https://nlwkn.hannit-share.de/index.php/apps/files/files/11334138?dir=/db/DIN/Rep&openfile=true', '_blank');
+  //var newWindow = window.open('https://nlwkn.hannit-share.de/index.php/apps/files/files/11334138?dir=/db/DIN/Rep&openfile=true', '_blank');
+  var newWindow = window.open('https://www.google.de/maps/dir//52.4350337,7.0772211/@52.4349563,7.0772211,18.22z/data=!4m2!4m1!3e0?', '_blank');
+  
   });
 
   container.appendChild(link);
