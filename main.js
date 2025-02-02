@@ -154,8 +154,8 @@ const exp_allgm_fsk_layer = new VectorLayer({
   name: 'fsk', 
   style: getStyleForArtFSK,
   visible: false,
-  //minResolution: 0,
-  //maxResolution: 4
+  minResolution: 0,
+  maxResolution: 4
 })
 const exp_bw_son_lin_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_son_lin.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }), 
@@ -1730,7 +1730,7 @@ var sub2 = new Bar({
       currentlyHighlightedFeature = null; 
     } else {
       // Fordere den Nutzer zur Eingabe auf
-      userInput = prompt("Bitte geben Sie einen Text ein:", "");
+      userInput = prompt("gem flur zähler/nenner oder fsk-id:", "");
       if (userInput) {
         highlightFeature(userInput);
       }
@@ -1748,27 +1748,37 @@ var sub2 = new Bar({
 
 // Funktion zur Suche und Markierung im Layer "exp_allgm_fsk_layer"
 function highlightFeature(searchText) {
- const source = exp_allgm_fsk_layer.getSource();
- const features = source.getFeatures();
- let found = false;
+  const source = exp_allgm_fsk_layer.getSource();
+  const features = source.getFeatures();
+  let found = false;
 
- features.some(feature => {
-   let searchValue = feature.get("Suche");
-   if (searchValue === searchText) {
-     feature.setStyle(highlightStyle);
-     map.getView().fit(feature.getGeometry().getExtent(), { duration: 1000 });
-     
-     currentlyHighlightedFeature = feature; // Speichere das aktuell angeklickte Feature
- 
-     found = true; 
-     return true; 
-   }
-   return false; 
- });
- if (!found) {
-   alert("Kein passendes Feature gefunden!");
- }
+  // Prüfen, ob die erste Stelle eine Zahl oder ein Buchstabe ist
+  const firstChar = searchText.charAt(0);
+  const isNumber = !isNaN(firstChar) && firstChar.trim() !== "";
+
+  // Wähle das zu durchsuchende Attribut
+  const searchAttribute = isNumber ? "fsk" : "Suche";
+
+  features.some(feature => {
+    let searchValue = feature.get(searchAttribute);
+    if (searchValue === searchText) {
+      
+      feature.setStyle(highlightStyle);
+      map.getView().fit(feature.getGeometry().getExtent(), { duration: 1000 });
+
+      currentlyHighlightedFeature = feature; // Speichere das aktuell angeklickte Feature
+
+      found = true;
+      return true;
+    }
+    return false;
+  });
+
+  if (!found) {
+    alert("Kein passendes Feature gefunden!, FSK-Layer sichtbar??");
+  }
 }
+
 
 // Markierungsstil für das gefundene Feature
 const highlightStyle = new Style({
