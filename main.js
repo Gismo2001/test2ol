@@ -486,7 +486,6 @@ const gnAtlas2002 = new TileLayer({
   opacity: 1.000000,
   visible: false,
 });
-
 const gnAtlas1990 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -497,7 +496,6 @@ const gnAtlas1990 = new TileLayer({
   opacity: 1.000000,
   visible: false,
 });
-
 const gnAtlas1980 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -538,7 +536,6 @@ const gnAtlas1937 = new TileLayer({
   opacity: 1.000000,
   visible: false,
 });
-
 var baseDE_layer = new TileLayer({
   title: "Base-DE",
   opacity: 1.000000,
@@ -1562,9 +1559,6 @@ document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
   return false;
 };
-
-
-
 //----------------------------------------------Print
 const dims = {
   a0: [1189, 841],
@@ -1722,7 +1716,7 @@ var sub2 = new Bar({
  toggleOne: true,
  controls: [
  new TextButton({
-  html: "2.1",
+  html: "FSk",
   handleClick: function () {
     if (currentlyHighlightedFeature) {
       // Wenn ein Feature bereits markiert wurde, hebe die Markierung auf und setze zurück
@@ -1778,8 +1772,6 @@ function highlightFeature(searchText) {
     alert("Kein passendes Feature gefunden!, FSK-Layer sichtbar??");
   }
 }
-
-
 // Markierungsstil für das gefundene Feature
 const highlightStyle = new Style({
  stroke: new Stroke({
@@ -1869,7 +1861,7 @@ var sub1 = new Bar({
 
     }),
     new Toggle({
-      html:"2", 
+      html:"S", 
       onToggle: function(b) { 
         //test();
        },
@@ -1883,7 +1875,7 @@ var sub1 = new Bar({
 var mainBar1 = new Bar({
   controls: [
     new Toggle({
-      html: "H",
+      html: "D",
       // First level nested control bar
       bar: sub1,
       onToggle: function() { },
