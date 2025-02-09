@@ -31,7 +31,6 @@ function initializeWMS(WMSCapabilities,map ) {
         e.layer.set('legend', e.options.data.legend);
    });
 };
-
 function checkForLinkInTH(html) {
     const table = document.createElement('table');
     table.innerHTML = html;
@@ -60,9 +59,7 @@ function checkForLinkInTH(html) {
         }
     }
     return table.outerHTML;
-}
-
-
+};
 function dragElement(elmnt) {
     alert("Hall");
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -104,5 +101,5 @@ function dragElement(elmnt) {
       document.onmouseup = null;
       document.onmousemove = null;
     }
-  }
+;}
   
