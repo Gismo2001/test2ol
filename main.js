@@ -1109,6 +1109,7 @@ map.on('click', function (evt) {
           '<div style="max-height: 200px; overflow-y: auto;">' +
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
           '<p>' + "Id = " + feature.get('bw_id') +  ' (' + (feature.get('KTR') ? feature.get('KTR') : 'k.A.') + ')' +  '</p>' +
+          `<p><a href="#" onclick="alert(&quot;https://www.google.com/maps?q=${result}&quot;); return false;">Maps Link</a></p>` +
           `<p><a href="https://www.google.com/maps?q=&layer=c&cbll=${result}&cbp=12,90,0,0,1" target="_blank" rel="noopener noreferrer">streetview</a></p>` +
           '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
           '<p>' + "Bauj. = " + (feature.get('baujahr') ? feature.get('baujahr') : 'k.A.') + '</p>' +
