@@ -33,4 +33,3 @@ export function UTMToLatLon_Fix(east, north, zone, isNorthernHemisphere) {
     return `${lat.toFixed(6)},${lon.toFixed(6)}`;
   }
   
-  

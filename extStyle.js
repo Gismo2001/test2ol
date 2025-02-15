@@ -241,10 +241,10 @@ function getStyleForArtEin(feature) {
             iconSrc = './data/einEinleitung.svg';
             break;
         case 'Sonstige':
-            iconSrc = './data/einSonstige.svg';
+            iconSrc = './data/einSonstige1.svg';
             break;
         default:
-            iconSrc = './data/einSonstige.svg';
+            iconSrc = './data/einSonstige1.svg';
     }
 
     return new Style({
@@ -255,45 +255,6 @@ function getStyleForArtEin(feature) {
     });
 };
 
-/* function getStyleForArtSonPun(feature) {   
-    const artValue = feature.get('bauart');
-    let iconSrc;
-    switch (artValue) {
-        case 'Bootsanleger':
-            iconSrc = './data/bwSonPun_Anleger.svg';
-            break;
-        case 'Betriebsgebäude':
-            iconSrc = './data/sonPunBetrieb.svg';
-            break;
-        case 'Infotafel':
-            iconSrc = './data/sonPunInfo.svg';
-            break;
-        case 'Auskolkung':
-            iconSrc = './data/sonPunKolk.svg';
-            break;
-        case 'Furt':
-            iconSrc = './data/bwSonPun_Furt.svg';
-            break;
-        case 'Tor':
-            iconSrc = './data/bwSonPun_Tor.svg';
-            break;
-        case 'Überfahrt':
-            iconSrc = './data/bwSonPun_Ueberfahrt.svg';
-            break;
-                case 'Betriebspegel':
-            iconSrc = './data/bwSonPun_Betriebspegel.svg';
-            break;
-        default:
-            iconSrc = './data/sonPunSonstige.svg';
-    }
-    return new Style({
-        image: new Icon({
-            src: iconSrc,
-            scale: .9 
-        })
-    });
-}; */
-
 function getStyleForArtSonPun(feature) {
     const artValue = feature.get('bauart');
     let iconSrc;
@@ -303,6 +264,15 @@ function getStyleForArtSonPun(feature) {
     
     }else if (/betriebs/i.test(artValue)) {
         iconSrc = './data/sonPunBetrieb.svg';
+   
+    }else if (/Schalt/i.test(artValue)) {
+        iconSrc = './data/sonPunSchalt.svg';
+
+    }else if (/schutz/i.test(artValue)) {
+        iconSrc = './data/sonPunSchutz.svg';
+
+    }else if (/steg/i.test(artValue)) {
+        iconSrc = './data/bwSonPun_Anleger.svg';
     
     } else if (artValue === 'Infotafel') {
         iconSrc = './data/sonPunInfo.svg';
@@ -317,7 +287,7 @@ function getStyleForArtSonPun(feature) {
     } else if (artValue === 'Betriebspegel') {
         iconSrc = './data/bwSonPun_Betriebspegel.svg';
     } else {
-        iconSrc = './data/sonPunSonstige.svg';
+        iconSrc = './data/sonPunSonstige1.svg';
     }
 
     return new Style({

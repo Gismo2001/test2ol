@@ -84,7 +84,8 @@ import { UTMToLatLon_Fix } from './myNewFunc';
 //var popup; // Globale Variable für das Popup
 
 // Funktion zum Verschieben des DIVs
-function dragInfo() {
+function dragInfo(infoDiv) {
+  console.log(document.getElementById("Info"));
   dragElement(document.getElementById("Info"));  
 }
 
@@ -369,7 +370,7 @@ const wmsWrrlFgLayer = new TileLayer({
       'TILED': true,
     },
   }),
-  visible: true,
+  visible: false,
   opacity: 1,
 });
 const wmsGewWmsFgLayer = new TileLayer({
@@ -384,7 +385,7 @@ const wmsGewWmsFgLayer = new TileLayer({
       'TILED': true,
     },
   }),
-  visible: false,
+  visible: true,
   opacity: 1,
 });
 
@@ -999,7 +1000,8 @@ function singleClickHandler(evt) {
                 const infoDiv = createInfoDiv(layerName, modifiedHTML);
                 document.body.appendChild(infoDiv);
                 // Funktion zum Verschieben des DIVs
-                //dragInfo();
+                //console.log('infoDiv: '+ infoDiv);
+                //dragInfo(infoDiv);
               } else {
                 console.log('nichts verwertbares gefunden');
                 //alert('nichts verwertbares gefunden');
@@ -1064,36 +1066,38 @@ var closer = document.getElementById('popup-closer');
 map.on('click', function (evt) {
   if (globalCoordAnOderAus===false ){
     var coordinates = evt.coordinate;
-    var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-    console.log(layer);
-    var layname = layer.get('name');
-    
-    var beschreibLangValue = feature.get('beschreib_lang');
-    var beschreibLangHtml = '';
-    if (beschreibLangValue && beschreibLangValue.trim() !== '') {
-    beschreibLangHtml = '<br>' + '<u>' + "Beschreib (lang): " + '</u>' + beschreibLangValue + '</p>';
-    };
-    // Popup soll nur für bestimmte Layernamen angezeigt werden
-    if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'sle' && layname !== 'weh' && layname !== 'son_lin' && layname !== 'exp_gew_fla' ) {
-      
-      if (feature) {
-        coordinates = feature.getGeometry().getCoordinates();
-        popup.setPosition(coordinates);
-        // HTML-Tag Foto1
-        var foto1Value = feature.get('foto1');
-        var foto1Html = '';
-        var foto2Value = feature.get('foto2');
-        var foto2Html = '';
-        var foto3Value = feature.get('foto3');
-        var foto3Html = '';
-        var foto4Value = feature.get('foto4');
-        var foto4Html = '';
-        
-        if (foto1Value && foto1Value.trim() !== '') {
-          foto1Html = '<a href="' + foto1Value + '" onclick="window.open(\'' + foto1Value + '\', \'_blank\'); return false;">Foto 1</a>';
-        } else {
-          foto1Html =   " Foto 1 ";
-        }
+    var feature = map.forEachFeatureAtPixel
+    (
+      evt.pixel, 
+      function(feature, layer) 
+      {
+        var layname = layer.get('name');
+        var beschreibLangValue = feature.get('beschreib_lang');
+        var beschreibLangHtml = '';
+        if (beschreibLangValue && beschreibLangValue.trim() !== '') {
+          beschreibLangHtml = '<br>' + '<u>' + "Beschreib (lang): " + '</u>' + beschreibLangValue + '</p>';
+        };
+        // Popup soll nur für bestimmte Layernamen angezeigt werden
+        if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'sle' && layname !== 'weh' && layname !== 'son_lin' && layname !== 'exp_gew_fla' ) {
+          if (feature) {
+            coordinates = feature.getGeometry().getCoordinates();
+            popup.setPosition(coordinates);
+            // HTML-Tag Foto1
+            var foto1Value = feature.get('foto1');
+            var foto1Html = '';
+            var foto2Value = feature.get('foto2');
+            var foto2Html = '';
+            var foto3Value = feature.get('foto3');
+            var foto3Html = '';
+            var foto4Value = feature.get('foto4');
+            var foto4Html = '';
+            if (foto1Value && foto1Value.trim() !== '') {
+              foto1Html = '<a href="' + foto1Value + '" onclick="window.open(\'' + foto1Value + '\', \'_blank\'); return false;">Foto 1</a>';
+          } 
+          else 
+          {
+              foto1Html =   " Foto 1 ";
+          }
         if (foto2Value && foto2Value.trim() !== '') {
           foto2Html = '<a href="' + foto2Value + '" onclick="window.open(\'' + foto2Value + '\', \'_blank\'); return false;">Foto 2</a>';
         } else {
@@ -1112,15 +1116,15 @@ map.on('click', function (evt) {
         var rwert = feature.get('rwert');
         var hwert = feature.get('hwert');
         var result = UTMToLatLon_Fix(rwert, hwert, 32, true);
-
+ 
          content.innerHTML =
           '<div style="max-height: 200px; overflow-y: auto;">' +
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
           '<p>' + "Id = " + feature.get('bw_id') +  ' (' + (feature.get('KTR') ? feature.get('KTR') : 'k.A.') + ')' +  '</p>' +
-          `<p><a href="#" onclick="alert(&quot;https://www.google.com/maps?q=${result}&quot;); return false;">Maps Link</a></p>` +
-          `<p><a href="https://www.google.com/maps?q=&layer=c&cbll=${result}&cbp=12,90,0,0,1" target="_blank" rel="noopener noreferrer">streetview</a></p>` +
           '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
           '<p>' + "Bauj. = " + (feature.get('baujahr') ? feature.get('baujahr') : 'k.A.') + '</p>' +
+          `<p><a href="https://www.google.com/maps?q=${result}" target="_blank" rel="noopener noreferrer">Google Maps link</a></p>` +
+          `<p><a href="https://www.google.com/maps?q=&layer=c&cbll=${result}&cbp=12,90,0,0,1" target="_blank" rel="noopener noreferrer">streetview</a></p>` +
           '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
            '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
            '<p>' + beschreibLangHtml + '</p>' +
@@ -1181,7 +1185,6 @@ map.on('click', function (evt) {
       '<p><a href="' + feature.get('U_Steckbrief') + '" onclick="window.open(\'' + feature.get('U_Steckbrief') + '\', \'_blank\'); return false;">NLWKN-SB</a> '+
       '<p>' + urlWKDBHtml +
       //'<a href="' + feature.get('URL_WKDB') + '" onclick="window.open(\'' + feature.get('URL_WKDB') + '\', \'_blank\'); return false;">WK_DB</a> '+
-
       //'<a href="' + feature.get('foto1') + '" onclick="window.open(\'' + feature.get('foto1') + '\', \'_blank\'); return false;">Karte</a> ' +
       //'<a href="' + feature.get('foto2') + '" onclick="window.open(\'' + feature.get('foto2') + '\', \'_blank\'); return false;">Foto</a><br>' +
       '<p><a href="' + feature.get('BSB') + '" onclick="window.open(\'' + feature.get('BSB') + '\', \'_blank\'); return false;">BSB  </a>' +
@@ -1196,7 +1199,6 @@ map.on('click', function (evt) {
       coordinates = evt.coordinate; 
       popup.setPosition(coordinates);
       content.innerHTML =
-      
       '<div style="max-height: 300px; overflow-y: auto;">' +
       '<p>ID: ' + feature.get('Massn_ID') + '<br>' +
       '<p>Bez (Art): ' + feature.get('UMnArtBez') + '<br>' +
@@ -1246,7 +1248,6 @@ map.on('click', function (evt) {
            '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
            '<p>' + beschreibLangHtml + '</p>' +
           '</div>';
-      
     }
     // Führen Sie Aktionen für den Layernamen 'exp_gew_fla' durch
     if (layname === 'exp_gew_fla') {
@@ -1334,6 +1335,7 @@ map.on('click', function (evt) {
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
           '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
           '<p>' + "WSP (OW) = " + feature.get('WSP_OW') + " m" +  "  WSP (UW) = " + feature.get('WSP_UW') + " m" + '</p>' +
+          `<p><a href="https://www.google.com/maps?q=${result}" target="_blank" rel="noopener noreferrer">Google Maps link</a></p>` +
           `<p><a href="https://www.google.com/maps?q=&layer=c&cbll=${result}&cbp=12,90,0,0,1" target="_blank" rel="noopener noreferrer">streetview</a></p>` +
           '<p>' + "Bauj. = " + feature.get('baujahr') + '</p>' +
           '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
@@ -1384,6 +1386,7 @@ map.on('click', function (evt) {
               '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
               '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
               //'<p>' + "WSP1 (OW) = " + feature.get('Ziel_OW1').toFixed(2) + " m" +  "  WSP2 (OW) = " + feature.get('Ziel_OW2').toFixed(2) + " m" + '</p>' +
+              `<p><a href="https://www.google.com/maps?q=${result}" target="_blank" rel="noopener noreferrer">Google Maps link</a></p>` +
               `<p><a href="https://www.google.com/maps?q=&layer=c&cbll=${result}&cbp=12,90,0,0,1" target="_blank" rel="noopener noreferrer">streetview</a></p>` +
               '<p>' + "WSP1 (OW) = " + feature.get('Ziel_OW1') + " m" +  "  WSP2 (OW) = " + feature.get('Ziel_OW2') + " m" + '</p>' +
               '<p>' + "Bauj. = " + feature.get('baujahr') + '</p>' +
@@ -1478,7 +1481,6 @@ function placeMarkerAndShowCoordinates(event) {
       stopEvent: false,
     });
     map.addOverlay(markerCoordOverlay);
-    
     if (projectionSelect.value === 'EPSG:3857') {
       const format = createStringXY(2);
       const swappedCoordinate = [event.coordinate[1], event.coordinate[0]]; // Swap x and y
@@ -1549,33 +1551,21 @@ function transformCoordinateToMousePosition32632(coordinate) {
 //--------------------------------------------Hyerperlink um ein neues Browserfenster zu öffnen wird dem Popup hinzugefügt
 document.addEventListener('DOMContentLoaded', function () {
   var popup = document.getElementById('popup');
-  
   var popupCloser = document.getElementById('popup-closer');
   var container = document.createElement('div');
   var link = document.createElement('a');
-  //schreibeInnerHtml(layer);
   link.textContent = 'Weitere Infos';
-  //link.href = '#'; // Verhindert, dass der Link die Seite neu lädt
-  //link.addEventListener('click', function(event) {
-  //  event.preventDefault(); // Verhindert die Standardaktion des Links
-  //  var newWindow = window.open('', '_blank');
-  //  newWindow.document.body.innerHTML = 
-  //    '<p>Hallo neue Welt 2</p>'
-  
-  //});
-  
-  //***********************Alternativ einen Bericht öffnen
   link.addEventListener('click', function(event) {
   event.preventDefault(); // Verhindert die Standardaktion des Links
-  //var newWindow = window.open('https://nlwkn.hannit-share.de/index.php/apps/files/files/11334138?dir=/db/DIN/Rep&openfile=true', '_blank');
-  var newWindow = window.open('https://www.google.de/maps/dir//52.4350337,7.0772211/@52.4349563,7.0772211,18.22z/data=!4m2!4m1!3e0?', '_blank');
-  
+  var newWindow = window.open('https://nlwkn.hannit-share.de/index.php/apps/files/files/11334138?dir=/db/DIN/Rep&openfile=true', '_blank');
   });
-
   container.appendChild(link);
   container.appendChild(popupCloser);
   popup.appendChild(container);
 });
+  //var newWindow = window.open('https://www.google.de/maps/dir//52.4350337,7.0772211/@52.4349563,7.0772211,18.22z/data=!4m2!4m1!3e0?', '_blank');
+  //var newWindow = window.open(' https://www.google.com/maps?q=52.5200,13.4050', '_blank');
+
 //--------------------------------------------Popup schließen
 document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
@@ -1738,7 +1728,8 @@ var sub2 = new Bar({
  toggleOne: true,
  controls: [
  new TextButton({
-  html: "FSk",
+  html: '<i class="fa fa-map" ></i>',
+  title: "Flurstückssuche",
   handleClick: function () {
     if (currentlyHighlightedFeature) {
       // Wenn ein Feature bereits markiert wurde, hebe die Markierung auf und setze zurück
@@ -1755,8 +1746,13 @@ var sub2 = new Bar({
  }),
  new TextButton({
   html: "2.2",
-  handleClick: function () {
-   // Aktionen
+  title: "noch nich belegt",
+  handleClick: 
+  function (
+  
+  ) 
+  {
+    alert('Button ist nicht belegt')
   }
  })
  ]
@@ -1810,7 +1806,8 @@ var sub1 = new Bar({
   toggleOne: true,
   controls:[
     new Toggle({
-      html: "P",
+      html: '<i class="fa fa-map-marker" ></i>',
+      title: "GPS-Position",
       //autoActivate: true,
       onToggle: 
       function () {
@@ -1879,11 +1876,10 @@ var sub1 = new Bar({
         //updateButtonAppearance(); // Aktualisieren Sie das Erscheinungsbild des Buttons basierend auf dem aktualisierten isActive-Status
         
       } ,
-      
-
     }),
     new Toggle({
-      html:"S", 
+      html:'<i class="fa fa-search"></i>',
+      title: "Suche", 
       onToggle: function(b) { 
         //test();
        },
@@ -1897,11 +1893,11 @@ var sub1 = new Bar({
 var mainBar1 = new Bar({
   controls: [
     new Toggle({
-      html: "D",
-      // First level nested control bar
+      html: '<i class="fa fa-info"></i>',
+      title: "Weitere Funktionen",
+       // First level nested control bar
       bar: sub1,
       onToggle: function() { },
-      
     })
   ]
 });
