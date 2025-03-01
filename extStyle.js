@@ -2,6 +2,8 @@ import {Circle as CircleStyle, Fill, RegularShape, Icon, Stroke, Style, Text} fr
 import MultiPoint from 'ol/geom/MultiPoint';
 import { Point} from 'ol/geom.js';
 //extfunc.js
+
+
 const sleStyle = new Style({
     image: new Icon({
         src: './data/sle.svg',
@@ -38,7 +40,6 @@ const queStyle = new Style({
     scale: .9
     })
 });
-
 // neuer Style für gew_fl
 const exp_gew_fla_vecStyle = new Style({
     stroke: new Stroke({
@@ -47,14 +48,12 @@ const exp_gew_fla_vecStyle = new Style({
     }),
     
 });
-
 const gehoelz_vecStyle = new Style({
     stroke: new Stroke({
     color: 'rgba(173, 114, 3, 1)',
     width: 3
     }),
 });
-
 function getStyleForArtUmn(feature) {
     const mnIdValue = feature.get('Massn_ID');
     let strokeColor;
@@ -178,7 +177,6 @@ function getStyleForArtGewInfo(feature) {
         })
     ];
 }
-
 function getStyleForArtSonLin(feature) {   
     const artValue = feature.get('bauart');
     let strokeColor;
@@ -223,7 +221,6 @@ function getStyleForArtSonLin(feature) {
         })
     });
 };
-
 function getStyleForArtEin(feature) {   
     const artValue = feature.get('Ein_ord');
     let iconSrc;
@@ -254,7 +251,6 @@ function getStyleForArtEin(feature) {
         })
     });
 };
-
 function getStyleForArtSonPun(feature) {
     const artValue = feature.get('bauart');
     let iconSrc;
@@ -297,7 +293,6 @@ function getStyleForArtSonPun(feature) {
         })
     });
 }
-
 function machWasMitFSK(feature){
     console.log (feature.get('Art'));
 };
@@ -331,7 +326,6 @@ function getStyleForArtFSK(feature) {
         })
     });
 };
-
 const km10scalStyle = new Style({
     stroke: new Stroke({
         color: 'grey',
@@ -386,7 +380,6 @@ const km500scalStyle = function(feature, km, resolution) {
         return null;
     }
 };
-
 const arrowStyle = new Style({
     stroke: new Stroke({
         color: 'black',
@@ -408,8 +401,6 @@ const endpointStyle = new Style({
     }),
 });
 const combinedStyle = [arrowStyle, endpointStyle];
-
- 
 const gpsStyle = new Style({
     fill: new Fill({
       color: 'rgba(0, 0, 255, 0.2)',
@@ -423,8 +414,6 @@ const gpsStyle = new Style({
     }),
   
   });
-
-
 export { 
     bru_nlwknStyle,
     sleStyle,

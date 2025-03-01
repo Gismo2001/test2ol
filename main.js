@@ -1067,16 +1067,14 @@ map.on('click', function (evt) {
   if (globalCoordAnOderAus===false ){
     var coordinates = evt.coordinate;
     var feature = map.forEachFeatureAtPixel
-    (
-      evt.pixel, 
-      function(feature, layer) 
-      {
-        var layname = layer.get('name');
-        var beschreibLangValue = feature.get('beschreib_lang');
-        var beschreibLangHtml = '';
-        if (beschreibLangValue && beschreibLangValue.trim() !== '') {
-          beschreibLangHtml = '<br>' + '<u>' + "Beschreib (lang): " + '</u>' + beschreibLangValue + '</p>';
-        };
+    var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) 
+    {
+      var layname = layer.get('name');
+      var beschreibLangValue = feature.get('beschreib_lang');
+      var beschreibLangHtml = '';
+      if (beschreibLangValue && beschreibLangValue.trim() !== '') {
+        beschreibLangHtml = '<br>' + '<u>' + "Beschreib (lang): " + '</u>' + beschreibLangValue + '</p>';
+      };
         // Popup soll nur für bestimmte Layernamen angezeigt werden
         if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'sle' && layname !== 'weh' && layname !== 'son_lin' && layname !== 'exp_gew_fla' ) {
           if (feature) {
@@ -1118,7 +1116,7 @@ map.on('click', function (evt) {
         var result = UTMToLatLon_Fix(rwert, hwert, 32, true);
  
          content.innerHTML =
-          '<div style="max-height: 200px; overflow-y: auto;">' +
+         > '<div style="max-height: 200px; overflow-y: auto;">' +
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
           '<p>' + "Id = " + feature.get('bw_id') +  ' (' + (feature.get('KTR') ? feature.get('KTR') : 'k.A.') + ')' +  '</p>' +
           '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
