@@ -8,15 +8,10 @@ import Overlay from 'ol/Overlay.js';
 import Draw from 'ol/interaction/Draw.js';
 import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
 
-
-
 import {circular} from 'ol/geom/Polygon';
 import Geolocation from 'ol/Geolocation.js';
 import { jsPDF } from "jspdf";
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
-
-
-
 
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
@@ -1116,7 +1111,7 @@ map.on('click', function (evt) {
         var result = UTMToLatLon_Fix(rwert, hwert, 32, true);
  
          content.innerHTML =
-         > '<div style="max-height: 200px; overflow-y: auto;">' +
+          '<div style="max-height: 200px; overflow-y: auto;">' +
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
           '<p>' + "Id = " + feature.get('bw_id') +  ' (' + (feature.get('KTR') ? feature.get('KTR') : 'k.A.') + ')' +  '</p>' +
           '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
