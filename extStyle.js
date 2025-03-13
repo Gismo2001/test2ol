@@ -2,8 +2,6 @@ import {Circle as CircleStyle, Fill, RegularShape, Icon, Stroke, Style, Text} fr
 import MultiPoint from 'ol/geom/MultiPoint';
 import { Point} from 'ol/geom.js';
 //extfunc.js
-
-
 const sleStyle = new Style({
     image: new Icon({
         src: './data/sle.svg',
@@ -238,10 +236,10 @@ function getStyleForArtEin(feature) {
             iconSrc = './data/einEinleitung.svg';
             break;
         case 'Sonstige':
-            iconSrc = './data/einSonstige1.svg';
+            iconSrc = './data/einSonstige.svg';
             break;
         default:
-            iconSrc = './data/einSonstige1.svg';
+            iconSrc = './data/einSonstige.svg';
     }
 
     return new Style({
@@ -251,6 +249,44 @@ function getStyleForArtEin(feature) {
         })
     });
 };
+/* function getStyleForArtSonPun(feature) {   
+    const artValue = feature.get('bauart');
+    let iconSrc;
+    switch (artValue) {
+        case 'Bootsanleger':
+            iconSrc = './data/bwSonPun_Anleger.svg';
+            break;
+        case 'Betriebsgebäude':
+            iconSrc = './data/sonPunBetrieb.svg';
+            break;
+        case 'Infotafel':
+            iconSrc = './data/sonPunInfo.svg';
+            break;
+        case 'Auskolkung':
+            iconSrc = './data/sonPunKolk.svg';
+            break;
+        case 'Furt':
+            iconSrc = './data/bwSonPun_Furt.svg';
+            break;
+        case 'Tor':
+            iconSrc = './data/bwSonPun_Tor.svg';
+            break;
+        case 'Überfahrt':
+            iconSrc = './data/bwSonPun_Ueberfahrt.svg';
+            break;
+                case 'Betriebspegel':
+            iconSrc = './data/bwSonPun_Betriebspegel.svg';
+            break;
+        default:
+            iconSrc = './data/sonPunSonstige.svg';
+    }
+    return new Style({
+        image: new Icon({
+            src: iconSrc,
+            scale: .9 
+        })
+    });
+}; */
 function getStyleForArtSonPun(feature) {
     const artValue = feature.get('bauart');
     let iconSrc;
@@ -260,16 +296,10 @@ function getStyleForArtSonPun(feature) {
     
     }else if (/betriebs/i.test(artValue)) {
         iconSrc = './data/sonPunBetrieb.svg';
-   
-    }else if (/Schalt/i.test(artValue)) {
-        iconSrc = './data/sonPunSchalt.svg';
-
-    }else if (/schutz/i.test(artValue)) {
-        iconSrc = './data/sonPunSchutz.svg';
-
-    }else if (/steg/i.test(artValue)) {
-        iconSrc = './data/bwSonPun_Anleger.svg';
     
+    }else if (/steg/i.test(artValue)) {
+        iconSrc = './data/bwSonPun_Anleger.svg';   
+        
     } else if (artValue === 'Infotafel') {
         iconSrc = './data/sonPunInfo.svg';
     } else if (artValue === 'Auskolkung') {
@@ -283,7 +313,7 @@ function getStyleForArtSonPun(feature) {
     } else if (artValue === 'Betriebspegel') {
         iconSrc = './data/bwSonPun_Betriebspegel.svg';
     } else {
-        iconSrc = './data/sonPunSonstige1.svg';
+        iconSrc = './data/sonPunSonstige.svg';
     }
 
     return new Style({
@@ -380,12 +410,23 @@ const km500scalStyle = function(feature, km, resolution) {
         return null;
     }
 };
-const arrowStyle = new Style({
-    stroke: new Stroke({
-        color: 'black',
-        width: 4,
-    }),
-});
+
+
+
+function arrowStyle(feature) {   
+    const directionValue = feature.get('Direction') || 0; // Standardwert 0, falls kein Wert vorhanden
+    console.log("aufgerufen");
+    return new Style({
+        
+        image: new Icon({
+            src: './data/arrow.svg', // Ersetze mit dem tatsächlichen Pfad zum Pfeil-Symbol
+            anchor: [0.5, 0.5], // Mittelpunkt als Rotationsachse
+            rotateWithView: true,
+            rotation: (Math.PI / 180) * directionValue // Grad in Radiant umwandeln
+        })
+    });
+}
+
 const endpointStyle = new Style({
     geometry: function (feature) {
         const coordinates = feature.getGeometry().getCoordinates();
@@ -401,7 +442,7 @@ const endpointStyle = new Style({
     }),
 });
 const combinedStyle = [arrowStyle, endpointStyle];
-const gpsStyle = new Style({
+ const gpsStyle = new Style({
     fill: new Fill({
       color: 'rgba(0, 0, 255, 0.2)',
       opacity: 0.5,
@@ -413,8 +454,9 @@ const gpsStyle = new Style({
       rotateWithView: true,
     }),
   
-  });
-export { 
+});
+
+ export { 
     bru_nlwknStyle,
     sleStyle,
     wehStyle, 
@@ -434,6 +476,7 @@ export {
     km500scalStyle,
     combinedStyle,
     gpsStyle,
+    arrowStyle,
     machWasMitFSK
 };
    

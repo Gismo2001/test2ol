@@ -1,5 +1,5 @@
 @import "node_modules/ol/ol.css";
-@import "node_modules/ol-ext/dist/ol-ext.css";
+
 
 *{
   box-sizing: border-box;
@@ -290,10 +290,14 @@ html {
   overflow-y: auto;
   z-index: 1007;
   background: rgb(255, 255, 255);
-  bottom: 150px;
+  top: 30px;
   width: 80%;
-  left: 5px;
+  left: 30px;
   font-size: 16px;
+  overflow-y: scroll;
+  max-height: 80%;
+  padding: 10px;
+  
 }
 /* Stil für das Schließen-Symbol */
 .close-icon {
@@ -397,3 +401,39 @@ margin: 0px auto 0px 10px;
   width: 50px;
   margin: 10px;
 } */
+
+
+
+#search-results-container {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 1px solid black;
+  padding: 10px;
+  z-index: 10000; /* Stellt sicher, dass es über anderen Elementen liegt */
+  display: none; /* Startet unsichtbar */
+  max-height: 300px; /* Begrenzte Höhe, damit die Scrollbar erscheint */
+  overflow-y: auto; /* Scrollbar hinzufügen, wenn nötig */
+}
+#search-results li {
+  cursor: pointer;
+  padding: 1px;
+  border-bottom: 1px solid #ddd;
+}
+#search-results {
+  list-style-position: inside; /* Punkte innerhalb des Containers */
+  padding-left: 0; /* Entfernt zusätzlichen linken Abstand */
+}
+
+
+#close-search-results {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}

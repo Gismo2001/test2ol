@@ -8,11 +8,12 @@ import Overlay from 'ol/Overlay.js';
 import Draw from 'ol/interaction/Draw.js';
 import {LineString, Polygon, Point, Circle} from 'ol/geom.js';
 
+
+
 import {circular} from 'ol/geom/Polygon';
 import Geolocation from 'ol/Geolocation.js';
 import { jsPDF } from "jspdf";
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
-
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import TileWMS from 'ol/source/TileWMS.js';
@@ -23,6 +24,7 @@ import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
 import { FullScreen, Attribution, defaults as defaultControls, ZoomToExtent, Control } from 'ol/control.js';
 import { DragRotateAndZoom } from 'ol/interaction.js';
+import { DragAndDrop } from 'ol/interaction.js';
 import { defaults as defaultInteractions } from 'ol/interaction.js';
 import { singleClick } from 'ol/events/condition';
 
@@ -37,6 +39,9 @@ import SearchFeature from 'ol-ext/control/SearchFeature';
 //import SearchNominatim from 'ol-ext/control/SearchNominatim';
 import WMSCapabilities from'ol-ext/control/WMSCapabilities';
 
+
+
+
 import Icon from 'ol/style/Icon'; // Hinzufügen Sie diesen Import
 
 
@@ -44,6 +49,8 @@ import Bar from 'ol-ext/control/Bar';
 import Toggle from 'ol-ext/control/Toggle'; // Importieren Sie Toggle
 import { Modify, Select } from 'ol/interaction'; // Importieren Sie Draw
 import TextButton from 'ol-ext/control/TextButton';
+
+
 
 //projektion definieren und registrieren
 proj4.defs('EPSG:32632', '+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs');
@@ -69,18 +76,15 @@ import {
   km100scalStyle,
   km500scalStyle,
   combinedStyle,
+  arrowStyle,
   machWasMitFSK,
   getStyleForArtSonLin,
-  getStyleForArtGewInfo,
- 
+  getStyleForArtGewInfo
 } from './extStyle';
-
 import { UTMToLatLon_Fix } from './myNewFunc';
-//var popup; // Globale Variable für das Popup
 
 // Funktion zum Verschieben des DIVs
-function dragInfo(infoDiv) {
-  console.log(document.getElementById("Info"));
+function dragInfo() {
   dragElement(document.getElementById("Info"));  
 }
 
@@ -89,10 +93,18 @@ const attribution = new Attribution({
   html: '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
 });
 
+// Function to remove all overlays
+function removeAllOverlays() {
+  map.getOverlays().clear();
+}
+
+
 const mapView = new View({
   center: proj.fromLonLat([7.35, 52.7]),
   zoom: 9
 });
+
+
 
 const map = new Map({
   target: "map",
@@ -102,10 +114,12 @@ const map = new Map({
     new ZoomToExtent({
        extent: [727361, 6839277, 858148, 6990951] // Geben Sie hier das Ausdehnungsintervall an
      }),
-    attribution // Fügen Sie hier Ihre benutzerdefinierte Attribution-Steuerung hinzu
+    attribution,
+   
   ]),
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
+
 
 //------------------------------------Attribution collapse
 function checkSize() {
@@ -155,6 +169,7 @@ const gehoelz_vecLayer = new VectorLayer({
 const exp_allgm_fsk_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_allgm_fsk.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'fsk',
+  //permalink:"fsk", 
   name: 'fsk', 
   style: getStyleForArtFSK,
   visible: false,
@@ -163,7 +178,8 @@ const exp_allgm_fsk_layer = new VectorLayer({
 })
 const exp_bw_son_lin_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_son_lin.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }), 
-  title: 'Sonstig, Linien', 
+  title: 'Sonstig, Linien',
+  //permalink:"son_lin", 
   name: 'son_lin',
   style: getStyleForArtSonLin,
   visible: false
@@ -180,6 +196,7 @@ const exp_gew_info_layer = new VectorLayer({
   format: new GeoJSON(),
   url: function (extent) {return './myLayers/exp_gew_info.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Gew, Info', 
+  //permalink:"gew_info", 
   name: 'gew_info',
   style: getStyleForArtGewInfo,
   //style: combinedStyle,
@@ -189,65 +206,46 @@ const gew_layer_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gew.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'gew', // Titel für den Layer-Switcher
   name: 'gew',
-  style: new Style({
-    fill: new Fill({ color: 'rgba(0,28, 240, 0.4)' }),
-    stroke: new Stroke({ color: 'blue', width: 2 })
+  style: new Style({fill: new Fill({ color: 'rgba(0,28, 240, 0.4)' }),stroke: new Stroke({ color: 'blue', width: 2 })
   })
 })
 
 const exp_bw_son_pun_layer = new VectorLayer({
-  source: new VectorSource({
-  format: new GeoJSON(),
-  url: function (extent) {return './myLayers/exp_bw_son_pun.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_son_pun.geojson' + '?bbox=' + extent.join(','); },strategy: LoadingStrategy.bbox}),
   title: 'Sonstige, Punkte', 
+  //permalink:"son_pun", 
   name: 'son_pun', 
   style: getStyleForArtSonPun,
   visible: false
 });
 const exp_bw_ein_layer = new VectorLayer({
-  source: new VectorSource({
-  format: new GeoJSON(),
-  url: function (extent) {return './myLayers/exp_bw_ein.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_ein.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Einläufe', 
+ // permalink:"ein", 
   name: 'ein', 
   style: getStyleForArtEin,
   visible: false
 });
 const exp_bw_que_layer = new VectorLayer({
-  source: new VectorSource({
-    format: new GeoJSON(),
-    url: function (extent) {
-      return './myLayers/exp_bw_que.geojson' + '?bbox=' + extent.join(',');
-    },
-    strategy: LoadingStrategy.bbox
-  }),
+  source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_que.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox}),
   title: 'Querung', 
+ // permalink:"que", 
   name: 'que', // Titel für den Layer-Switcher
   style: queStyle,
   visible: false
 });
 const exp_bw_due_layer = new VectorLayer({
-  source: new VectorSource({
-    format: new GeoJSON(),
-    url: function (extent) {
-      return './myLayers/exp_bw_due.geojson' + '?bbox=' + extent.join(',');
-    },
-    strategy: LoadingStrategy.bbox
-  }),
+  source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_due.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox }),
   title: 'Düker', // Titel für den Layer-Switcher
+ // permalink:"due", 
   name: 'due', // Titel für den Layer-Switcher
   style: dueStyle,
   visible: false
 });
 const exp_bw_weh_layer = new VectorLayer({
-  source: new VectorSource({
-    format: new GeoJSON(),
-    url: function (extent) {
-      return './myLayers/exp_bw_weh.geojson' + '?bbox=' + extent.join(',');
-    },
-    strategy: LoadingStrategy.bbox
-  }),
+  source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_weh.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox}),
   title: 'Wehr', // Titel für den Layer-Switcher
+  //permalink:"weh", 
   name: 'weh', // Titel für den Layer-Switcher
   style: wehStyle,
   visible: false
@@ -255,30 +253,26 @@ const exp_bw_weh_layer = new VectorLayer({
 const exp_bw_bru_nlwkn_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_bru_nlwkn.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Brücke (NLWKN)', 
+  //permalink:"bru_nlwkn",
   name: 'bru_nlwkn', // Titel für den Layer-Switcher
   style: bru_nlwknStyle,
   visible: false
 });
 const exp_bw_bru_andere_layer = new VectorLayer({
-  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_bru_andere.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
-  title: 'Brücke (andere)', 
+  source: new VectorSource({format: new GeoJSON(),url:function (extent) {return './myLayers/exp_bw_bru_andere.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  title: 'Brücke (andere)',
+  //permalink:"bru_andere", 
   name: 'bru_andere', 
   style: bruAndereStyle,
   visible: false
 });
 const exp_bw_sle_layer = new VectorLayer({
-  source: new VectorSource({
-    format: new GeoJSON(),
-    url: function (extent) {
-      return './myLayers/exp_bw_sle.geojson' + '?bbox=' + extent.join(',');
-    },
-    strategy: LoadingStrategy.bbox
-  }),
+  source: new VectorSource({format: new GeoJSON(),url:function (extent) {return './myLayers/exp_bw_sle.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox }),
   title: 'Schleuse', // Titel für den Layer-Switcher
+  //permalink:"sle", 
   name: 'sle', // Titel für den Layer-Switcher
   style: sleStyle,
-  visible: true,
-  trash: false,
+  visible: true, 
 });
 
 const km10scal_layer = new VectorLayer({
@@ -389,10 +383,11 @@ const gnAtlas2023 = new TileLayer({
     url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/dop_wms",
     attributions: 'Orthophotos Niedersachsen, LGLN',
     params: {"LAYERS": "ni_dop20", "TILED": "true", "VERSION": "1.3.0"},
+        
   })),
   title: "2023_NI",
   opacity: 1.000000,
-  visible: true,
+  visible: false,
 });
 const gnAtlas2020 = new TileLayer({
   source: new TileWMS(({
@@ -420,7 +415,7 @@ const gnAtlas2017 = new TileLayer({
   })),
   title: "2017_NI",
   opacity: 1.000000,
-  visible: false,
+  visible: true,
 });
 const gnAtlas2014 = new TileLayer({
   source: new TileWMS(({
@@ -490,6 +485,7 @@ const gnAtlas2002 = new TileLayer({
   opacity: 1.000000,
   visible: false,
 });
+
 const gnAtlas1990 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -500,6 +496,7 @@ const gnAtlas1990 = new TileLayer({
   opacity: 1.000000,
   visible: false,
 });
+
 const gnAtlas1980 = new TileLayer({
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
@@ -540,6 +537,7 @@ const gnAtlas1937 = new TileLayer({
   opacity: 1.000000,
   visible: false,
 });
+
 var baseDE_layer = new TileLayer({
   title: "Base-DE",
   opacity: 1.000000,
@@ -628,6 +626,41 @@ const osmTileCr = new TileLayer({
   opacity: 0.75
 });
 
+var Alkis_layer = new TileLayer({
+  title: "ALKIS",
+  opacity: 1.000000,
+  visible: false,
+  type: 'base',
+  source: new TileWMS({
+    url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/alkis_wms?",
+    attributions: '© LGLN',
+    params: {
+      "LAYERS": "ALKIS",
+      "TILED": true, // "true" sollte ohne Anführungszeichen sein
+      "VERSION": "1.3.0"
+    },
+  }),
+});
+
+
+
+/* // Manuellen Button für Permalink erstellen
+const tmpButton = document.createElement("button");
+tmpButton.innerHTML = '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>';
+tmpButton.style.position = "absolute";
+tmpButton.style.top = "8px";
+tmpButton.style.left = "100px";
+tmpButton.style.zIndex = "1000";
+tmpButton.style.width = "22px";
+tmpButton.style.height = "22px";
+tmpButton.onclick = function () {
+   alert("Button gedrückt");
+};
+document.body.appendChild(tmpButton);
+
+// Button zum DOM hinzufügen
+document.body.appendChild(tmpButton); */
+
 const layerSwitcher = new LayerSwitcher({ 
   activationMode: 'click', 
   reverse: true, 
@@ -635,7 +668,7 @@ const layerSwitcher = new LayerSwitcher({
   tipLabel: 'Legende', 
  });
 map.addControl(layerSwitcher);
-
+    
 //------------------------------------ Layer für Messung
 const source = new VectorSource();
 const vector = new VectorLayer({
@@ -653,7 +686,6 @@ const vector = new VectorLayer({
 let sketch;
 let measureTooltipElement;
 let measureTooltip;
-
 //-------------------------------------------Funktionen für Messung----------------- //
 const pointerMoveHandler = function (evt) {
   
@@ -668,7 +700,10 @@ const pointerMoveHandler = function (evt) {
   }  
 };
 map.on('pointermove', pointerMoveHandler);
+
+
 let draw;
+
 const formatLength = function (line) {
   const length = getLength(line);
   let output;
@@ -763,6 +798,7 @@ function createMeasureTooltip() {
   });
   map.addOverlay(measureTooltip);
 }
+
 //Mit Kontextmenü werden die Overlays fü Messungen wieder gelöscht
 map.getViewport().addEventListener('contextmenu', function(evt) {
   evt.preventDefault(); // Verhindert das Standardkontextmenü
@@ -771,11 +807,11 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
     draw.finishDrawing(); // Beendet die laufende Messung
     map.removeInteraction(draw); // Entfernt die Zeicheninteraktion
     map.un('pointermove', pointerMoveHandler); // Entfernt den Event-Listener für 'pointermove'
+    map.getOverlays().clear();//helpTooltip = null;
     measureTooltip = null;
+    helpTooltipElement = null;
     measureTooltipElement = null;
-    map.removeOverlay(measureTooltip);
-    
-    //map.removeOverlay(measureTooltip);
+    removeAllOverlays();
     
     return; // Beende die Funktion, um weitere Interaktionen zu verhindern
   }
@@ -790,7 +826,6 @@ function removeMeasureResult() {
   measureTooltip = null;
   measureTooltipElement = null;
 } */
-
 
 //------------------------------------Custom Controls 1 für Linie und für Fläche ........................
 class CustomControls1 extends Control {
@@ -822,7 +857,6 @@ map.addControl(new CustomControls1({
   target: 'custom-controls'
 }));
 
-
 //---------------------------------------------Layergruppen
 const BwGroupP = new LayerGroup({
   title: "Bauw.(P)",
@@ -830,6 +864,7 @@ const BwGroupP = new LayerGroup({
   fold: true,
   fold: 'close',
   layers: [ exp_bw_son_pun_layer, exp_bw_ein_layer, exp_bw_que_layer, exp_bw_due_layer, exp_bw_bru_andere_layer, exp_bw_bru_nlwkn_layer, exp_bw_weh_layer, exp_bw_sle_layer],
+  
 });
 const BwGroupL = new LayerGroup({
   title: "Bauw.(L)",
@@ -844,10 +879,11 @@ const wmsLayerGroup = new LayerGroup({
   fold: true,
   fold: 'close',
   visible: false,
-  layers: [ wmsLsgLayer, wmsNsgLayer, wmsUesgLayer, wmsWrrlFgLayer, wmsGewWmsFgLayer ]
+  layers: [ Alkis_layer, wmsLsgLayer, wmsNsgLayer, wmsUesgLayer, wmsWrrlFgLayer, wmsGewWmsFgLayer ]
 });
 const GNAtlasGroup = new LayerGroup({
   title: "Luftbilder",
+  name: "Luftbilder",
   fold: true,
   fold: 'close',
   visible: false,
@@ -868,7 +904,7 @@ const BaseGroup = new LayerGroup({
 });
 map.addLayer(BaseGroup);
 map.addLayer(GNAtlasGroup);
-map.addLayer(exp_allgm_fsk_layer);
+map.addLayer(exp_allgm_fsk_layer);-
 map.addLayer(gew_layer_layer);
 map.addLayer(wmsLayerGroup);
 map.addLayer(kmGroup);
@@ -877,7 +913,7 @@ map.addLayer(BwGroupP);
 map.addLayer(vector); 
 //Ende Layer hinzufügen---------------------------------------
 
-//--------------------------------------------------Info für WMS-Layer
+//-----------------------------------------------------------------Info für WMS-Layer
 var toggleButtonU = new Toggle({
   html: '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>',
   className: "select",
@@ -926,7 +962,7 @@ let layer_selected = null; // Setze layer_selected auf null, um sicherzustellen,
 selectFeat.on('select', function (e) {
   e.selected.forEach(function (featureSelected) {
       const layerName = selectFeat.getLayer(featureSelected).get('name');
-      //console.log('SelcetFeat='+ layerName);
+      
 
       if (layerName !== 'gew') {
           // Setze layer_selected nur, wenn das layerName nicht 'gew' ist
@@ -948,10 +984,10 @@ function getLayersInGroup(layerGroup) {
       if (layer instanceof LayerGroup) {
           // Wenn der Layer ein LayerGroup ist, rufe die Funktion rekursiv auf
           layers.push(...getLayersInGroup(layer));
-          //console.log('layers in group: '+ layers);
+          
       } else {
           // Füge den Layer zur Liste hinzu, wenn e ein TileLayer ist
-          //console.log('layers nicht in group: '+ layer);
+          
           layers.push(layer);
       }
   });
@@ -961,8 +997,8 @@ function getLayersInGroup(layerGroup) {
 function singleClickHandler(evt) {
   const visibleLayers = [];
   map.getLayers().forEach(layer => {
-      const layerName = layer.get('name');
       
+      const layerName = layer.get('name');
       if (layer.getVisible()) {
         if (layer instanceof LayerGroup) {
           if (layerName !== 'GN-DOPs' && layerName !== 'Base' && layerName !== 'Station' && layerName !== 'BauwP' && layerName !== 'BauwL' && layerName !== undefined){
@@ -986,7 +1022,9 @@ function singleClickHandler(evt) {
           fetch(url)
                 
           .then((response) => response.text())
+          
           .then((html) => {
+            console.log(html)
             if (html.trim() !== '') {
              //removeExistingInfoDiv();
               var bodyIsEmpty = /<body[^>]*>\s*<\/body>/i.test(html);
@@ -995,8 +1033,7 @@ function singleClickHandler(evt) {
                 const infoDiv = createInfoDiv(layerName, modifiedHTML);
                 document.body.appendChild(infoDiv);
                 // Funktion zum Verschieben des DIVs
-                //console.log('infoDiv: '+ infoDiv);
-                //dragInfo(infoDiv);
+                //dragInfo();
               } else {
                 console.log('nichts verwertbares gefunden');
                 //alert('nichts verwertbares gefunden');
@@ -1035,7 +1072,7 @@ function removeExistingInfoDiv() {
   if (existingInfoDiv) { existingInfoDiv.remove(); }
 }
 
-//---------------------------------------------------Funktionen für Popup
+//--------------------------------------------------------------Funktionen für Popup
 var container = document.getElementById('popup');
 var content = document.getElementById('popup-content');
 var closer = document.getElementById('popup-closer');
@@ -1047,6 +1084,10 @@ var popup = new Overlay({
   duration: 250
   }
 });
+content.addEventListener('contextmenu', function (event) {
+  event.stopPropagation();
+});
+
 map.addOverlay(popup);
 
 closer.onclick = function()
@@ -1057,40 +1098,39 @@ closer.onclick = function()
 };
 var closer = document.getElementById('popup-closer');
 
-//--------------------------------------------------Funktionen für Text im Popup
+//-------------------------------------------------------Funktionen für Text im Popup
 map.on('click', function (evt) {
+  console.log(globalCoordAnOderAus);
   if (globalCoordAnOderAus===false ){
     var coordinates = evt.coordinate;
-    var feature = map.forEachFeatureAtPixel
     var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) 
     {
       var layname = layer.get('name');
       var beschreibLangValue = feature.get('beschreib_lang');
       var beschreibLangHtml = '';
       if (beschreibLangValue && beschreibLangValue.trim() !== '') {
-        beschreibLangHtml = '<br>' + '<u>' + "Beschreib (lang): " + '</u>' + beschreibLangValue + '</p>';
+      beschreibLangHtml = '<br>' + '<u>' + "Beschreib (lang): " + '</u>' + beschreibLangValue + '</p>';
       };
-        // Popup soll nur für bestimmte Layernamen angezeigt werden
-        if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'sle' && layname !== 'weh' && layname !== 'son_lin' && layname !== 'exp_gew_fla' ) {
-          if (feature) {
-            coordinates = feature.getGeometry().getCoordinates();
-            popup.setPosition(coordinates);
-            // HTML-Tag Foto1
-            var foto1Value = feature.get('foto1');
-            var foto1Html = '';
-            var foto2Value = feature.get('foto2');
-            var foto2Html = '';
-            var foto3Value = feature.get('foto3');
-            var foto3Html = '';
-            var foto4Value = feature.get('foto4');
-            var foto4Html = '';
-            if (foto1Value && foto1Value.trim() !== '') {
-              foto1Html = '<a href="' + foto1Value + '" onclick="window.open(\'' + foto1Value + '\', \'_blank\'); return false;">Foto 1</a>';
-          } 
-          else 
-          {
-              foto1Html =   " Foto 1 ";
-          }
+    // Popup soll nur für bestimmte Layernamen angezeigt werden
+    if (layname !== 'gew' && layname !== 'km10scal' && layname !== 'km100scal' && layname !== 'km500scal' && layname !== 'fsk' && layname !== 'sle' && layname !== 'weh' && layname !== 'son_lin' && layname !== 'exp_gew_fla' ) {
+        if (feature) {
+        coordinates = feature.getGeometry().getCoordinates();
+        popup.setPosition(coordinates);
+        // HTML-Tag Foto1
+        var foto1Value = feature.get('foto1');
+        var foto1Html = '';
+        var foto2Value = feature.get('foto2');
+        var foto2Html = '';
+        var foto3Value = feature.get('foto3');
+        var foto3Html = '';
+        var foto4Value = feature.get('foto4');
+        var foto4Html = '';
+        
+        if (foto1Value && foto1Value.trim() !== '') {
+          foto1Html = '<a href="' + foto1Value + '" onclick="window.open(\'' + foto1Value + '\', \'_blank\'); return false;">Foto 1</a>';
+        } else {
+          foto1Html =   " Foto 1 ";
+        }
         if (foto2Value && foto2Value.trim() !== '') {
           foto2Html = '<a href="' + foto2Value + '" onclick="window.open(\'' + foto2Value + '\', \'_blank\'); return false;">Foto 2</a>';
         } else {
@@ -1109,19 +1149,19 @@ map.on('click', function (evt) {
         var rwert = feature.get('rwert');
         var hwert = feature.get('hwert');
         var result = UTMToLatLon_Fix(rwert, hwert, 32, true);
- 
+
          content.innerHTML =
-          '<div style="max-height: 200px; overflow-y: auto;">' +
-          '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
-          '<p>' + "Id = " + feature.get('bw_id') +  ' (' + (feature.get('KTR') ? feature.get('KTR') : 'k.A.') + ')' +  '</p>' +
-          '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
-          '<p>' + "Bauj. = " + (feature.get('baujahr') ? feature.get('baujahr') : 'k.A.') + '</p>' +
-          `<p><a href="https://www.google.com/maps?q=${result}" target="_blank" rel="noopener noreferrer">Google Maps link</a></p>` +
-          `<p><a href="https://www.google.com/maps?q=&layer=c&cbll=${result}&cbp=12,90,0,0,1" target="_blank" rel="noopener noreferrer">streetview</a></p>` +
-          '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
-           '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
-           '<p>' + beschreibLangHtml + '</p>' +
-          '</div>';
+         '<div style="max-height: 200px; overflow-y: auto;">' +
+         '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
+         '<p>' + "Id = " + feature.get('bw_id') +  ' (' + (feature.get('KTR') ? feature.get('KTR') : 'k.A.') + ')' +  '</p>' +
+         '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
+         '<p>' + "Bauj. = " + (feature.get('baujahr') ? feature.get('baujahr') : 'k.A.') + '</p>' +
+         `<p><a href="https://www.google.com/maps?q=${result}" target="_blank" rel="noopener noreferrer">Google Maps link</a></p>` +
+         `<p><a href="https://www.google.com/maps?q=&layer=c&cbll=${result}&cbp=12,90,0,0,1" target="_blank" rel="noopener noreferrer">streetview</a></p>` +
+         '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
+          '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
+          '<p>' + beschreibLangHtml + '</p>' +
+         '</div>';
       } else {
         popup.setPosition(undefined);
       }
@@ -1138,6 +1178,9 @@ map.on('click', function (evt) {
       var foto4Html = '';
       var urlWKDB = feature.get('URL_WKDB');
       var urlWKDBHtml = '';
+      var url_wk_sb = feature.get('URL_WKSB');
+      console.log(url_wk_sb);
+      var url_wk_sb_Html = '';
 
       if (foto1Value && foto1Value.trim() !== '') {
         foto1Html = '<a href="' + foto1Value + '" onclick="window.open(\'' + foto1Value + '\', \'_blank\'); return false;">Foto 1</a>';
@@ -1159,24 +1202,26 @@ map.on('click', function (evt) {
       } else {
         foto4Html = " Foto 4 ";
       }
-      if (foto4Value && foto4Value.trim() !== '') {
-        foto4Html = '<a href="' + foto4Value + '" onclick="window.open(\'' + foto4Value + '\', \'_blank\'); return false;">Foto 4</a>';
-      } else {
-        foto4Html = " Foto 4 ";
-      }
       if (urlWKDB && urlWKDB.trim() !== '') {
-        urlWKDBHtml = '<a href="' + urlWKDB + '" onclick="window.open(\'' + urlWKDB + '\', \'_blank\'); return false;">WK-Datenblatt</a>';
+        urlWKDBHtml = '<a href="' + urlWKDB + '" onclick="window.open(\'' + urlWKDB + '\', \'_blank\'); return false;">NLWKN-WK</a>';
       } else {
-        urlWKDBHtml = "WK-Datenblatt";
+        urlWKDBHtml = " NLWKN-WK";
       }
+      
+      if (url_wk_sb && url_wk_sb .trim() !== '') {
+        url_wk_sb_Html = '<a href="' + url_wk_sb + '" onclick="window.open(\'' + url_wk_sb + '\', \'_blank\'); return false;">BfG-WK</a>';
+      } else {
+        url_wk_sb_Html = "BfG-WK";
+      }
+      
       coordinates = evt.coordinate; 
       popup.setPosition(coordinates);
       content.innerHTML =
       '<div style="max-height: 300px; overflow-y: auto;">' +
       '<p>Name: ' + feature.get('IDUabschn') + '<br>' + "von " + feature.get('Bez_Anfang') + " bis " + feature.get('Bez_Ende')  + '</p>' +
       '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
-      '<p><a href="' + feature.get('U_Steckbrief') + '" onclick="window.open(\'' + feature.get('U_Steckbrief') + '\', \'_blank\'); return false;">NLWKN-SB</a> '+
-      '<p>' + urlWKDBHtml +
+      '<p><a href="' + feature.get('U_Steckbrief') + '" onclick="window.open(\'' + feature.get('U_Steckbrief') + '\', \'_blank\'); return false;">NLWKN-SB</a> ' + url_wk_sb_Html + " " + urlWKDBHtml + 
+      
       //'<a href="' + feature.get('URL_WKDB') + '" onclick="window.open(\'' + feature.get('URL_WKDB') + '\', \'_blank\'); return false;">WK_DB</a> '+
       //'<a href="' + feature.get('foto1') + '" onclick="window.open(\'' + feature.get('foto1') + '\', \'_blank\'); return false;">Karte</a> ' +
       //'<a href="' + feature.get('foto2') + '" onclick="window.open(\'' + feature.get('foto2') + '\', \'_blank\'); return false;">Foto</a><br>' +
@@ -1192,6 +1237,7 @@ map.on('click', function (evt) {
       coordinates = evt.coordinate; 
       popup.setPosition(coordinates);
       content.innerHTML =
+      
       '<div style="max-height: 300px; overflow-y: auto;">' +
       '<p>ID: ' + feature.get('Massn_ID') + '<br>' +
       '<p>Bez (Art): ' + feature.get('UMnArtBez') + '<br>' +
@@ -1241,6 +1287,7 @@ map.on('click', function (evt) {
            '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
            '<p>' + beschreibLangHtml + '</p>' +
           '</div>';
+      
     }
     // Führen Sie Aktionen für den Layernamen 'exp_gew_fla' durch
     if (layname === 'exp_gew_fla') {
@@ -1474,6 +1521,7 @@ function placeMarkerAndShowCoordinates(event) {
       stopEvent: false,
     });
     map.addOverlay(markerCoordOverlay);
+    
     if (projectionSelect.value === 'EPSG:3857') {
       const format = createStringXY(2);
       const swappedCoordinate = [event.coordinate[1], event.coordinate[0]]; // Swap x and y
@@ -1489,7 +1537,7 @@ function placeMarkerAndShowCoordinates(event) {
       const swappedCoordinate = [transformedCoordinate[1], transformedCoordinate[0]]; // Swap x and y
       mousePositionElement.innerHTML = `Coordinates: ${format(swappedCoordinate)}`;
       // const googleMapsLink = `https://maps.app.goo.gl/?q=${swappedCoordinate[0]},${swappedCoordinate[1]}`;
-      // console.log(googleMapsLink);
+      
     }
     
   }
@@ -1544,27 +1592,40 @@ function transformCoordinateToMousePosition32632(coordinate) {
 //--------------------------------------------Hyerperlink um ein neues Browserfenster zu öffnen wird dem Popup hinzugefügt
 document.addEventListener('DOMContentLoaded', function () {
   var popup = document.getElementById('popup');
+  
   var popupCloser = document.getElementById('popup-closer');
   var container = document.createElement('div');
   var link = document.createElement('a');
+  //schreibeInnerHtml(layer);
   link.textContent = 'Weitere Infos';
+  //link.href = '#'; // Verhindert, dass der Link die Seite neu lädt
+  //link.addEventListener('click', function(event) {
+  //  event.preventDefault(); // Verhindert die Standardaktion des Links
+  //  var newWindow = window.open('', '_blank');
+  //  newWindow.document.body.innerHTML = 
+  //    '<p>Hallo neue Welt 2</p>'
+  
+  //});
+  
+  //***********************Alternativ einen Bericht öffnen
   link.addEventListener('click', function(event) {
   event.preventDefault(); // Verhindert die Standardaktion des Links
   var newWindow = window.open('https://nlwkn.hannit-share.de/index.php/apps/files/files/11334138?dir=/db/DIN/Rep&openfile=true', '_blank');
   });
+
   container.appendChild(link);
   container.appendChild(popupCloser);
   popup.appendChild(container);
 });
-  //var newWindow = window.open('https://www.google.de/maps/dir//52.4350337,7.0772211/@52.4349563,7.0772211,18.22z/data=!4m2!4m1!3e0?', '_blank');
-  //var newWindow = window.open(' https://www.google.com/maps?q=52.5200,13.4050', '_blank');
-
 //--------------------------------------------Popup schließen
 document.getElementById('popup-closer').onclick = function () {
   popup.setPosition(undefined);
   return false;
 };
-//----------------------------------------------Print
+
+
+
+//---------------------------------------------------------------------------Print
 const dims = {
   a0: [1189, 841],
   a1: [841, 594],
@@ -1653,7 +1714,7 @@ var sLayer = new VectorLayer({
 });
 map.addLayer(sLayer);
 
-//----------------------------------------------------------- Set the search control 
+//-------------------------------------------------------------- Set the search control 
 var search = new SearchPhoton({
   //target: $(".options").get(0),
   lang:"de",		// Force preferred language
@@ -1662,6 +1723,7 @@ var search = new SearchPhoton({
   position: true	// Search, with priority to geo position
 });
 map.addControl (search);
+
 
 // Select feature when click on the reference index
 search.on('select', function(e){
@@ -1672,7 +1734,7 @@ search.on('select', function(e){
     
     var format = new GeoJSON();
     var f = format.readFeature(e.search.geojson, { dataProjection: "EPSG:4326", featureProjection: map.getView().getProjection() });
-    //console.log(f)
+   
     sLayer.getSource().addFeature(f);
     var view = map.getView();
     var resolution = view.getResolutionForExtent(f.getGeometry().getExtent(), map.getSize());
@@ -1712,6 +1774,9 @@ function addMarker(coordinates) {
   sLayer.getSource().clear(); // Löscht vorherige Marker
   sLayer.getSource().addFeature(marker);
 };
+
+//----------------------------------------------------------------Menü mit Submenü
+
 //-----------------------------------------Menü mit Submenü
 var userInput = ""; // Globale Variable zur Speicherung der Nutzereingabe
 var currentlyHighlightedFeature = null; // Variable zur Verfolgung des aktuell markierten Features
@@ -1720,6 +1785,7 @@ var currentlyHighlightedFeature = null; // Variable zur Verfolgung des aktuell m
 var sub2 = new Bar({
  toggleOne: true,
  controls: [
+  // Suche nach Flurstück
  new TextButton({
   html: '<i class="fa fa-map" ></i>',
   title: "Flurstückssuche",
@@ -1732,77 +1798,247 @@ var sub2 = new Bar({
       // Fordere den Nutzer zur Eingabe auf
       userInput = prompt("gem flur zähler/nenner oder fsk-id:", "");
       if (userInput) {
-        highlightFeature(userInput);
+        highlightFeatureFSK(userInput);
       }
     }
   }
  }),
+ // Suche nach Bauwerk
  new TextButton({
-  html: "2.2",
-  title: "noch nich belegt",
-  handleClick: 
-  function (
-  
-  ) 
-  {
-    alert('Button ist nicht belegt')
+  html: '<i class="fa fa-anchor" ></i>',
+  title: "Suche bw",
+  handleClick: function () {
+    let searchText = prompt("Geben Sie den Suchtext ein:");
+    if (searchText && searchText.trim() !== "") { // Falls der Nutzer etwas eingegeben hat
+      let results = searchFeaturesByTextBw(searchText);
+      document.getElementById("search-results-container").style.display = "block"; // Zeige das div an
+    } else {
+      alert("Bitte geben Sie einen gültigen Suchtext ein.");
+    }
+  }
+ }),
+ // Suche nach Eigentümer
+ new TextButton({
+  html: '<i class="fa fa-anchor"></i>',
+  title: "Suche Eigentümer",
+  handleClick: function () {
+    let searchText = prompt("Geben Sie den Suchtext ein:");
+    if (searchText && searchText.trim() !== "") { // Falls der Nutzer etwas eingegeben hat
+      let results = searchFeaturesByTextEig(searchText);
+      document.getElementById("search-results-container").style.display = "block"; // Zeige das div an
+    } else {
+      alert("Bitte geben Sie einen gültigen Suchtext ein.");
+    }
   }
  })
  ]
 });
 
-// Funktion zur Suche und Markierung im Layer "exp_allgm_fsk_layer"
-function highlightFeature(searchText) {
+// ------------------------------------------------Funktion zur Suche und Markierung FSK "
+function highlightFeatureFSK(searchText) {
   const source = exp_allgm_fsk_layer.getSource();
   const features = source.getFeatures();
   let found = false;
-
   // Prüfen, ob die erste Stelle eine Zahl oder ein Buchstabe ist
   const firstChar = searchText.charAt(0);
   const isNumber = !isNaN(firstChar) && firstChar.trim() !== "";
-
   // Wähle das zu durchsuchende Attribut
   const searchAttribute = isNumber ? "fsk" : "Suche";
-
   features.some(feature => {
     let searchValue = feature.get(searchAttribute);
     if (searchValue === searchText) {
-      
       feature.setStyle(highlightStyle);
       map.getView().fit(feature.getGeometry().getExtent(), { duration: 1000 });
-
       currentlyHighlightedFeature = feature; // Speichere das aktuell angeklickte Feature
-
       found = true;
       return true;
     }
     return false;
   });
-
   if (!found) {
     alert("Kein passendes Feature gefunden!, FSK-Layer sichtbar??");
   }
 }
+//---------------------------------------------- Funktion zur Suche und Markierung Eigentümer"
+function highlightFeatureEig1(feature) {
+  // Falls ein anderes Feature hervorgehoben ist, Stil zurücksetzen
+  if (currentlyHighlightedFeature) {
+    currentlyHighlightedFeature.setStyle(null); // Standard-Stil wiederherstellen
+  }
+  feature.setStyle(highlightStyle);
+  currentlyHighlightedFeature = feature; // Speichert das hervorgehobene Feature
+  // Karte auf das Feature zoomen
+  let geometry = feature.getGeometry();
+  let extent = geometry.getExtent();
+  map.getView().fit(extent, { 
+    duration: 1000, 
+    padding: [50, 50, 50, 50], 
+    maxZoom: 18 
+  });
+}
+
 // Markierungsstil für das gefundene Feature
 const highlightStyle = new Style({
  stroke: new Stroke({
  color: 'red',
- width: 3
+ width: 12 
  }),
  fill: new Fill({
- color: 'rgba(255, 0, 0, 0.3)'
+ color: 'rgb(234, 255, 0)'
  })
 });
 
-//GPS-Postionn durch "P"
+//----------------------------------------------------- Funktionen zur Eigentümersuche
+function searchFeaturesByTextEig(searchText) {
+  let matchingFeatures = [];
+  console.log('Suche gestartet Eigentümer');
+
+  const source = exp_allgm_fsk_layer.getSource();
+  if (!source) {
+    console.error("Fehler: Die Layer-Quelle ist nicht verfügbar.");
+    return;
+  }
+
+  let features = source.getFeatures();
+  
+  features.forEach(feature => {
+    let properties = feature.getProperties();
+    let name = properties.Eig1 ? properties.Eig1.toLowerCase() : '';
+    
+    let searchTextLower = searchText.toLowerCase(); // Suchtext ebenfalls in Kleinbuchstaben umwandeln
+    
+    if (name.includes(searchTextLower)) {
+      matchingFeatures.push({ feature }); // Layer explizit hinzugefügt
+    }
+  });
+  
+  // Ergebnisse anzeigen
+  displaySearchResultsEig(matchingFeatures);
+
+  document.getElementById("close-search-results").addEventListener("click", function() {
+    document.getElementById("search-results-container").style.display = "none";
+    
+    // Hervorhebung zurücksetzen
+    if (currentlyHighlightedFeature) {
+      currentlyHighlightedFeature.setStyle(null);
+      currentlyHighlightedFeature = null;
+    }
+  });
+  
+}
+
+// Funktionen zur Bauwerkssuche
+function searchFeaturesByTextBw(searchText) {  
+  let layers = [exp_bw_bru_nlwkn_layer, exp_bw_due_layer, exp_bw_sle_layer, exp_bw_weh_layer, exp_bw_bru_andere_layer, exp_bw_ein_layer, exp_bw_que_layer, exp_bw_son_pun_layer ]; 
+  let matchingFeatures = [];
+  layers.forEach(layer => {
+      if (!layer) return;
+      let source = layer.getSource();
+      if (!source) return;
+      let features = source.getFeatures();
+      features.forEach(feature => {
+        let properties = feature.getProperties();
+        let name = properties.name ? properties.name.toLowerCase() : '';
+        let beschreib = properties.beschreib ? properties.beschreib.toLowerCase() : '';
+        let searchTextLower = searchText.toLowerCase(); // Suchtext ebenfalls in Kleinbuchstaben umwandeln
+        if (name.includes(searchTextLower) || beschreib.includes(searchTextLower)) {
+            matchingFeatures.push({ feature, layer });
+        }
+    });
+  });
+  // Ergebnisse anzeigen
+  displaySearchResultsBw(matchingFeatures);
+  document.getElementById("close-search-results").addEventListener("click", function() {
+    document.getElementById("search-results-container").style.display = "none";
+  });
+}
+
+function displaySearchResultsBw(results) {
+  let resultContainer = document.getElementById('search-results');
+  resultContainer.innerHTML = ''; // Alte Ergebnisse löschen
+  if (results.length === 0) {
+      resultContainer.innerHTML = '<li>Keine Treffer</li>';
+      return;
+  }
+  // 🔹 Alphanumerische Sortierung nach bw_id
+  results.sort((a, b) => {
+      let idA = a.feature.getProperties().bw_id || '';
+      let idB = b.feature.getProperties().bw_id || '';
+      return idA.localeCompare(idB, undefined, { numeric: true, sensitivity: 'base' });
+  });
+  results.forEach((item) => {
+      let feature = item.feature;
+      let properties = feature.getProperties();
+      let id = properties.bw_id;
+      let name = properties.name || 'Unbekannt';
+      let listItem = document.createElement('li');
+      listItem.textContent = id + ": " + name; // Nur den Namen anzeigen
+      listItem.onclick = () => zoomToFeature(feature);
+      resultContainer.appendChild(listItem);
+  });
+}
+
+//let currentlyHighlightedFeature = null; // Speichert das aktuell hervorgehobene Feature
+
+function displaySearchResultsEig(results) {
+  let resultContainer = document.getElementById('search-results');
+  resultContainer.innerHTML = ''; // Alte Ergebnisse löschen
+
+  if (results.length === 0) {
+    resultContainer.innerHTML = '<li>Keine Treffer</li>';
+    return;
+  }
+
+  
+  results.sort((a, b) => {
+    let idA = a.feature?.getProperties()?.Eig1?.trim() || '';
+    let idB = b.feature?.getProperties()?.Eig1?.trim() || '';
+    return idA.localeCompare(idB, undefined, { numeric: true, sensitivity: 'base' }); 
+  });
+
+  results.forEach((item) => {
+    let feature = item.feature;
+    let properties = feature.getProperties();
+    let name = properties.Eig1 || 'Unbekannt';
+    let suche = properties.Suche || 'Unbekannt';
+
+    let listItem = document.createElement('li');
+    listItem.textContent = name + "/ FSK: " + suche; // Nur den Namen anzeigen
+    listItem.onclick = () => highlightFeatureEig1(feature); // Beim Klicken hervorheben
+
+    resultContainer.appendChild(listItem);
+  });
+}
+
+
+function zoomToFeature(feature) {
+    let geometry = feature.getGeometry();
+    let extent = geometry.getExtent();
+    map.getView().fit(extent, { 
+      duration: 1000, 
+      padding: [50, 50, 50, 50], 
+      maxZoom: 20// Verhindert zu starkes Hineinzoomen
+    });
+    
+    
+}
+
+window.closeSearchResults = function () {
+  document.getElementById("search-results-container").style.display = "none";
+};
+let jsonButtonState = false; // Initialer Zustand
+//Das Untermenü mit drei buttons
 var sub1 = new Bar({
   toggleOne: true,
+  //Die Untermenüs
   controls:[
+    // Das Untermenü GPS-Position
     new Toggle({
       html: '<i class="fa fa-map-marker" ></i>',
-      title: "GPS-Position",
+      title: "GPSPosition",
       //autoActivate: true,
       onToggle: 
+      // Funktion zur Anzeige der GPS-Position
       function () {
         if (!watchId) {
           // Starte die Geolokalisierung, wenn sie nicht aktiv ist
@@ -1870,25 +2106,86 @@ var sub1 = new Bar({
         
       } ,
     }),
+    // Das Untermenü Suche (ohne eigene Funktion) aber mit einem Untermenü
     new Toggle({
-      html:'<i class="fa fa-search"></i>',
-      title: "Suche", 
+      html:'<i class="fa fa-search"></i>', 
+      title: "Suche",
       onToggle: function(b) { 
         //test();
        },
       // Second level nested control bar
       bar: sub2
-    })
+    }),
+    // Das Untermenü GeoJson
+    new Toggle({
+      html: '<i class="fa fa-file"></i>',
+      title: "GeoJson drag and drop",
+      onToggle: function () {
+      jsonButtonState = !jsonButtonState; // Zustand umschalten
+      if (jsonButtonState === true) {
+        setInteraction(); // Deine Funktion aufrufen, wenn der Zustand true ist
+        } else {
+        map.removeInteraction(dragAndDropInteraction);
+        isActive = false;
+        console.log('dragAndDropInteraction deaktiviert');  
+        }
+      },
+    }),
   ]
 });
 
-//Mainbar1
+
+//const extractStyles = document.getElementById('extractstyles');
+let dragAndDropInteraction;
+
+function setInteraction() {
+   dragAndDropInteraction = new DragAndDrop({
+    formatConstructors: [
+      //GPX,
+      GeoJSON,
+      //IGC,
+      // use constructed format to set options
+      //new KML({extractStyles: extractStyles.checked}),
+      //TopoJSON,
+    ],
+  });
+  dragAndDropInteraction.on('addfeatures', function (event) {
+    if (!event.file) {
+        console.warn("Kein Dateiname verfügbar.");
+        return;
+    }
+    
+    let fileName = event.file.name || 'Unbenannt';
+    fileName = fileName.replace(/\.[^/.]+$/, ""); // Dateiendung entfernen
+    console.log(fileName);
+    
+    const vectorSource = new VectorSource({
+        features: event.features,
+    });
+
+    // Bedingte Zuweisung des Styles
+    const layerStyle = fileName === 'fot1' ? arrowStyle : undefined;
+
+    map.addLayer(new VectorLayer({
+        source: vectorSource,
+        title: fileName,
+        style: layerStyle, // Wird nur gesetzt, wenn fileName "fot1" ist
+    }));
+
+    map.getView().fit(vectorSource.getExtent());
+});
+
+map.addInteraction(dragAndDropInteraction);
+}
+
+
+//Mainbar Button "i"
 var mainBar1 = new Bar({
   controls: [
     new Toggle({
       html: '<i class="fa fa-info"></i>',
       title: "Weitere Funktionen",
-       // First level nested control bar
+      // Untermenü mit zwei Buttons
       bar: sub1,
       onToggle: function() { },
     })
@@ -1963,4 +2260,5 @@ searchSelect.addEventListener('change', function(event) {
  
   console.log(searchBox.value);
 }); */
+
 
