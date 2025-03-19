@@ -354,6 +354,7 @@ function getStyleForArtFSK(feature) {
             color: strokeColor,
             width: 0.5
         })
+       
     });
 };
 const km10scalStyle = new Style({
@@ -411,20 +412,48 @@ const km500scalStyle = function(feature, km, resolution) {
     }
 };
 
-
-
 function arrowStyle(feature) {   
     const directionValue = feature.get('Direction') || 0; // Standardwert 0, falls kein Wert vorhanden
-    console.log("aufgerufen");
     return new Style({
-        
         image: new Icon({
-            src: './data/arrow.svg', // Ersetze mit dem tatsächlichen Pfad zum Pfeil-Symbol
-            anchor: [0.5, 0.5], // Mittelpunkt als Rotationsachse
-            rotateWithView: true,
-            rotation: (Math.PI / 180) * directionValue // Grad in Radiant umwandeln
+        src: './data/arrow.svg', // Ersetze mit dem tatsächlichen Pfad zum Pfeil-Symbol
+        anchor: [0.5, 0.5], // Mittelpunkt als Rotationsachse
+        rotateWithView: true,
+        rotation: ((Math.PI / 180) * directionValue) - (Math.PI/2) // Grad in Radiant umwandeln
         })
     });
+}
+function geojsonStyle(feature) {
+    const geometryType = feature.getGeometry().getType();
+
+    if (geometryType === 'Point' || geometryType === 'MultiPoint') {
+        return new Style({
+            image: new CircleStyle({
+                radius: 7,
+                fill: new Fill({ color: 'red' }),
+                stroke: new Stroke({ color: 'black', width: 2 })
+            })
+        });
+    }
+
+    if (geometryType === 'LineString' || geometryType === 'MultiLineString') {
+        return new Style({
+            stroke: new Stroke({
+                color: 'red', // Blaue Linienfarbe
+                width: 4 // Linienbreite
+            })
+        });
+    }
+
+    if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
+        return new Style({
+            fill: new Fill({ color: 'red' }), // Halbdurchsichtiges Grün
+            stroke: new Stroke({ color: 'black', width: 3 }),
+            opacity: 0.5
+        });
+    }
+
+    return new Style(); // Fallback-Stil
 }
 
 const endpointStyle = new Style({
@@ -477,6 +506,7 @@ const combinedStyle = [arrowStyle, endpointStyle];
     combinedStyle,
     gpsStyle,
     arrowStyle,
+    geojsonStyle,
     machWasMitFSK
 };
    
