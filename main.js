@@ -2225,7 +2225,7 @@ var sub2 = new Bar({
         //test();
        },
       // Second level nested control bar
-      bar: sub2
+      //bar: sub2
     }),
     
   ]
