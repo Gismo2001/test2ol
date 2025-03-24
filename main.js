@@ -39,6 +39,10 @@ import SearchPhoton from 'ol-ext/control/SearchPhoton';
 import SearchFeature from 'ol-ext/control/SearchFeature';
 //import SearchNominatim from 'ol-ext/control/SearchNominatim';
 import WMSCapabilities from'ol-ext/control/WMSCapabilities';
+import CanvasAttribution from 'ol-ext/control/CanvasAttribution';
+import CanvasTitle from 'ol-ext/control/CanvasTitle';
+import CanvasScaleLine from 'ol-ext/control/CanvasScaleLine';
+import PrintDialog from 'ol-ext/control/PrintDialog';
 
 import Icon from 'ol/style/Icon'; // Hinzufügen Sie diesen Import
 
@@ -103,23 +107,76 @@ const mapView = new View({
 });
 
 
-
 const map = new Map({
   target: "map",
   view: mapView,
-  controls: defaultControls().extend([
+   controls: defaultControls().extend([
+    
     new FullScreen(),
     new ZoomToExtent({
-       extent: [727361, 6839277, 858148, 6990951] // Geben Sie hier das Ausdehnungsintervall an
+       extent: [727361, 6839277, 858148, 6990951] 
      }),
     attribution,
-   
+    
   ]),
+
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
 
+// Canvas-Kontrollen hinzufügen
+map.addControl(new CanvasAttribution());
+map.addControl(new CanvasTitle({ 
+  title: '', 
+  visible: false,
+  style: new Style({ 
+    
+  })
+}));
+
+
+
+// Print control
+var printControl = new PrintDialog({ 
+  target: document.querySelector('.info'),
+});
+printControl.setSize('A4');
+
+map.addControl(printControl);
+//printControl.element.classList.add('print-button');
+
+
+// Button-Click-Event für den Druck auslösen
+document.getElementById('printControl').addEventListener('click', function() {
+   printControl.print(); // Startet den Druckprozess
+});
+
+/* On print > save image file */
+printControl.on(['print', 'error'], function(e) {
+ // Print success
+ if (e.image) {
+   if (e.pdf) {
+     // Export pdf using the print info
+     var pdf = new jsPDF({
+       orientation: e.print.orientation,
+       unit: e.print.unit,
+       format: e.print.size
+     });
+     pdf.addImage(e.image, 'JPEG', e.print.position[0], e.print.position[1], e.print.imageWidth, e.print.imageHeight);
+     pdf.save(e.print.legend ? 'legend.pdf' : 'map.pdf');
+   } else  {
+     // Save image as file
+     e.canvas.toBlob(function(blob) {
+       var name = (e.print.legend ? 'legend.' : 'map.')+e.imageType.replace('image/','');
+       saveAs(blob, name);
+     }, e.imageType, e.quality);
+   }
+ } else {
+   console.warn('No canvas to export');
+ }
+});
 
 //------------------------------------Attribution collapse
+/*
 function checkSize() {
   const small = map.getSize()[0] < 600;
   attribution.setCollapsible(small);
@@ -127,6 +184,8 @@ function checkSize() {
 }
 map.on('change:size', checkSize);
 checkSize();
+*/
+
 
 //---------------------------------------------------Marker für Adresssuche
 const sourceP = new VectorSource();
@@ -138,7 +197,40 @@ let watchId = null; // Variable, um die Watch-ID der Geolokalisierung zu speiche
 const locateP = document.createElement('div');
 let isActive = false; // Variable, um den Aktivierungsstatus der Geolokalisierung zu verfolgen
 
-//*************neuer Layer
+/*
+const WFS_vectorSource = new VectorSource({
+  format: new GeoJSON(),
+  url: function (extent) {
+    return (
+      'https://geodaten.emsland.de/core-services/services/lkel_fb67_wasserwirtschaft_wfs?' +
+      'service=WFS&version=1.1.0&request=GetFeature&' +
+      'typename=lkel_fb67_landwirtschaftliche_feldberegung_oberflaechengewaesser&' +  
+      'outputFormat=application/json&srsname=EPSG:3857&' +
+      'bbox=' + extent.join(',') + ',EPSG:3857'
+    );
+  },
+  strategy: LoadingStrategy.bbox,
+});
+
+const WFS_vector = new VectorLayer({
+  source: WFS_vectorSource,
+  style: new Style({
+    stroke: new Stroke({
+      color: 'white',
+      width: 0.75,
+    }),
+    fill: new Fill({
+      color: 'rgba(100,100,100,0.25)',
+    }),
+  }),
+  title: 'WFS',
+});
+
+map.addLayer(WFS_vector);
+*/
+
+
+//die Layer
 const exp_gew_fla_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_info_fla.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Gewässerflächen', // Titel für den Layer-Switcher
@@ -227,7 +319,7 @@ const exp_bw_ein_layer = new VectorLayer({
 const exp_bw_que_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_que.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox}),
   title: 'Querung', 
- // permalink:"que", 
+  permalink:"que", 
   name: 'que', // Titel für den Layer-Switcher
   style: queStyle,
   visible: false
@@ -235,7 +327,7 @@ const exp_bw_que_layer = new VectorLayer({
 const exp_bw_due_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_due.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox }),
   title: 'Düker', // Titel für den Layer-Switcher
- // permalink:"due", 
+  permalink:"due", 
   name: 'due', // Titel für den Layer-Switcher
   style: dueStyle,
   visible: false
@@ -618,6 +710,7 @@ const osmTileGr = new TileLayer({
 const osmTileCr = new TileLayer({
   title: "osm-color",
   name: "osm-color",
+  permalink: "osm-color",
   type: 'base',
   source: new OSM({
       url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -719,12 +812,15 @@ const formatArea = function (polygon) {
   const area = getArea(polygon);
   let output;
   if (area >= 10000) {
-    output = (area / 1000000).toFixed(3) + ' ' + 'km<sup>2</sup>';
+    const km2 = (area / 1000000).toFixed(3) + ' km<sup>2</sup>';
+    const ha = (area / 10000).toFixed(3) + ' ha';
+    output = km2 + ' (' + ha + ')';
   } else {
-    output = area.toFixed(3) + ' ' + 'm<sup>2</sup>';
+    output = area.toFixed(3) + ' m<sup>2</sup>';
   }
   return output;
 };
+
 const style = new Style({
   fill: new Fill({
     color: 'rgba(255, 255, 255, 0.2)',
@@ -904,6 +1000,9 @@ map.addLayer(BwGroupL);
 map.addLayer(BwGroupP);
 map.addLayer(vector); 
 //Ende Layer hinzufügen---------------------------------------
+
+ 
+
 
 //-----------------------------------------------------------------Info für WMS-Layer
 var toggleButtonU = new Toggle({
@@ -1145,7 +1244,8 @@ map.on('click', function (evt) {
          '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
          '<p>' + "Id = " + feature.get('bw_id') +  ' (' + (feature.get('KTR') ? feature.get('KTR') : 'k.A.') + ')' +  '</p>' +
          '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
-         '<p>' + "Bemerk = " + (feature.get('bemerk') ? feature.get('bemerk') : 'k.A.') + ')' +  '</p>' +
+         //'<p>' + "Bemerk = " + feature.get('bemerk') + '</p>' +
+         '<p>' + "Bemerk = " + (feature.get('bemerk') ? feature.get('bemerk') : 'k.A.')  +  '</p>' +
          '<p>' + "Bauj. = " + (feature.get('baujahr') ? feature.get('baujahr') : 'k.A.') + '</p>' +
          `<p><a href="https://www.google.com/maps?q=${result}" target="_blank" rel="noopener noreferrer">Google Maps link</a></p>` +
          `<p><a href="https://www.google.com/maps?q=&layer=c&cbll=${result}&cbp=12,90,0,0,1" target="_blank" rel="noopener noreferrer">streetview</a></p>` +
@@ -1217,6 +1317,7 @@ map.on('click', function (evt) {
       //'<a href="' + feature.get('foto1') + '" onclick="window.open(\'' + feature.get('foto1') + '\', \'_blank\'); return false;">Karte</a> ' +
       //'<a href="' + feature.get('foto2') + '" onclick="window.open(\'' + feature.get('foto2') + '\', \'_blank\'); return false;">Foto</a><br>' +
       '<p><a href="' + feature.get('BSB') + '" onclick="window.open(\'' + feature.get('BSB') + '\', \'_blank\'); return false;">BSB  </a>' +
+      '<p>' + "Bemerk = " + (feature.get('bemerk') ? feature.get('bemerk') : 'k.A.')  +  '</p>' +
       '<a href="' + feature.get('MNB') + '" onclick="window.open(\'' + feature.get('MNB') + '\', \'_blank\'); return false;"> MNB</a><br> ' +
       'Kat: ' + feature.get('Kat') + '</a>' +
       ', KTR: ' + feature.get('KTR') + '</a>' +
@@ -1273,6 +1374,7 @@ map.on('click', function (evt) {
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
           '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
           '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
+          '<p>' + "Bemerk = " + (feature.get('bemerk') ? feature.get('bemerk') : 'k.A.')  +  '</p>' +
           '<p>' + "Bauj. = " + feature.get('baujahr') + '</p>' +
           '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
            '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
@@ -1318,6 +1420,7 @@ map.on('click', function (evt) {
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
           '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
           '<p>' + "U-Pflicht = " + feature.get('upflicht') + '</p>' +
+          '<p>' + "Bemerk = " + (feature.get('bemerk') ? feature.get('bemerk') : 'k.A.')  +  '</p>' +
           '<p>' + "Bauj. = " + feature.get('baujahr') + '</p>' +
           '<p>' + foto1Html + " " + foto2Html + " " + foto3Html + " " + foto4Html + 
            '<br>' + '<u>' + "Beschreibung (kurz): " + '</u>' + feature.get('beschreib') + '</p>' +
@@ -1365,7 +1468,7 @@ map.on('click', function (evt) {
           '<div style="max-height: 200px; overflow-y: auto;">' +
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
           '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
-          '<p>' + "Bemerk = " + (feature.get('bemerk') ? feature.get('bemerk') : 'k.A.') + ')' +  '</p>' +
+          '<p>' + "Bemerk = " + (feature.get('bemerk') ? feature.get('bemerk') : 'k.A.')  +  '</p>' +
           '<p>' + "WSP (OW) = " + feature.get('WSP_OW') + " m" +  "  WSP (UW) = " + feature.get('WSP_UW') + " m" + '</p>' +
           `<p><a href="https://www.google.com/maps?q=${result}" target="_blank" rel="noopener noreferrer">Google Maps link</a></p>` +
           `<p><a href="https://www.google.com/maps?q=&layer=c&cbll=${result}&cbp=12,90,0,0,1" target="_blank" rel="noopener noreferrer">streetview</a></p>` +
@@ -1416,7 +1519,7 @@ map.on('click', function (evt) {
               '<div style="max-height: 200px; overflow-y: auto;">' +
               '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
               '<p>' + "Id = " + feature.get('bw_id') +  ' (' + feature.get('KTR') +')' +  '</p>' +
-              '<p>' + "Bemerk = " + (feature.get('bemerk') ? feature.get('bemerk') : 'k.A.') + ')' +  '</p>' +
+              '<p>' + "Bemerk = " + (feature.get('bemerk') ? feature.get('bemerk') : 'k.A.')  +  '</p>' +
               //'<p>' + "WSP1 (OW) = " + feature.get('Ziel_OW1').toFixed(2) + " m" +  "  WSP2 (OW) = " + feature.get('Ziel_OW2').toFixed(2) + " m" + '</p>' +
               `<p><a href="https://www.google.com/maps?q=${result}" target="_blank" rel="noopener noreferrer">Google Maps link</a></p>` +
               `<p><a href="https://www.google.com/maps?q=&layer=c&cbll=${result}&cbp=12,90,0,0,1" target="_blank" rel="noopener noreferrer">streetview</a></p>` +
@@ -1495,6 +1598,7 @@ map.on('click', function (evt) {
           '</div>';
       }
     }
+    
     // Führen Sie Aktionen für den Layernamen 'geojson' durch
     if (layname.toLowerCase().startsWith('geojson')) {
       var att = feature.getProperties();
@@ -1511,7 +1615,7 @@ map.on('click', function (evt) {
       contentHtml += "</ul>";
       content.innerHTML = contentHtml;
     }
-    // Führen Sie Aktionen für den Layernamen 'geojson' durch
+    // Führen Sie Aktionen für den Layernamen 'kml' durch
     if (layname.toLowerCase().startsWith('kml')) {
       var att = feature.getProperties();
       coordinates = evt.coordinate; 
@@ -1681,82 +1785,6 @@ document.getElementById('popup-closer').onclick = function () {
   return false;
 };
 
-
-
-//---------------------------------------------------------------------------Print
-const dims = {
-  a0: [1189, 841],
-  a1: [841, 594],
-  a2: [594, 420],
-  a3: [420, 297],
-  a4: [297, 210],
-  a5: [210, 148],
-};
-
-document.getElementById('print-button').addEventListener('click', function() {
-  //document.getElementById('print-button').disabled = true;
-  alert('Erstmal bitte nur mit OSM als Hintergrund');
-  document.body.style.cursor = 'progress';
-  const format = 'a4';//document.getElementById('format').value;
-  const resolution = '72' //document.getElementById('resolution').value;
-  const dim = dims[format];
-  const width = Math.round((dim[0] * resolution) / 25.4);
-  const height = Math.round((dim[1] * resolution) / 25.4);
-  const size = map.getSize();
-  const viewResolution = map.getView().getResolution();
-  map.once('rendercomplete', function () {
-    const mapCanvas = document.createElement('canvas');
-    mapCanvas.width = width;
-    mapCanvas.height = height;
-    const mapContext = mapCanvas.getContext('2d');
-    Array.prototype.forEach.call(
-      document.querySelectorAll('.ol-layer canvas'),
-      function (canvas) {
-        if (canvas.width > 0) {
-          const opacity = canvas.parentNode.style.opacity;
-          mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
-          const transform = canvas.style.transform;
-          // Get the transform parameters from the style's transform matrix
-          const matrix = transform
-            .match(/^matrix\(([^\(]*)\)$/)[1]
-            .split(',')
-            .map(Number);
-          // Apply the transform to the export map context
-          CanvasRenderingContext2D.prototype.setTransform.apply(
-            mapContext,
-            matrix,
-          );
-          mapContext.drawImage(canvas, 0, 0);
-        }
-      },
-    );
-    mapContext.globalAlpha = 1;
-    mapContext.setTransform(1, 0, 0, 1, 0, 0);
-    const pdf = new jsPDF('landscape', undefined, format);
-    pdf.addImage(
-      mapCanvas.toDataURL('image/jpeg'),
-      'JPEG',
-      0,
-      0,
-      dim[0],
-      dim[1],
-    );
-    pdf.save('map.pdf');
-    // Reset original map size
-    map.setSize(size);
-    map.getView().setResolution(viewResolution);
-    document.getElementById('print-button').disabled = false; //exportButton.disabled = false;
-    document.body.style.cursor = 'auto';
-  });
-  // Set print size
-  const printSize = [width, height];
-  map.setSize(printSize);
-  const scaling = Math.min(width / size[0], height / size[1]);
-  map.getView().setResolution(viewResolution / scaling);
-},
-false,
-);
-
 // Current selection
 var sLayer = new VectorLayer({
   source: new VectorSource(),
@@ -1839,78 +1867,6 @@ function addMarker(coordinates) {
 var userInput = ""; // Globale Variable zur Speicherung der Nutzereingabe
 var currentlyHighlightedFeature = null; // Variable zur Verfolgung des aktuell markierten Features
 
-/* Nested subbar */
-var sub2 = new Bar({
- toggleOne: true,
- controls: [
-  // Suche nach Flurstück
- new TextButton({
-  html: '<i class="fa fa-map" ></i>',
-  title: "Flurstückssuche",
-  handleClick: function () {
-    if (currentlyHighlightedFeature) {
-      // Wenn ein Feature bereits markiert wurde, hebe die Markierung auf und setze zurück
-      currentlyHighlightedFeature.setStyle(null); 
-      currentlyHighlightedFeature = null; 
-    } else {
-      // Fordere den Nutzer zur Eingabe auf
-      userInput = prompt("gem flur zähler/nenner oder fsk-id:", "");
-      if (userInput) {
-        highlightFeatureFSK(userInput);
-      }
-    }
-  }
- }),
- // Suche nach Bauwerk
- new TextButton({
-  html: '<i class="fa fa-anchor" ></i>',
-  title: "Suche bw",
-  handleClick: function () {
-    let searchText = prompt("Geben Sie den Suchtext ein:");
-    if (searchText && searchText.trim() !== "") { // Falls der Nutzer etwas eingegeben hat
-      let results = searchFeaturesByTextBw(searchText);
-      document.getElementById("search-results-container").style.display = "block"; // Zeige das div an
-    } else {
-      alert("Bitte geben Sie einen gültigen Suchtext ein.");
-    }
-  }
- }),
- // Suche nach Eigentümer
- new TextButton({
-  html: '<i class="fa fa-anchor"></i>',
-  title: "Suche Eigentümer",
-  handleClick: function () {
-    let searchText = prompt("Geben Sie den Suchtext ein:");
-    if (searchText && searchText.trim() !== "") { // Falls der Nutzer etwas eingegeben hat
-      let results = searchFeaturesByTextEig(searchText);
-      document.getElementById("search-results-container").style.display = "block"; // Zeige das div an
-    } else {
-      alert("Bitte geben Sie einen gültigen Suchtext ein.");
-    }
-  }
- })
- ]
-});
-
-
-/* Nested subbar */
-var sub3 = new Bar({
-  toggleOne: true,
-  controls: [
-   // Suche nach Flurstück
-  new TextButton({
-   html: '<i class="fa fa-external-link"></i>',
-   title: "Permalink",
-   handleClick: function () {
-    
-   }
-  }),
- 
- 
-  ]
- });
-
-
 
 
 // Markierungsstil für das gefundene Feature
@@ -1923,7 +1879,6 @@ const highlightStyle = new Style({
  color: 'rgb(234, 255, 0)'
  })
 });
-
 //Suche BW
 function searchFeaturesByTextBw(searchText) {  
   let layers = [exp_bw_bru_nlwkn_layer, exp_bw_due_layer, exp_bw_sle_layer, exp_bw_weh_layer, exp_bw_bru_andere_layer, exp_bw_ein_layer, exp_bw_que_layer, exp_bw_son_pun_layer ]; 
@@ -1986,7 +1941,6 @@ function searchFeaturesByTextEig(searchText) {
     }
   });
 }
-
 //Display Ergebnis Suche Bw
 function displaySearchResultsBw(results) {
   let resultContainer = document.getElementById('search-results');
@@ -2042,7 +1996,6 @@ function displaySearchResultsEig(results) {
     resultContainer.appendChild(listItem);
   });
 }
-
 //Suche und Highlight Suche FSK
 function highlightFeatureFSK(searchText) {
   const source = exp_allgm_fsk_layer.getSource();
@@ -2085,8 +2038,6 @@ function highlightFeatureEig1(feature) {
     maxZoom: 18 
   });
 }
-
-
 function zoomToFeature(feature) {
     let geometry = feature.getGeometry();
     let extent = geometry.getExtent();
@@ -2103,10 +2054,64 @@ window.closeSearchResults = function () {
   document.getElementById("search-results-container").style.display = "none";
 };
 let jsonButtonState = false; // Initialer Zustand
+
+/* Nested subbar */
+var sub2 = new Bar({
+  toggleOne: true,
+  controls: [
+   // Suche nach Flurstück
+  new TextButton({
+   html: '<i class="fa fa-map" ></i>',
+   title: "Flurstückssuche",
+   handleClick: function () {
+     if (currentlyHighlightedFeature) {
+       // Wenn ein Feature bereits markiert wurde, hebe die Markierung auf und setze zurück
+       currentlyHighlightedFeature.setStyle(null); 
+       currentlyHighlightedFeature = null; 
+     } else {
+       // Fordere den Nutzer zur Eingabe auf
+       userInput = prompt("gem flur zähler/nenner oder fsk-id:", "");
+       if (userInput) {
+         highlightFeatureFSK(userInput);
+       }
+     }
+   }
+  }),
+  // Suche nach Bauwerk
+  new TextButton({
+   html: '<i class="fa fa-caret-up"></i>',
+   title: "Suche bw",
+   handleClick: function () {
+     let searchText = prompt("Geben Sie den Suchtext ein:");
+     if (searchText && searchText.trim() !== "") { // Falls der Nutzer etwas eingegeben hat
+       let results = searchFeaturesByTextBw(searchText);
+       document.getElementById("search-results-container").style.display = "block"; // Zeige das div an
+     } else {
+       alert("Bitte geben Sie einen gültigen Suchtext ein.");
+     }
+   }
+  }),
+  // Suche nach Eigentümer
+  new TextButton({
+   html: '<i class="fa fa-file"></i>',
+   title: "Suche Eigentümer",
+   handleClick: function () {
+     let searchText = prompt("Geben Sie den Suchtext ein:");
+     if (searchText && searchText.trim() !== "") { // Falls der Nutzer etwas eingegeben hat
+       let results = searchFeaturesByTextEig(searchText);
+       document.getElementById("search-results-container").style.display = "block"; // Zeige das div an
+     } else {
+       alert("Bitte geben Sie einen gültigen Suchtext ein.");
+     }
+   }
+  })
+  ]
+ });
+
 //Das Untermenü mit drei buttons
 var sub1 = new Bar({
   toggleOne: true,
-  //Die Untermenüs
+   //Die Untermenüs
   controls:[
     // Das Untermenü GPS-Position
     new Toggle({
@@ -2187,10 +2192,10 @@ var sub1 = new Bar({
       html:'<i class="fa fa-search"></i>', 
       title: "Suche",
       onToggle: function(b) { 
-        //test();
+        
        },
-      // Second level nested control bar
       bar: sub2
+      
     }),
     // Das Untermenü GeoJson
     new Toggle({
@@ -2208,33 +2213,133 @@ var sub1 = new Bar({
     }),
   ]
 });
-
 var sub2 = new Bar({
   toggleOne: true,
-  //Die Untermenüs
   controls:[
-    // Das Untermenü GPS-Position
     new Toggle({
-      html: '<i class="fa fa-map-marker" ></i>',
-      title: "Permalink",
-      //autoActivate: true,
-      onToggle: 
-      // Funktion zur Anzeige der GPS-Position
-      function () {} ,
+      html: '<i class="fa fa-image"></i>',
+      title: "WFS-Layer",
+      onToggle: function () {
+        let inputDiv = document.getElementById("wfsInputDiv");
+        if (!inputDiv) {
+          inputDiv = document.createElement("div");
+          inputDiv.id = "wfsInputDiv";
+          inputDiv.style.position = "absolute";
+          inputDiv.style.top = "50px";
+          inputDiv.style.left = "50px";
+          inputDiv.style.padding = "10px";
+          inputDiv.style.background = "white";
+          inputDiv.style.border = "1px solid black";
+          inputDiv.style.zIndex = "10000";
+      
+          let input = document.createElement("input");
+          input.type = "text";
+          input.id = "wfsUrlInput";
+          input.placeholder = "WFS-Layer URL eingeben";
+          input.style.width = "250px";
+      
+          let button = document.createElement("button");
+          button.innerText = "Hinzufügen";
+          button.onclick = function () {
+            let wfsUrl = document.getElementById("wfsUrlInput").value;
+            
+            if (wfsUrl) {
+              addWFSLayer(wfsUrl);
+              document.body.removeChild(inputDiv);
+            }
+          };
+      
+          let closeButton = document.createElement("button");
+          closeButton.innerText = "X";
+          closeButton.style.marginLeft = "10px";
+          closeButton.onclick = function () {
+            document.body.removeChild(inputDiv);
+          };
+      
+          inputDiv.appendChild(input);
+          inputDiv.appendChild(button);
+          inputDiv.appendChild(closeButton);
+          document.body.appendChild(inputDiv);
+        }
+      },
     }),
-    // Das Untermenü 2
     new Toggle({
-      html:'<i class="fa fa-search"></i>', 
-      title: "Suche",
+      html:'L', 
+      title: "Fehlt",
       onToggle: function(b) { 
-        //test();
        },
-      // Second level nested control bar
-      //bar: sub2
     }),
-    
   ]
 });
+
+// Funktion zum Hinzufügen eines WFS-Layers mit dynamischer BBOX-Anpassung
+function addWFSLayer(wfsUrl) {
+  console.log(wfsUrl);
+  let wfsLayer = new VectorLayer({
+    name: "GeoJson: " + wfsUrl,
+    title: "GeoJson: " + wfsUrl,
+    source: new VectorSource({
+      format: new GeoJSON(),
+      url: function (extent) {
+        let wfsLayName = "ms:ni_samtgemeinden";
+        let zoom = map.getView().getZoom();
+        let scaleFactor = 1 + (3 - zoom) * 0.3;
+        scaleFactor = Math.max(1, Math.min(scaleFactor, 3));
+        
+        let minX = extent[0], minY = extent[1], maxX = extent[2], maxY = extent[3];
+        let width = maxX - minX;
+        let height = maxY - minY;
+
+        let newMinX = minX - (width * (scaleFactor - 1) / 2);
+        let newMinY = minY - (height * (scaleFactor - 1) / 2);
+        let newMaxX = maxX + (width * (scaleFactor - 1) / 2);
+        let newMaxY = maxY + (height * (scaleFactor - 1) / 2);
+
+        let adjustedExtent = [newMinX, newMinY, newMaxX, newMaxY];
+
+        const layerName = "vg2500:vg2500_lan"; // Hier kannst du den Layer-Namen dynamisch setzen
+
+        return `${wfsUrl}?service=WFS&version=1.1.0&request=GetFeature&typename=${wfsLayName}&maxFeatures=10&outputFormat=application/json&srsname=EPSG:3857&bbox=${adjustedExtent.join(",")},EPSG:3857`;
+
+      },
+      strategy: LoadingStrategy.bbox,
+    }),
+    style: new Style({
+      stroke: new Stroke({
+        color: "blue",
+        width: 2,
+      }),
+      fill: new Fill({
+        color: "rgba(0, 0, 255, 0.1)",
+      }),
+    }),
+  });
+  
+  map.addLayer(wfsLayer);
+}
+
+//Mainbar Button "i"
+var mainBar1 = new Bar({
+  controls: [
+    new Toggle({
+      html: '<i class="fa fa-info"></i>',
+      title: "Weitere Funktionen",
+      // Untermenü mit zwei Buttons
+      bar: sub1,
+      onToggle: function() { },
+    }),
+    new Toggle({
+      html: 'W',
+      title: "Weitere Funktionen",
+      // Untermenü mit zwei Buttons
+      bar: sub2,
+      onToggle: function() { },
+    })
+  ]
+});
+map.addControl ( mainBar1 );
+mainBar1.setPosition('left');
+
 
 let dragAndDropInteraction;
 let zaehlerGeojson = 0;
@@ -2310,86 +2415,6 @@ function setInteraction()
   map.addInteraction(dragAndDropInteraction);
 }
 
-//Mainbar Button "i"
-var mainBar1 = new Bar({
-  controls: [
-    new Toggle({
-      html: '<i class="fa fa-info"></i>',
-      title: "Weitere Funktionen",
-      // Untermenü mit zwei Buttons
-      bar: sub1,
-      onToggle: function() { },
-    })
-  ]
-});
-map.addControl ( mainBar1 );
-mainBar1.setPosition('left');
-
-/*
-//Mainbar Button "L"
-var mainBar2 = new Bar({
-  controls: [
-    new Toggle({
-      html: 'L',
-      title: "Bar2",
-      // Untermenü mit zwei Buttons
-      bar: sub3,
-      onToggle: function() { },
-    })
-  ]
-});
-map.addControl ( mainBar2 );
-mainBar2.setPosition('left');
-
-'/
-
-
-//_----------------------------------------------------------------------------------------------------------------------
-
-/*
-// Main control bar
-var mainbar = new Bar();
-map.addControl(mainbar);
-
-// Nested toobar with one control activated at once 
-var nested = new Bar ({ toggleOne: true, group:true });
-mainbar.addControl (nested);
-// Add selection tool (a toggle control with a select interaction)
-var selectCtrl = new Toggle({
-  html: '<i class="fa fa-hand-pointer-o"></i>',
-  className: "select",
-  title: "Select",
-  interaction: new Select (),
-  active:true,
-  onToggle: function(active) {
-    $("#info").text("Select is "+(active?"activated":"deactivated"));
-  }
-});
-nested.addControl(selectCtrl);
-
-// Add editing tools
-var pedit = new Toggle({
-  html: '<i class="fa fa-map-marker" ></i>',
-  className: "edit",
-  title: 'Point',
-  interaction: new Draw({
-    type: 'Point',
-    source: vector.getSource()
-  }),
-  onToggle: function(active) {
-    $("#info").text("Edition is "+(active?"activated":"deactivated"));
-  }
-});
-nested.addControl ( pedit );
-
-// Standard Controls 
-mainbar.addControl (new ZoomToExtent({  extent: [ 265971,6243397 , 273148,6250665 ] }));
-mainbar.addControl (new Rotate());
-mainbar.addControl (new FullScreen());
-
-
-//-------------------------------------------------------------------------------------------------------------
-*/
 
 
 

@@ -91,7 +91,6 @@ html {
   margin: 1px auto auto 10px;
 }
 
-
 .locate {
   top: 125px;
   left: 8px;
@@ -402,8 +401,6 @@ margin: 0px auto 0px 10px;
   margin: 10px;
 } */
 
-
-
 #search-results-container {
   position: fixed;
   top: 0;
@@ -426,8 +423,6 @@ margin: 0px auto 0px 10px;
   list-style-position: inside; /* Punkte innerhalb des Containers */
   padding-left: 0; /* Entfernt zusätzlichen linken Abstand */
 }
-
-
 #close-search-results {
   background: none;
   border: none;
@@ -436,4 +431,28 @@ margin: 0px auto 0px 10px;
   position: absolute;
   top: 5px;
   right: 5px;
+}
+
+.ol-control-title {
+  height: 2em;
+}
+
+.ol-print-compass {
+  top: 1.5em !important;
+}
+
+/* Print-Button unter Full-Extent platzieren */
+.ol-control.print-button {
+  position: absolute;
+  left: 0px;
+  top: 6em;    /* Setzt den Button direkt unter Full Extent */
+  height: 2.5em;
+  width: 2.5em;
+  z-index: 1000; /* Sicherstellen, dass der Button über der Karte bleibt */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none !important;  /* Entfernt Hintergrund */
+  border: none !important;      /* Entfernt Ränder */
+  box-shadow: none !important;  /* Entfernt Schatten */
 }
