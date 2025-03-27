@@ -21,6 +21,10 @@ import TileWMS from 'ol/source/TileWMS.js';
 import TileImage from 'ol/source/TileImage.js';
 import XYZ from 'ol/source/XYZ.js';
 
+import Permalink from 'ol-ext/control/Permalink';
+import getLayerByLink from 'ol-ext/control/Permalink';
+
+
 import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
 import { FullScreen, Attribution, defaults as defaultControls, ZoomToExtent, Control } from 'ol/control.js';
@@ -28,6 +32,7 @@ import { DragRotateAndZoom } from 'ol/interaction.js';
 import { DragAndDrop } from 'ol/interaction.js';
 import { defaults as defaultInteractions } from 'ol/interaction.js';
 import { singleClick } from 'ol/events/condition';
+
 
 import MousePosition from 'ol/control/MousePosition.js';
 import { transform } from 'ol/proj';
@@ -39,10 +44,15 @@ import SearchPhoton from 'ol-ext/control/SearchPhoton';
 import SearchFeature from 'ol-ext/control/SearchFeature';
 //import SearchNominatim from 'ol-ext/control/SearchNominatim';
 import WMSCapabilities from'ol-ext/control/WMSCapabilities';
+
+
 import CanvasAttribution from 'ol-ext/control/CanvasAttribution';
 import CanvasTitle from 'ol-ext/control/CanvasTitle';
 import CanvasScaleLine from 'ol-ext/control/CanvasScaleLine';
 import PrintDialog from 'ol-ext/control/PrintDialog';
+
+
+import FeatureList from 'ol-ext/control/FeatureList';
 
 import Icon from 'ol/style/Icon'; // Hinzufügen Sie diesen Import
 
@@ -129,20 +139,23 @@ map.addControl(new CanvasTitle({
   title: '', 
   visible: false,
   style: new Style({ 
-    
-  })
+   // text: new Text({ font: 'bold 12pt "Arial",Verdana,Geneva,Lucida,Lucida Grande,Helvetica,sans-serif' })
+  }),
 }));
 
-
-
+// Maßstabsleiste hinzufügen
+map.addControl(new CanvasScaleLine());
 // Print control
 var printControl = new PrintDialog({ 
-  target: document.querySelector('.info'),
+  openWindow: true,
+  // target: document.querySelector('.info'),
+  // targetDialog: map.getTargetElement() 
+  // save: false,
+  // copy: false,
+  // pdf: false
 });
 printControl.setSize('A4');
-
 map.addControl(printControl);
-//printControl.element.classList.add('print-button');
 
 
 // Button-Click-Event für den Druck auslösen
@@ -152,27 +165,37 @@ document.getElementById('printControl').addEventListener('click', function() {
 
 /* On print > save image file */
 printControl.on(['print', 'error'], function(e) {
- // Print success
- if (e.image) {
-   if (e.pdf) {
-     // Export pdf using the print info
-     var pdf = new jsPDF({
-       orientation: e.print.orientation,
-       unit: e.print.unit,
-       format: e.print.size
-     });
-     pdf.addImage(e.image, 'JPEG', e.print.position[0], e.print.position[1], e.print.imageWidth, e.print.imageHeight);
-     pdf.save(e.print.legend ? 'legend.pdf' : 'map.pdf');
-   } else  {
-     // Save image as file
-     e.canvas.toBlob(function(blob) {
-       var name = (e.print.legend ? 'legend.' : 'map.')+e.imageType.replace('image/','');
-       saveAs(blob, name);
-     }, e.imageType, e.quality);
-   }
- } else {
-   console.warn('No canvas to export');
- }
+  document.body.style.overflow = 'hidden'; 
+  document.body.style.overflow = '';
+  if (e.image) {
+    if (e.pdf) {
+      // Export pdf using the print info
+      var pdf = new jsPDF({
+        orientation: e.print.orientation,
+        unit: e.print.unit,
+        format: e.print.size
+      });
+      pdf.addImage(e.image, 'JPEG', e.print.position[0], e.print.position[1], e.print.imageWidth, e.print.imageHeight);
+      pdf.save(e.print.legend ? 'legend.pdf' : 'map.pdf');
+    } else  {
+      // Save image as file
+      if (e.canvas.toBlob) {
+        e.canvas.toBlob(function(blob) {
+          var name = (e.print.legend ? 'legend.' : 'map.') + e.imageType.replace('image/', '');
+          saveAs(blob, name);
+        }, e.imageType, e.quality);
+      } else {
+        var dataURL = e.canvas.toDataURL(e.imageType, e.quality);
+        var link = document.createElement('a');
+        link.href = dataURL;
+        link.download = (e.print.legend ? 'legend.' : 'map.') + e.imageType.replace('image/', '');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }    }
+  } else {
+    console.warn('No canvas to export');
+  }
 });
 
 //------------------------------------Attribution collapse
@@ -259,7 +282,6 @@ const gehoelz_vecLayer = new VectorLayer({
 const exp_allgm_fsk_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_allgm_fsk.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'fsk',
-  //permalink:"fsk", 
   name: 'fsk', 
   style: getStyleForArtFSK,
   visible: false,
@@ -269,7 +291,6 @@ const exp_allgm_fsk_layer = new VectorLayer({
 const exp_bw_son_lin_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_son_lin.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }), 
   title: 'Sonstig, Linien',
-  //permalink:"son_lin", 
   name: 'son_lin',
   style: getStyleForArtSonLin,
   visible: false
@@ -356,6 +377,7 @@ const exp_bw_bru_andere_layer = new VectorLayer({
   style: bruAndereStyle,
   visible: false
 });
+
 const exp_bw_sle_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url:function (extent) {return './myLayers/exp_bw_sle.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox }),
   title: 'Schleuse', // Titel für den Layer-Switcher
@@ -633,6 +655,7 @@ const gnAtlas1937 = new TileLayer({
 
 var baseDE_layer = new TileLayer({
   title: "Base-DE",
+  name: "Base-DE",
   opacity: 1.000000,
   visible: false,
   type: 'base',
@@ -648,6 +671,7 @@ var baseDE_layer = new TileLayer({
 });
 var dop20ni_layer = new TileLayer({
   title: "DOP20 NI",
+  name: "DOP20 NI",
   opacity: 1.000000,
   visible: false,
   type: 'base',
@@ -665,6 +689,7 @@ var dop20ni_layer = new TileLayer({
 });
 const googleSatLayer = new TileLayer({
   title: "GoogleSat",
+  name: "GoogleSat",
   type: 'base',
   baseLayer: false,
   visible: false,
@@ -672,6 +697,7 @@ const googleSatLayer = new TileLayer({
 });
 const googleHybLayer = new TileLayer({
   title: "GoogleHybrid",
+  name: "GoogleHybrid",
   type: 'base',
   baseLayer: false,
   visible: false,
@@ -679,6 +705,7 @@ const googleHybLayer = new TileLayer({
 });
 const ESRIWorldImagery = new TileLayer({
   title: 'ESRI-Sat',
+  name: 'ESRI-Sat',
   type: 'base',
   opacity: 1.000000,
   visible: false,
@@ -689,6 +716,7 @@ const ESRIWorldImagery = new TileLayer({
 });
 const ESRIWorldGrey = new TileLayer({
   title: 'ESRI-Grey',
+  name: 'ESRI-Grey',
   type: 'base',
   opacity: 1.000000,
   visible: false,
@@ -697,8 +725,10 @@ const ESRIWorldGrey = new TileLayer({
       url: 'http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
   })
 });
+
 const osmTileGr = new TileLayer({
   title: "osm-grey",
+  name: "osm-grey",
   className: 'bw',
   type: 'base',
   visible: false,
@@ -722,6 +752,7 @@ const osmTileCr = new TileLayer({
 
 var Alkis_layer = new TileLayer({
   title: "ALKIS",
+  name: "ALKIS",
   opacity: 1.000000,
   visible: false,
   type: 'base',
@@ -753,16 +784,48 @@ tmpButton.onclick = function () {
 document.body.appendChild(tmpButton);
 
 // Button zum DOM hinzufügen
+
 document.body.appendChild(tmpButton); */
+
 
 const layerSwitcher = new LayerSwitcher({ 
   activationMode: 'click', 
   reverse: true, 
   trash: true, 
-  tipLabel: 'Legende', 
- });
+  tipLabel: 'Legende',
+  onchangeCheck: function(layer, checked) {
+      console.log('Layer:', layer);  // Das gesamte Layer-Objekt
+      console.log('Layer Name:', layer.get('name')); // Den Namen des Layers abrufen
+
+      if (checked) {
+          console.log('Layer wurde aktiviert:', layer.get('name'));
+          // Hier kannst du weitere Aktionen durchführen, wenn der Layer aktiviert wird
+      } else {
+          console.log('Layer wurde deaktiviert:', layer.get('name'));
+          // Hier kannst du weitere Aktionen durchführen, wenn der Layer deaktiviert wird
+      }
+  }
+});
+
 map.addControl(layerSwitcher);
-    
+console.log('LayerSwitcher added to the map.');
+
+// Event-Listener für Sichtbarkeitsänderung
+layerSwitcher.on('layer:visible', function(event) {
+ console.log('Layer visibility changed event triggered:', event);
+ const layer = event.layer; // Überprüfe die Struktur des Events
+ console.log('Layer:', layer);
+});
+
+// Beispiel: Button, um einen Layer auszuwählen
+/* document.getElementById('selectLayerControl').addEventListener('click', function() {
+  layerSwitcher.selectLayer(exp_bw_que_layer);
+});
+ */
+
+
+
+
 //------------------------------------ Layer für Messung
 const source = new VectorSource();
 const vector = new VectorLayer({
@@ -944,6 +1007,74 @@ class CustomControls1 extends Control {
 map.addControl(new CustomControls1({
   target: 'custom-controls'
 }));
+
+
+
+// Control
+var ctrl = new Permalink({    
+  title: "Link erzeugen",
+  geohash: /gh=/.test(document.location.href),
+  localStorage: true,  // Save permalink in localStorage if no URL provided
+  urlReplace: false,
+  fixed: 2,
+  visible: true,
+  onclick: function(url) {
+    console.log("Aktuelle URL-Parameter: ", ctrl.getUrlParam());
+    console.log("Permalink: ", ctrl.getLink());
+
+    // Layer-Namen sammeln
+    let activeLayers = [];
+    map.getLayers().getArray().forEach(group => {
+      if (group instanceof LayerGroup) {
+        let groupName = group.get('name') || 'UnbekannteGruppe';
+        group.getLayers().forEach(layer => {
+          if (layer.get('visible')) {
+            let layerName = layer.get('name') || 'UnbekannterLayer';
+            activeLayers.push(`${groupName}.${layerName}`);
+          }
+        });
+      }
+    });
+
+    console.log("Aktive Layer:", activeLayers);
+
+    // Layer-Namen zum Permalink hinzufügen
+    let newUrl = new URL(url);
+    if (activeLayers.length) {
+      newUrl.searchParams.set('layers', activeLayers.join(','));
+    }
+    let finalUrl = newUrl.toString();
+    console.log("Neuer Permalink mit Layern:", finalUrl);
+    copyToClipboard(finalUrl);
+  }
+});
+map.addControl(ctrl);
+
+console.log("Element " + ctrl.element);  // Gibt das HTML-Element zurück
+ctrl.element.classList.add('custom-permalink');
+console.log("Classlist" + ctrl.element.classList)
+
+
+
+// Funktion zum Kopieren des Links in die Zwischenablage
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Permalink wurde in die Zwischenablage kopiert: ' + text);
+  }).catch(err => {
+    alert('Fehler beim Kopieren des Permalinks: ' + err);
+  });
+}
+
+
+// Funktion zum Abrufen der Layer basierend auf dem Permalink
+function getLayersFromPermalink(layers) {
+  var permalinkLayers = layers.filter(layer => layer.get('Permalink')); // Nur Layer mit "Permalink"
+  console.log("Layer mit Permalink-Attribut:", permalinkLayers);
+}
+
+
+
+
 
 //---------------------------------------------Layergruppen
 const BwGroupP = new LayerGroup({
@@ -2415,14 +2546,118 @@ function setInteraction()
   map.addInteraction(dragAndDropInteraction);
 }
 
+/* 
+exp_bw_due_layer.getSource().on('change', function() {
+  if (exp_bw_due_layer.getSource().getState() === 'ready') {
+    listCtrl.setFeatures(exp_bw_due_layer.getSource().getFeatures());
+  }
+});
+
+// Select-Interaktion
+var selecti = new Select({
+  hitTolerance: 5,
+  condition: singleClick
+});
+map.addInteraction(selecti);
+
+// Feature bei Klick auswählen
+selecti.on('select', function(e) {
+  var f = e.selected[0];
+  if (f) {
+    showInfo(f);
+    listCtrl.select(f);
+  }
+});
+
+function showInfo(f) {
+  var prop = f.getProperties();
+  var content = document.getElementById('popup-content');
+  
+  // Inhalt leeren und neue Liste erstellen
+  var html = '<ul>';
+  for (var p in prop) {
+    if (p !== 'geometry') {
+      html += `<li><strong>${p}:</strong> ${prop[p]}</li>`;
+    }
+  }
+  html += '</ul>';
+
+  // Popup-Inhalt setzen
+  content.innerHTML = html;
+
+  // Popup an Feature-Position setzen
+  var coordinates = f.getGeometry().getCoordinates();
+  popup.setPosition(coordinates);
+}
 
 
+// Select-Control
+var listCtrl = new FeatureList({
+  //className: 'ol-bottom',
+  title: 'Querungen',
+  collapsed: false,
+  features: exp_bw_que_layer.getSource().getFeatures(),
+  
+  number: 20,
+  //target: document.body
+});
 
+console.log(listCtrl);
+listCtrl.enableSort('bw_id', 'name', 'ID_con');
+map.addControl(listCtrl);
 
+listCtrl.on('select', function(e) {
+  if (!e.feature) return;
+  selecti.getFeatures().clear();
+  selecti.getFeatures().push(e.feature);
+  showInfo(e.feature);
+});
+
+listCtrl.on('dblclick', function(e) {
+  if (!e.feature) return;
+  map.getView().fit(e.feature.getGeometry().getExtent());
+  map.getView().setZoom(map.getView().getZoom() - 1);
+});
+
+listCtrl.on(['resize', 'collapse', 'sort'], function(e) {
+  console.log(e);
+});
+
+ */
 //------------------------WMS-Control aus myFunc.js hinzufügen
 document.addEventListener('DOMContentLoaded', function() {
   initializeWMS(WMSCapabilities, map ); // Aufrufen der initializeWMS-Funktion aus myFunc.js
 });
+
+window.onload = function() {
+  console.log("URL-Parameter beim Laden der Seite:", window.location.search);
+  const urlParams = new URLSearchParams(window.location.search);
+  const layersParam = urlParams.get('layers');
+  
+  if (layersParam) {
+    const layersToShow = layersParam.split(',');
+
+    map.getLayers().getArray().forEach(group => {
+      if (group instanceof LayerGroup) {
+        let groupName = group.get('name');
+
+        group.getLayers().forEach(layer => {
+          let layerFullName = `${groupName}.${layer.get('name')}`;
+          if (layersToShow.includes(layerFullName)) {
+            layer.setVisible(true);
+            console.log("Layer sichtbar:", layerFullName);
+          } else {
+            layer.setVisible(false);
+            console.log("Layer unsichtbar:", layerFullName);
+          }
+        });
+      }
+    });
+  }
+};
+
+
+
 
 /* const mySearch = document.getElementById('searchBox');
 mySearch.addEventListener('change', function(event){
