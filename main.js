@@ -2701,14 +2701,14 @@ mainBar1.setPosition('left');
 
 var mainbar2 = new Bar();
 map.addControl(mainbar2);
-mainbar2.setPosition('bottom');
+mainbar2.setPosition('right');
 //mainbar2.addControl (search);
 mainbar2.addControl (permalinkControl);
 mainbar2.addControl (printControl);
 mainbar2.addControl(toggleButtonU);
 
 var Mainbar3 = new Bar();
-Mainbar3.setPosition('top');
+Mainbar3.setPosition('bottom-left');
 map.addControl(Mainbar3);
 Mainbar3.addControl (new FullScreen({
   source: 'fullscreen',
