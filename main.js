@@ -2720,7 +2720,7 @@ mainbar3.addControl(new ZoomToExtent({
  }));
 mainbar3.addControl (new Rotate());
 mainbar3.setPosition('bottom-left');
-mainbar3.element.style.bottom = '140px';
+mainbar3.element.style.bottom = '120px';
 
 var checkExist = setInterval(() => {
   let barElement = document.querySelector('.ol-control.ol-bar.bottom-left');
