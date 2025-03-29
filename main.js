@@ -27,7 +27,7 @@ import getLayerByLink from 'ol-ext/control/Permalink';
 
 import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
-import { FullScreen, Attribution, defaults as defaultControls, ZoomToExtent, Control } from 'ol/control.js';
+import { FullScreen, Attribution, defaults as defaultControls, ZoomToExtent, Control, Rotate } from 'ol/control.js';
 import { DragRotateAndZoom } from 'ol/interaction.js';
 import { DragAndDrop } from 'ol/interaction.js';
 import { defaults as defaultInteractions } from 'ol/interaction.js';
@@ -87,6 +87,7 @@ import {
   getStyleForArtGewInfo
 } from './extStyle';
 import { UTMToLatLon_Fix } from './myNewFunc';
+import { createLoader } from 'ol/source/wms';
 
 
 //projektion definieren und registrieren
@@ -122,82 +123,12 @@ const map = new Map({
   view: mapView,
    controls: defaultControls().extend([
     
-    new FullScreen(),
-    new ZoomToExtent({
-       extent: [727361, 6839277, 858148, 6990951] 
-     }),
     attribution,
     
   ]),
 
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
-
-// Canvas-Kontrollen hinzufügen
-map.addControl(new CanvasAttribution());
-map.addControl(new CanvasTitle({ 
-  title: '', 
-  visible: false,
-  style: new Style({ 
-   // text: new Text({ font: 'bold 12pt "Arial",Verdana,Geneva,Lucida,Lucida Grande,Helvetica,sans-serif' })
-  }),
-}));
-
-// Maßstabsleiste hinzufügen
-map.addControl(new CanvasScaleLine());
-// Print control
-var printControl = new PrintDialog({ 
-  openWindow: true,
-  // target: document.querySelector('.info'),
-  // targetDialog: map.getTargetElement() 
-  // save: false,
-  // copy: false,
-  // pdf: false
-});
-printControl.setSize('A4');
-map.addControl(printControl);
-
-
-// Button-Click-Event für den Druck auslösen
-document.getElementById('printControl').addEventListener('click', function() {
-   printControl.print(); // Startet den Druckprozess
-});
-
-/* On print > save image file */
-printControl.on(['print', 'error'], function(e) {
-  document.body.style.overflow = 'hidden'; 
-  document.body.style.overflow = '';
-  if (e.image) {
-    if (e.pdf) {
-      // Export pdf using the print info
-      var pdf = new jsPDF({
-        orientation: e.print.orientation,
-        unit: e.print.unit,
-        format: e.print.size
-      });
-      pdf.addImage(e.image, 'JPEG', e.print.position[0], e.print.position[1], e.print.imageWidth, e.print.imageHeight);
-      pdf.save(e.print.legend ? 'legend.pdf' : 'map.pdf');
-    } else  {
-      // Save image as file
-      if (e.canvas.toBlob) {
-        e.canvas.toBlob(function(blob) {
-          var name = (e.print.legend ? 'legend.' : 'map.') + e.imageType.replace('image/', '');
-          saveAs(blob, name);
-        }, e.imageType, e.quality);
-      } else {
-        var dataURL = e.canvas.toDataURL(e.imageType, e.quality);
-        var link = document.createElement('a');
-        link.href = dataURL;
-        link.download = (e.print.legend ? 'legend.' : 'map.') + e.imageType.replace('image/', '');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }    }
-  } else {
-    console.warn('No canvas to export');
-  }
-});
-
 //------------------------------------Attribution collapse
 /*
 function checkSize() {
@@ -794,11 +725,11 @@ const layerSwitcher = new LayerSwitcher({
   trash: true, 
   tipLabel: 'Legende',
   onchangeCheck: function(layer, checked) {
-      console.log('Layer:', layer);  // Das gesamte Layer-Objekt
+     // console.log('Layer:', layer);  // Das gesamte Layer-Objekt
       console.log('Layer Name:', layer.get('name')); // Den Namen des Layers abrufen
 
       if (checked) {
-          console.log('Layer wurde aktiviert:', layer.get('name'));
+      //    console.log('Layer wurde aktiviert:', layer.get('name'));
           // Hier kannst du weitere Aktionen durchführen, wenn der Layer aktiviert wird
       } else {
           console.log('Layer wurde deaktiviert:', layer.get('name'));
@@ -808,7 +739,7 @@ const layerSwitcher = new LayerSwitcher({
 });
 
 map.addControl(layerSwitcher);
-console.log('LayerSwitcher added to the map.');
+
 
 // Event-Listener für Sichtbarkeitsänderung
 layerSwitcher.on('layer:visible', function(event) {
@@ -1008,74 +939,6 @@ map.addControl(new CustomControls1({
   target: 'custom-controls'
 }));
 
-
-
-// Control
-var ctrl = new Permalink({    
-  title: "Link erzeugen",
-  geohash: /gh=/.test(document.location.href),
-  localStorage: true,  // Save permalink in localStorage if no URL provided
-  urlReplace: false,
-  fixed: 2,
-  visible: true,
-  onclick: function(url) {
-    console.log("Aktuelle URL-Parameter: ", ctrl.getUrlParam());
-    console.log("Permalink: ", ctrl.getLink());
-
-    // Layer-Namen sammeln
-    let activeLayers = [];
-    map.getLayers().getArray().forEach(group => {
-      if (group instanceof LayerGroup) {
-        let groupName = group.get('name') || 'UnbekannteGruppe';
-        group.getLayers().forEach(layer => {
-          if (layer.get('visible')) {
-            let layerName = layer.get('name') || 'UnbekannterLayer';
-            activeLayers.push(`${groupName}.${layerName}`);
-          }
-        });
-      }
-    });
-
-    console.log("Aktive Layer:", activeLayers);
-
-    // Layer-Namen zum Permalink hinzufügen
-    let newUrl = new URL(url);
-    if (activeLayers.length) {
-      newUrl.searchParams.set('layers', activeLayers.join(','));
-    }
-    let finalUrl = newUrl.toString();
-    console.log("Neuer Permalink mit Layern:", finalUrl);
-    copyToClipboard(finalUrl);
-  }
-});
-map.addControl(ctrl);
-
-console.log("Element " + ctrl.element);  // Gibt das HTML-Element zurück
-ctrl.element.classList.add('custom-permalink');
-console.log("Classlist" + ctrl.element.classList)
-
-
-
-// Funktion zum Kopieren des Links in die Zwischenablage
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    alert('Permalink wurde in die Zwischenablage kopiert: ' + text);
-  }).catch(err => {
-    alert('Fehler beim Kopieren des Permalinks: ' + err);
-  });
-}
-
-
-// Funktion zum Abrufen der Layer basierend auf dem Permalink
-function getLayersFromPermalink(layers) {
-  var permalinkLayers = layers.filter(layer => layer.get('Permalink')); // Nur Layer mit "Permalink"
-  console.log("Layer mit Permalink-Attribut:", permalinkLayers);
-}
-
-
-
-
-
 //---------------------------------------------Layergruppen
 const BwGroupP = new LayerGroup({
   title: "Bauw.(P)",
@@ -1166,7 +1029,7 @@ var toggleButtonU = new Toggle({
 // Klasse 'active' zum Button hinzufügen, um sicherzustellen, dass er beim Start als aktiv dargestellt wird
 toggleButtonU.element.classList.add('active');
 toggleButtonU.element.querySelector('.icon').classList.add('active');
-map.addControl(toggleButtonU);
+//map.addControl(toggleButtonU);
 
 var selectInteraction = new Select({
   layers: [vector],
@@ -2450,27 +2313,6 @@ function addWFSLayer(wfsUrl) {
 }
 
 //Mainbar Button "i"
-var mainBar1 = new Bar({
-  controls: [
-    new Toggle({
-      html: '<i class="fa fa-info"></i>',
-      title: "Weitere Funktionen",
-      // Untermenü mit zwei Buttons
-      bar: sub1,
-      onToggle: function() { },
-    }),
-    new Toggle({
-      html: 'W',
-      title: "Weitere Funktionen",
-      // Untermenü mit zwei Buttons
-      bar: sub2,
-      onToggle: function() { },
-    })
-  ]
-});
-map.addControl ( mainBar1 );
-mainBar1.setPosition('left');
-
 
 let dragAndDropInteraction;
 let zaehlerGeojson = 0;
@@ -2625,22 +2467,137 @@ listCtrl.on(['resize', 'collapse', 'sort'], function(e) {
 
  */
 //------------------------WMS-Control aus myFunc.js hinzufügen
-document.addEventListener('DOMContentLoaded', function() {
-  initializeWMS(WMSCapabilities, map ); // Aufrufen der initializeWMS-Funktion aus myFunc.js
+//document.addEventListener('DOMContentLoaded', function() {
+//  initializeWMS(WMSCapabilities, map ); // Aufrufen der initializeWMS-Funktion aus myFunc.js
+//});
+
+//-----------------------------------------------------------------------------------------Permalink
+var permalinkControl = new Permalink({    
+  target: document.getElementById('permalink-container'), // Container für den Permalink
+  title: "Link erzeugen",
+  geohash: /gh=/.test(document.location.href),
+  localStorage: true,  // Save permalink in localStorage if no URL provided
+  urlReplace: false,
+  fixed: 2,
+  visible: true,
+  onclick: function(url) {
+    console.log("Aktuelle URL-Parameter: ", permalinkControl.getUrlParam());
+    console.log("Permalink: ", permalinkControl.getLink());
+
+    // Layer-Namen sammeln
+    let activeLayers = [];
+    map.getLayers().getArray().forEach(group => {
+      if (group instanceof LayerGroup) {
+        let groupName = group.get('name') || 'UnbekannteGruppe';
+        group.getLayers().forEach(layer => {
+          if (layer.get('visible')) {
+            let layerName = layer.get('name') || 'UnbekannterLayer';
+            activeLayers.push(`${groupName}.${layerName}`);
+          }
+        });
+      }
+    });
+
+    console.log("Aktive Layer:", activeLayers);
+
+    // Layer-Namen zum Permalink hinzufügen
+    let newUrl = new URL(url);
+    if (activeLayers.length) {
+      newUrl.searchParams.set('layers', activeLayers.join(','));
+    }
+    let finalUrl = newUrl.toString();
+    console.log("Neuer Permalink mit Layern:", finalUrl);
+    copyToClipboard(finalUrl);
+  }
 });
+//map.addControl(permalinkControl);
+
+// Funktion zum Kopieren des Links in die Zwischenablage
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Permalink wurde in die Zwischenablage kopiert: ' + text);
+  }).catch(err => {
+    alert('Fehler beim Kopieren des Permalinks: ' + err);
+  });
+}
+
+
+//----------------------------------------------------------------------------------------------------------Print
+map.addControl(new CanvasAttribution());
+map.addControl(new CanvasTitle({ 
+  title: '', 
+  visible: false,
+  style: new Style({ 
+   // text: new Text({ font: 'bold 12pt "Arial",Verdana,Geneva,Lucida,Lucida Grande,Helvetica,sans-serif' })
+  }),
+}));
+map.addControl(new CanvasScaleLine());
+
+
+var printControl = new PrintDialog({ 
+  title: 'Drucken',
+  lang: 'de',
+  //target: document.getElementById('print-container'), 
+  openWindow: true,
+  // target: document.querySelector('.info'),
+  // targetDialog: map.getTargetElement() 
+  // save: false,
+  // copy: false,
+  // pdf: false
+});
+//map.addControl(printControl);
+//printControl.setSize('A4');
+//printControl.setOrientation('portrait');
+
+
+
+/* On print > save image file */
+printControl.on(['print', 'error'], function(e) {
+  document.body.style.overflow = 'hidden'; 
+  document.body.style.overflow = '';
+  if (e.image) {
+    if (e.pdf) {
+      // Export pdf using the print info
+      var pdf = new jsPDF({
+        orientation: e.print.orientation,
+        unit: e.print.unit,
+        format: e.print.size
+      });
+      pdf.addImage(e.image, 'JPEG', e.print.position[0], e.print.position[1], e.print.imageWidth, e.print.imageHeight);
+      pdf.save(e.print.legend ? 'legend.pdf' : 'map.pdf');
+    } else  {
+      // Save image as file
+      if (e.canvas.toBlob) {
+        e.canvas.toBlob(function(blob) {
+          var name = (e.print.legend ? 'legend.' : 'map.') + e.imageType.replace('image/', '');
+          saveAs(blob, name);
+        }, e.imageType, e.quality);
+      } else {
+        var dataURL = e.canvas.toDataURL(e.imageType, e.quality);
+        var link = document.createElement('a');
+        link.href = dataURL;
+        link.download = (e.print.legend ? 'legend.' : 'map.') + e.imageType.replace('image/', '');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }    }
+  } else {
+    console.warn('No canvas to export');
+  }
+});
+
 
 window.onload = function() {
   console.log("URL-Parameter beim Laden der Seite:", window.location.search);
   const urlParams = new URLSearchParams(window.location.search);
+  console.log(urlParams);
   const layersParam = urlParams.get('layers');
-  
+  console.log("layersParam:", layersParam);
   if (layersParam) {
     const layersToShow = layersParam.split(',');
-
     map.getLayers().getArray().forEach(group => {
       if (group instanceof LayerGroup) {
         let groupName = group.get('name');
-
         group.getLayers().forEach(layer => {
           let layerFullName = `${groupName}.${layer.get('name')}`;
           if (layersToShow.includes(layerFullName)) {
@@ -2721,3 +2678,164 @@ searchSelect.addEventListener('change', function(event) {
 }); */
 
 
+var mainBar1 = new Bar({
+  controls: [
+    new Toggle({
+      html: '<i class="fa fa-info"></i>',
+      title: "Weitere Funktionen",
+      // Untermenü mit zwei Buttons
+      bar: sub1,
+      onToggle: function() { },
+    }),
+    new Toggle({
+      html: 'W',
+      title: "Weitere Funktionen",
+      // Untermenü mit zwei Buttons
+      bar: sub2,
+      onToggle: function() { },
+    })
+  ]
+});
+map.addControl ( mainBar1 );
+mainBar1.setPosition('left');
+
+var mainbar2 = new Bar();
+map.addControl(mainbar2);
+mainbar2.setPosition('bottom');
+//mainbar2.addControl (search);
+mainbar2.addControl (permalinkControl);
+mainbar2.addControl (printControl);
+mainbar2.addControl(toggleButtonU);
+
+var Mainbar3 = new Bar();
+Mainbar3.setPosition('top');
+map.addControl(Mainbar3);
+Mainbar3.addControl (new FullScreen({
+  source: 'fullscreen',
+  title: 'Vollbild',
+  
+}));
+
+Mainbar3.addControl(new ZoomToExtent({
+   extent: [727361, 6839277, 858148, 6990951] 
+ }));
+ Mainbar3.addControl (new Rotate());
+ 
+
+ 
+ document.addEventListener('DOMContentLoaded', function() {
+  initializeWMS(WMSCapabilities, map ); // Aufrufen der initializeWMS-Funktion aus myFunc.js
+  });
+ 
+// Inhalt von myFunc.js
+function initializeWMS(WMSCapabilities,map ) {
+  var cap = new WMSCapabilities({
+      target: document.body,
+      srs: ['EPSG:4326', 'EPSG:3857', 'EPSG:32632'],
+      cors: true,
+      popupLayer: true,
+      placeholder: 'WMS link hier einfügen...',
+      title: 'WMS-Dienste',
+      searchLabel: 'Suche',
+      optional: 'token',
+      services: {
+      
+  
+  'Verwaltungsgrenzen NI ': 'https://opendata.lgln.niedersachsen.de/doorman/noauth/verwaltungsgrenzen_wms',            
+  'Hydro, Umweltkarten NI ': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Hydro_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
+  'WRRL, Umweltkarten NI ': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/WRRL_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
+  'Natur, Umweltkarten NI': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Natur_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
+  'HW-Schutz, Umwelkarten NI':'https://www.umweltkarten-niedersachsen.de/arcgis/services/HWSchutz_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
+  'schutzgebiete, NL': 'https://service.pdok.nl/provincies/aardkundige-waarden/wms/v1_0?request=GetCapabilities&service=WMS',
+  'wateren, NL': 'https://service.pdok.nl/kadaster/hy/wms/v1_0?',
+  'EU-Waterbodies 3rd RBMP': 'https://water.discomap.eea.europa.eu/arcgis/services/WISE_WFD/WFD2022_SurfaceWaterBody_WM/MapServer/WMSServer?request=GetCapabilities&service=WMS',
+  'Luft u. Lärm': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Luft_Laerm_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
+  'Boden, Umweltkarten NI': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Boden_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
+  'Inspire Hydro': 'https://sg.geodatenzentrum.de/wms_dlm250_inspire?Request=GetCapabilities&SERVICE=WMS',
+  'TopPlusOpen': 'https://sgx.geodatenzentrum.de/wms_topplus_open?request=GetCapabilities&service=wms'
+
+  
+
+      },
+      trace: true
+  });
+  Mainbar3.addControl(cap);
+  cap.on('load', function (e) {
+      map.addLayer(e.layer);
+      e.layer.set('legend', e.options.data.legend);
+ });
+};
+
+function checkForLinkInTH(html) {
+  const table = document.createElement('table');
+  table.innerHTML = html;
+
+  const trs = table.querySelectorAll('tr');
+  const secondTr = trs[1];
+
+  if (secondTr) {
+      const tds = secondTr.querySelectorAll('td');
+      
+      // Durchlaufe alle td-Tags im zweiten tr-Tag
+      for (const td of tds) {
+          // Prüfe, ob der Inhalt des td-Tags "https://" enthält
+          if (td.textContent.includes('https://') || td.textContent.includes('http://')) {
+              // Wenn ja, erstelle ein a-Element und setze den Link
+              const link = td.textContent.trim();
+              const aElement = document.createElement('a');
+              aElement.href = link;
+              aElement.target = '_blank';
+              aElement.textContent = 'Link';
+              
+              // Lösche den Inhalt des td-Tags und füge das a-Element hinzu
+              td.innerHTML = '';
+              td.appendChild(aElement);
+          }
+      }
+  }
+  return table.outerHTML;
+}
+
+
+function dragElement(elmnt) {
+  alert("Hall");
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  if (document.getElementById(elmnt.id + "header")) {
+    // if present, the header is where you move the DIV from:
+    document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+  } else {
+    // otherwise, move the DIV from anywhere inside the DIV:
+    elmnt.onmousedown = dragMouseDown;
+  }
+
+  function dragMouseDown(e) {
+    
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+  }
+
+  function closeDragElement() {
+    // stop moving when mouse button is released:
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
