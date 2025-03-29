@@ -2701,11 +2701,13 @@ mainBar1.setPosition('left');
 
 var mainbar2 = new Bar();
 map.addControl(mainbar2);
-mainbar2.setPosition('right');
+
 //mainbar2.addControl (search);
 mainbar2.addControl (permalinkControl);
 mainbar2.addControl (printControl);
 mainbar2.addControl(toggleButtonU);
+mainbar2.setPosition('bottom-right');
+mainbar2.element.style.bottom = '60px';
 
 var mainbar3 = new Bar();
 map.addControl(mainbar3);
@@ -2719,6 +2721,14 @@ mainbar3.addControl(new ZoomToExtent({
 mainbar3.addControl (new Rotate());
 mainbar3.setPosition('bottom-left');
 mainbar3.element.style.bottom = '160px';
+
+var checkExist = setInterval(() => {
+  let barElement = document.querySelector('.ol-control.ol-bar.bottom-left');
+  if (barElement) {
+    //barElement.style.bottom = '160px';
+    clearInterval(checkExist);
+  }
+}, 100);
 
 document.addEventListener('DOMContentLoaded', function() {
   initializeWMS(WMSCapabilities, map ); // Aufrufen der initializeWMS-Funktion aus myFunc.js
