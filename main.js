@@ -2546,8 +2546,8 @@ var printControl = new PrintDialog({
   // pdf: false
 });
 //map.addControl(printControl);
-//printControl.setSize('A4');
-//printControl.setOrientation('portrait');
+printControl.setSize('A4');
+printControl.setOrientation('portrait');
 
 
 
