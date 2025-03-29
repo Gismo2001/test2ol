@@ -2707,25 +2707,22 @@ mainbar2.addControl (permalinkControl);
 mainbar2.addControl (printControl);
 mainbar2.addControl(toggleButtonU);
 
-var Mainbar3 = new Bar();
-Mainbar3.setPosition('bottom-left');
-map.addControl(Mainbar3);
-Mainbar3.addControl (new FullScreen({
+var mainbar3 = new Bar();
+map.addControl(mainbar3);
+mainbar3.addControl (new FullScreen({
   source: 'fullscreen',
   title: 'Vollbild',
-  
 }));
-
-Mainbar3.addControl(new ZoomToExtent({
+mainbar3.addControl(new ZoomToExtent({
    extent: [727361, 6839277, 858148, 6990951] 
  }));
- Mainbar3.addControl (new Rotate());
- 
+mainbar3.addControl (new Rotate());
+mainbar3.setPosition('bottom-left');
+mainbar3.element.style.bottom = '160px';
 
- 
- document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
   initializeWMS(WMSCapabilities, map ); // Aufrufen der initializeWMS-Funktion aus myFunc.js
-  });
+});
  
 // Inhalt von myFunc.js
 function initializeWMS(WMSCapabilities,map ) {
@@ -2759,7 +2756,7 @@ function initializeWMS(WMSCapabilities,map ) {
       },
       trace: true
   });
-  Mainbar3.addControl(cap);
+  mainbar3.addControl(cap);
   cap.on('load', function (e) {
       map.addLayer(e.layer);
       e.layer.set('legend', e.options.data.legend);
