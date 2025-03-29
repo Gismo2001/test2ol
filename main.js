@@ -27,7 +27,7 @@ import getLayerByLink from 'ol-ext/control/Permalink';
 
 import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
-import { FullScreen, Attribution, defaults as defaultControls, ZoomToExtent, Control, Rotate } from 'ol/control.js';
+import { FullScreen, Attribution, defaults as defaultControls, ZoomToExtent, Control } from 'ol/control.js';
 import { DragRotateAndZoom } from 'ol/interaction.js';
 import { DragAndDrop } from 'ol/interaction.js';
 import { defaults as defaultInteractions } from 'ol/interaction.js';
@@ -122,7 +122,7 @@ const map = new Map({
   target: "map",
   view: mapView,
    controls: defaultControls().extend([
-    
+    new FullScreen(),
     attribution,
     
   ]),
@@ -2711,14 +2711,9 @@ mainbar2.element.style.bottom = '60px';
 
 var mainbar3 = new Bar();
 map.addControl(mainbar3);
-mainbar3.addControl (new FullScreen({
-  source: 'fullscreen',
-  title: 'Vollbild',
-}));
 mainbar3.addControl(new ZoomToExtent({
    extent: [727361, 6839277, 858148, 6990951] 
  }));
-mainbar3.addControl (new Rotate());
 mainbar3.setPosition('bottom-left');
 mainbar3.element.style.bottom = '120px';
 
