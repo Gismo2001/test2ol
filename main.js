@@ -102,7 +102,7 @@ function dragInfo() {
 }
 
 const attribution = new Attribution({
-  collapsible: false,
+  collapsible: true,
   html: '<a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
 });
 
@@ -110,13 +110,10 @@ const attribution = new Attribution({
 function removeAllOverlays() {
   map.getOverlays().clear();
 }
-
-
 const mapView = new View({
   center: proj.fromLonLat([7.35, 52.7]),
   zoom: 9
 });
-
 
 const map = new Map({
   target: "map",
@@ -124,13 +121,11 @@ const map = new Map({
    controls: defaultControls().extend([
     new FullScreen(),
     attribution,
-    
   ]),
-
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
+
 //------------------------------------Attribution collapse
-/*
 function checkSize() {
   const small = map.getSize()[0] < 600;
   attribution.setCollapsible(small);
@@ -138,8 +133,6 @@ function checkSize() {
 }
 map.on('change:size', checkSize);
 checkSize();
-*/
-
 
 //---------------------------------------------------Marker für Adresssuche
 const sourceP = new VectorSource();
@@ -183,7 +176,6 @@ const WFS_vector = new VectorLayer({
 map.addLayer(WFS_vector);
 */
 
-
 //die Layer
 const exp_gew_fla_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_info_fla.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
@@ -200,8 +192,6 @@ const exp_gew_biotope_noh = new VectorLayer({
   style: exp_gew_fla_vecStyle,
   visible: false
 });
-
-//************
 
 const gehoelz_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gehoelz_vec.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
@@ -241,7 +231,6 @@ const exp_gew_info_layer = new VectorLayer({
   //permalink:"gew_info", 
   name: 'gew_info',
   style: getStyleForArtGewInfo,
-  //style: combinedStyle,
   visible: false
 });
 const gew_layer_layer = new VectorLayer({
@@ -263,7 +252,7 @@ const exp_bw_son_pun_layer = new VectorLayer({
 const exp_bw_ein_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_ein.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Einläufe', 
- // permalink:"ein", 
+  //permalink:"ein", 
   name: 'ein', 
   style: getStyleForArtEin,
   visible: false
@@ -271,7 +260,7 @@ const exp_bw_ein_layer = new VectorLayer({
 const exp_bw_que_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_que.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox}),
   title: 'Querung', 
-  permalink:"que", 
+  //permalink:"que", 
   name: 'que', // Titel für den Layer-Switcher
   style: queStyle,
   visible: false
@@ -279,7 +268,7 @@ const exp_bw_que_layer = new VectorLayer({
 const exp_bw_due_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_due.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox }),
   title: 'Düker', // Titel für den Layer-Switcher
-  permalink:"due", 
+  //permalink:"due", 
   name: 'due', // Titel für den Layer-Switcher
   style: dueStyle,
   visible: false
@@ -321,6 +310,7 @@ const exp_bw_sle_layer = new VectorLayer({
 const km10scal_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_10_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'km10scal', // Titel für den Layer-Switcher
+  name: 'km10cal',
   style: km10scalStyle,
   visible: true,
   minResolution: 0,
@@ -329,9 +319,8 @@ const km10scal_layer = new VectorLayer({
 const km100scal_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_100_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'km100scal', // Titel für den Layer-Switcher
-  style: function(feature, resolution) {
-    return km100scalStyle(feature, feature.get('km'), resolution);
-  },
+  name: 'km100cal',
+  style: function(feature, resolution) {return km100scalStyle(feature, feature.get('km'), resolution);  },
   visible: true,
   minResolution: 0,
   maxResolution: 3 
@@ -339,9 +328,8 @@ const km100scal_layer = new VectorLayer({
 const km500scal_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_500_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'km500scal', // Titel für den Layer-Switcher
-  style: function(feature, resolution) {
-    return km500scalStyle(feature, feature.get('km'), resolution);
-  },
+  name: 'km500cal',
+  style: function(feature, resolution) {return km500scalStyle(feature, feature.get('km'), resolution);  },
   visible: true  
 });
 
@@ -425,161 +413,158 @@ const wmsGewWmsFgLayer = new TileLayer({
 
 
 const gnAtlas2023 = new TileLayer({
+  title: "2023_NI",
+  name: "2023_NI",
   source: new TileWMS(({
     url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/dop_wms",
     attributions: 'Orthophotos Niedersachsen, LGLN',
     params: {"LAYERS": "ni_dop20", "TILED": "true", "VERSION": "1.3.0"},
-        
   })),
-  title: "2023_NI",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas2020 = new TileLayer({
+  title: "2020_NI",
+  name: "2020_NI",
   source: new TileWMS(({
-    //url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-    //attributions: ' ',
-    //params: {"LAYERS": "12", "TILED": "true", "VERSION": "1.3.0"},
-    
     url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/doph_wms?",
     attributions: ' ',
     params: {"LAYERS": "ni_dop20h_rgb_2020", "TILED": "true", "VERSION": "1.3.0"},
   })),
-  title: "2020_NI",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas2017 = new TileLayer({
+  title: "2017_NI",
+  name: "2017_NI",
   source: new TileWMS(({
-    //url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-    //attributions: ' ',
-    //params: {"LAYERS": "11", "TILED": "true", "VERSION": "1.3.0"},
-
     url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/doph_wms?",
     attributions: ' ',
     params: {"LAYERS": "ni_dop20h_rgb_2017", "TILED": "true", "VERSION": "1.3.0"},
   })),
-  title: "2017_NI",
   opacity: 1.000000,
   visible: true,
 });
 const gnAtlas2014 = new TileLayer({
+  title: "2014_NI",
+  name: "2014_NI",
   source: new TileWMS(({
-    //url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-    //attributions: ' ',
-    //params: {"LAYERS": "10", "TILED": "true", "VERSION": "1.3.0"},
-
     url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/doph_wms?",
     attributions: ' ',
     params: {"LAYERS": "ni_dop20h_rgb_2014", "TILED": "true", "VERSION": "1.3.0"},
   })),
-  title: "2014_NI",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas2012 = new TileLayer({
+  title: "2012_NOH",
+  name: "2012_NOH",
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
      params: {"LAYERS": "9", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "2012_NOH",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas2011 = new TileLayer({
+  title: "2011_NI",
+  name: "2011_NI",
   source: new TileWMS(({
-    //url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
-    //attributions: ' ',
-    //params: {"LAYERS": "11", "TILED": "true", "VERSION": "1.3.0"},
-
     url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/doph_wms?",
     attributions: ' ',
     params: {"LAYERS": "ni_dop20h_rgb_2011", "TILED": "true", "VERSION": "1.3.0"},
   })),
-  title: "2011_NI",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas2010 = new TileLayer({
+  title: "2010_NOH",
+  name: "2010_NOH",
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
      params: {"LAYERS": "8", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "2010_NOH",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas2009 = new TileLayer({
+  title: "2009_NOH",
+  name: "2009_NOH",
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
      params: {"LAYERS": "7", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "2009_NOH",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas2002 = new TileLayer({
+  title: "2002_NOH",
+  name: "2002_NOH",
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
      params: {"LAYERS": "6", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "2002_NOH",
   opacity: 1.000000,
   visible: false,
 });
 
 const gnAtlas1990 = new TileLayer({
+  title: "1990_NOH",
+  name: "1990_NOH",
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
      params: {"LAYERS": "5", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "1990_NOH",
   opacity: 1.000000,
   visible: false,
 });
 
 const gnAtlas1980 = new TileLayer({
+  title: "1980_NOH",
+  name: "1980_NOH",
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
      params: {"LAYERS": "4", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "1980_NOH",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas1970 = new TileLayer({
+  title: "1970_NOH",
+  name: "1970_NOH",
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
      params: {"LAYERS": "3", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "1970_NOH",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas1957 = new TileLayer({
+  title: "1957_NOH",
+  name: "1957_NOH",
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
      params: {"LAYERS": "2", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "1957_NOH",
   opacity: 1.000000,
   visible: false,
 });
 const gnAtlas1937 = new TileLayer({
+  title: "1937_NOH",
+  name: "1937_NOH",
   source: new TileWMS(({
       url: "https://geo.grafschaft.de/arcgis/services/Migratrion_Okt_2020/BAS_Luftbilder_2/MapServer/WMSServer",
       attributions: ' ',
      params: {"LAYERS": "1", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  title: "1937_NOH",
   opacity: 1.000000,
   visible: false,
 });
@@ -595,7 +580,7 @@ var baseDE_layer = new TileLayer({
     attributions: '© GeoBasis-DE / BKG (Jahr des letzten Datenbezugs) CC BY 4.0',
     params: {
       "LAYERS": "de_basemapde_web_raster_farbe",
-      "TILED": true, // "true" sollte ohne Anführungszeichen sein
+      "TILED": true,
       "VERSION": "1.3.0"
     },
   }),
@@ -607,13 +592,11 @@ var dop20ni_layer = new TileLayer({
   visible: false,
   type: 'base',
   source: new TileWMS({
-    //url: "https://www.geobasisdaten.niedersachsen.de/doorman/noauth/wms_ni_dop",
-    //https://opendata.lgln.niedersachsen.de/doorman/noauth/dop_wms
     url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/dop_wms",
     attributions: 'Orthophotos Niedersachsen, LGLN',
     params: {
       "LAYERS": "ni_dop20",
-      "TILED": true, // "true" sollte ohne Anführungszeichen sein
+      "TILED": true, 
       "VERSION": "1.3.0"
     },
   }),
@@ -698,27 +681,6 @@ var Alkis_layer = new TileLayer({
   }),
 });
 
-
-
-/* // Manuellen Button für Permalink erstellen
-const tmpButton = document.createElement("button");
-tmpButton.innerHTML = '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>';
-tmpButton.style.position = "absolute";
-tmpButton.style.top = "8px";
-tmpButton.style.left = "100px";
-tmpButton.style.zIndex = "1000";
-tmpButton.style.width = "22px";
-tmpButton.style.height = "22px";
-tmpButton.onclick = function () {
-   alert("Button gedrückt");
-};
-document.body.appendChild(tmpButton);
-
-// Button zum DOM hinzufügen
-
-document.body.appendChild(tmpButton); */
-
-
 const layerSwitcher = new LayerSwitcher({ 
   activationMode: 'click', 
   reverse: true, 
@@ -737,7 +699,6 @@ const layerSwitcher = new LayerSwitcher({
       }
   }
 });
-
 map.addControl(layerSwitcher);
 
 
@@ -754,13 +715,12 @@ layerSwitcher.on('layer:visible', function(event) {
 });
  */
 
-
-
-
 //------------------------------------ Layer für Messung
 const source = new VectorSource();
 const vector = new VectorLayer({
   displayInLayerSwitcher: false,
+  title: "tmp_layer1",
+  name: "tmp_layer1",
   source: source,
   style: {
     'fill-color': 'rgba(136, 136, 136, 0.526)',
@@ -776,7 +736,6 @@ let measureTooltipElement;
 let measureTooltip;
 //-------------------------------------------Funktionen für Messung----------------- //
 const pointerMoveHandler = function (evt) {
-  
   if (evt.pointerType === 'touch') {
     if (evt.dragging) {
        return;
@@ -788,7 +747,6 @@ const pointerMoveHandler = function (evt) {
   }  
 };
 map.on('pointermove', pointerMoveHandler);
-
 
 let draw;
 
@@ -820,8 +778,8 @@ const style = new Style({
     color: 'rgba(255, 255, 255, 0.2)',
   }),
   stroke: new Stroke({
-    color: 'blue', // Blaue Linienfarbe
-    width: 2, // Linienbreite
+    color: 'blue',
+    width: 2, 
   }),
   image: new CircleStyle({
     radius: 5,
@@ -894,11 +852,11 @@ function createMeasureTooltip() {
 map.getViewport().addEventListener('contextmenu', function(evt) {
   evt.preventDefault(); // Verhindert das Standardkontextmenü
   if (draw) {
-    source.clear(); // Löscht alle Vektoren aus der Quelle
-    draw.finishDrawing(); // Beendet die laufende Messung
-    map.removeInteraction(draw); // Entfernt die Zeicheninteraktion
-    map.un('pointermove', pointerMoveHandler); // Entfernt den Event-Listener für 'pointermove'
-    map.getOverlays().clear();//helpTooltip = null;
+    source.clear(); 
+    draw.finishDrawing(); 
+    map.removeInteraction(draw);
+    map.un('pointermove', pointerMoveHandler); 
+    map.getOverlays().clear();
     measureTooltip = null;
     helpTooltipElement = null;
     measureTooltipElement = null;
@@ -928,7 +886,6 @@ class CustomControls1 extends Control {
     });
     element.appendChild(buttonLength);
     element.appendChild(buttonArea);
-
     super({
       element: element,
       target: options.target,
@@ -973,6 +930,7 @@ const GNAtlasGroup = new LayerGroup({
 });
 const kmGroup = new LayerGroup({
   title: "Station",
+  name: "Station",
   fold: true,
   fold: 'close',
   layers: [km10scal_layer, km100scal_layer, km500scal_layer]
@@ -995,15 +953,13 @@ map.addLayer(BwGroupP);
 map.addLayer(vector); 
 //Ende Layer hinzufügen---------------------------------------
 
- 
-
 
 //-----------------------------------------------------------------Info für WMS-Layer
 var toggleButtonU = new Toggle({
   html: '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>',
   className: "select",
   title: "Select Info",
-  active: true, // Button wird beim Start als aktiv gesetzt
+  active: false, // Button wird beim Start als aktiv gesetzt
   interaction: selectInteraction,
   onToggle: function(active) {
     alert("Jetzt ist BW-Abfrage " + (active ? "activated" : "deactivated"));
@@ -1027,9 +983,9 @@ var toggleButtonU = new Toggle({
   }
 });
 // Klasse 'active' zum Button hinzufügen, um sicherzustellen, dass er beim Start als aktiv dargestellt wird
-toggleButtonU.element.classList.add('active');
-toggleButtonU.element.querySelector('.icon').classList.add('active');
-//map.addControl(toggleButtonU);
+//toggleButtonU.element.classList.add('active');
+//toggleButtonU.element.querySelector('.icon').classList.add('active');
+
 
 var selectInteraction = new Select({
   layers: [vector],
@@ -1042,7 +998,7 @@ var selectFeat = new Select({
   condition: singleClick,
 });
 
-let layer_selected = null; // Setze layer_selected auf null, um sicherzustellen, dass es immer definiert ist
+let layer_selected = null; 
 
 selectFeat.on('select', function (e) {
   e.selected.forEach(function (featureSelected) {
@@ -1053,7 +1009,7 @@ selectFeat.on('select', function (e) {
           
       } else {
           selectFeat.getFeatures().clear(); // Hebt die Selektion auf
-          layer_selected = null; // Setze layer_selected auf null, da die Selektion aufgehoben wurde
+          layer_selected = null; 
       }
   });
 });
@@ -1102,9 +1058,7 @@ function singleClickHandler(evt) {
         const url = source.getFeatureInfoUrl(evt.coordinate, viewResolution, viewProjection, {'INFO_FORMAT': 'text/html'});
         if (url) {
           fetch(url)
-                
           .then((response) => response.text())
-          
           .then((html) => {
             console.log(html)
             if (html.trim() !== '') {
@@ -1136,8 +1090,6 @@ function createInfoDiv(name, html) {
   const infoDiv = document.createElement('p');
   infoDiv.id = 'info';
   infoDiv.classList.add('Info');
-  
-  //infoDiv.innerHTML = `<strong>${name} Layer</strong><br>${html}`;
   infoDiv.innerHTML = `${html}`;
   const closeIcon = document.createElement('p');
   closeIcon.innerHTML = '&times;';
@@ -1781,6 +1733,8 @@ document.getElementById('popup-closer').onclick = function () {
 
 // Current selection
 var sLayer = new VectorLayer({
+  title: "tmp_Layer2",
+  name: "tmp_Layer2",
   source: new VectorSource(),
   style: new Style({ image: new CircleStyle({radius: 5,stroke: new Stroke ({color: 'rgb(255,165,0)', width: 3 }),fill: new Fill({color: 'rgba(255,165,0,.3)' })      }),
       stroke: new Stroke ({
@@ -2152,8 +2106,8 @@ var sub1 = new Bar({
                     })
                   }),
                   source: sourceP,
-                  title: 'Null',
-                  name: 'Null',
+                  title: 'gps_Layer',
+                  name: 'gps_Layer',
                   zIndex: 9999,
                 });
                 map.addLayer(layerP);
@@ -2473,7 +2427,7 @@ listCtrl.on(['resize', 'collapse', 'sort'], function(e) {
 
 //-----------------------------------------------------------------------------------------Permalink
 var permalinkControl = new Permalink({    
-  target: document.getElementById('permalink-container'), // Container für den Permalink
+  target: document.getElementById('permalink-container'), 
   title: "Link erzeugen",
   geohash: /gh=/.test(document.location.href),
   localStorage: true,  // Save permalink in localStorage if no URL provided
@@ -2483,7 +2437,7 @@ var permalinkControl = new Permalink({
   onclick: function(url) {
     console.log("Aktuelle URL-Parameter: ", permalinkControl.getUrlParam());
     console.log("Permalink: ", permalinkControl.getLink());
-
+    console.log(geohash);
     // Layer-Namen sammeln
     let activeLayers = [];
     map.getLayers().getArray().forEach(group => {
@@ -2761,7 +2715,7 @@ function initializeWMS(WMSCapabilities,map ) {
       },
       trace: true
   });
-  mainbar3.addControl(cap);
+  map.addControl(cap);
   cap.on('load', function (e) {
       map.addLayer(e.layer);
       e.layer.set('legend', e.options.data.legend);
