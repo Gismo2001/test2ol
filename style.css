@@ -387,5 +387,7 @@ html {
   top: 1.5em !important;
 }
 
-
+.ID_con {
+  display: none;
+}
 

@@ -15,6 +15,7 @@ import Geolocation from 'ol/Geolocation.js';
 
 import jsPDF from "jspdf";
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style.js';
+import Text from 'ol/style/Text';
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import TileWMS from 'ol/source/TileWMS.js';
@@ -23,6 +24,7 @@ import XYZ from 'ol/source/XYZ.js';
 
 import Permalink from 'ol-ext/control/Permalink';
 import getLayerByLink from 'ol-ext/control/Permalink';
+
 
 
 import {getArea, getLength} from 'ol/sphere.js';
@@ -44,6 +46,7 @@ import SearchPhoton from 'ol-ext/control/SearchPhoton';
 import SearchFeature from 'ol-ext/control/SearchFeature';
 //import SearchNominatim from 'ol-ext/control/SearchNominatim';
 import WMSCapabilities from'ol-ext/control/WMSCapabilities';
+import collection from 'ol/Collection';
 
 
 import CanvasAttribution from 'ol-ext/control/CanvasAttribution';
@@ -128,7 +131,96 @@ const map = new Map({
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
 
+window.onload = function() {
+  console.log("URL-Parameter beim Laden der Seite:", window.location.search);
+  const urlParams = new URLSearchParams(window.location.search);
+  console.log(urlParams);
+  const layersParam = urlParams.get('layers');
+  console.log("layersParam:", layersParam);
+  if (layersParam) {
+    const layersToShow = layersParam.split(',');
+    map.getLayers().getArray().forEach(group => {
+      if (group instanceof LayerGroup) {
+        let groupName = group.get('name');
+        group.getLayers().forEach(layer => {
+          let layerFullName = `${groupName}.${layer.get('name')}`;
+          if (layersToShow.includes(layerFullName)) {
+            layer.setVisible(true);
+            console.log("Layer sichtbar:", layerFullName);
+          } else {
+            layer.setVisible(false);
+            console.log("Layer unsichtbar:", layerFullName);
+          }
+        });
+      }
+    });
+  }
+};
+
+//----------------------------------------------------------------------------------------------------------Print
+map.addControl(new CanvasAttribution());
+map.addControl(new CanvasTitle({ 
+  title: '', 
+  visible: false,
+  style: new Style({ 
+    text: new Text({ font: 'bold 12pt "Arial",Verdana,Geneva,Lucida,Lucida Grande,Helvetica,sans-serif' })
+  }),
+}));
+//map.addControl(new CanvasScaleLine());
+
+
+var printControl = new PrintDialog({ 
+  title: 'Drucken',
+  lang: 'de',
+  //target: document.getElementById('print-container'), 
+  //openWindow: ,
+  
+});
+printControl.setSize('A4');
+printControl.setOrientation('portrait');
+//map.addControl(printControl);
+
+
+
+/* On print > save image file */
+printControl.on(['print', 'error'], function(e) {
+  //document.body.style.overflow = 'hidden'; 
+  //document.body.style.overflow = '';
+  if (e.image) {
+    if (e.pdf) {
+      // Export pdf using the print info
+      var pdf = new jsPDF({
+        orientation: e.print.orientation,
+        unit: e.print.unit,
+        format: e.print.size
+      });
+      pdf.addImage(e.image, 'JPEG', e.print.position[0], e.print.position[1], e.print.imageWidth, e.print.imageHeight);
+      pdf.save(e.print.legend ? 'legend.pdf' : 'map.pdf');
+    } else  {
+      // Save image as file
+      if (e.canvas.toBlob) {
+        e.canvas.toBlob(function(blob) {
+          var name = (e.print.legend ? 'legend.' : 'map.') + e.imageType.replace('image/', '');
+          saveAs(blob, name);
+        }, e.imageType, e.quality);
+      } else {
+        var dataURL = e.canvas.toDataURL(e.imageType, e.quality);
+        var link = document.createElement('a');
+        link.href = dataURL;
+        link.download = (e.print.legend ? 'legend.' : 'map.') + e.imageType.replace('image/', '');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }}
+  } else {
+    console.warn('No canvas to export');
+  }
+});
+
+
+
 //------------------------------------Attribution collapse
+/*
 function checkSize() {
   const small = map.getSize()[0] < 600;
   attribution.setCollapsible(small);
@@ -136,6 +228,7 @@ function checkSize() {
 }
 map.on('change:size', checkSize);
 checkSize();
+*/
 
 //---------------------------------------------------Marker für Adresssuche
 const sourceP = new VectorSource();
@@ -1819,7 +1912,6 @@ var userInput = ""; // Globale Variable zur Speicherung der Nutzereingabe
 var currentlyHighlightedFeature = null; // Variable zur Verfolgung des aktuell markierten Features
 
 
-
 // Markierungsstil für das gefundene Feature
 const highlightStyle = new Style({
  stroke: new Stroke({
@@ -2269,7 +2361,6 @@ function addWFSLayer(wfsUrl) {
   map.addLayer(wfsLayer);
 }
 
-//Mainbar Button "i"
 
 let dragAndDropInteraction;
 let zaehlerGeojson = 0;
@@ -2345,12 +2436,38 @@ function setInteraction()
   map.addInteraction(dragAndDropInteraction);
 }
 
+
 /* 
-exp_bw_due_layer.getSource().on('change', function() {
-  if (exp_bw_due_layer.getSource().getState() === 'ready') {
-    listCtrl.setFeatures(exp_bw_due_layer.getSource().getFeatures());
+
+exp_bw_sle_layer.getSource().on('change', function() {
+  if (exp_bw_sle_layer.getSource().getState() === 'ready') {
+    var tmpFeatures = exp_bw_sle_layer.getSource().getFeatures().map(f => {
+      var clone = f.clone();
+      var props = { ...clone.getProperties() };
+
+      // Unerwünschte Attribute entfernen
+      
+      delete props.ID_con;
+
+      console.log("Bereinigte Properties:", props); // Prüfen, ob die Attribute entfernt wurden
+
+      clone.setProperties({});
+      clone.setProperties(props);
+      //listCtrl.setFeatures(clone );
+      return clone;
+    });
+
+    console.log("Vorhandene Features:", tmpFeatures); // Debugging
+
+    // Methode 1: Direkt als Array übergeben
+    //listCtrl.setFeatures(tmpFeatures);
+
+    // Methode 2: Falls nötig, als Collection
+    listCtrl.setFeatures(new collection(tmpFeatures));
   }
 });
+
+
 
 // Select-Interaktion
 var selecti = new Select({
@@ -2371,6 +2488,7 @@ selecti.on('select', function(e) {
 function showInfo(f) {
   var prop = f.getProperties();
   var content = document.getElementById('popup-content');
+  console.log ("Proper: " + prop)
   
   // Inhalt leeren und neue Liste erstellen
   var html = '<ul>';
@@ -2388,22 +2506,21 @@ function showInfo(f) {
   var coordinates = f.getGeometry().getCoordinates();
   popup.setPosition(coordinates);
 }
-
-
 // Select-Control
 var listCtrl = new FeatureList({
-  //className: 'ol-bottom',
+  className: 'ol-bottom',
   title: 'Querungen',
-  collapsed: false,
-  features: exp_bw_que_layer.getSource().getFeatures(),
-  
-  number: 20,
+  collapsed: true,
+  //features: exp_bw_sle_layer.getSource().getFeatures(),
   //target: document.body
 });
-
-console.log(listCtrl);
-listCtrl.enableSort('bw_id', 'name', 'ID_con');
 map.addControl(listCtrl);
+
+console.log("Features: " + listCtrl.features);
+const listColumes = ["ID_con", "name"];
+listCtrl.setColumns(listColumes)
+listCtrl.enableSort('bw_id', 'name', 'ID_con');
+
 
 listCtrl.on('select', function(e) {
   if (!e.feature) return;
@@ -2432,7 +2549,7 @@ listCtrl.on(['resize', 'collapse', 'sort'], function(e) {
 var permalinkControl = new Permalink({    
   target: document.getElementById('permalink-container'), 
   title: "Link erzeugen",
-  geohash: /gh=/.test(document.location.href),
+  //geohash: /gh=/.test(document.location.href),
   localStorage: true,  // Save permalink in localStorage if no URL provided
   urlReplace: false,
   fixed: 2,
@@ -2440,7 +2557,7 @@ var permalinkControl = new Permalink({
   onclick: function(url) {
     console.log("Aktuelle URL-Parameter: ", permalinkControl.getUrlParam());
     console.log("Permalink: ", permalinkControl.getLink());
-    console.log(geohash);
+    
     // Layer-Namen sammeln
     let activeLayers = [];
     map.getLayers().getArray().forEach(group => {
@@ -2479,96 +2596,7 @@ function copyToClipboard(text) {
 }
 
 
-//----------------------------------------------------------------------------------------------------------Print
-map.addControl(new CanvasAttribution());
-map.addControl(new CanvasTitle({ 
-  title: '', 
-  visible: false,
-  style: new Style({ 
-   // text: new Text({ font: 'bold 12pt "Arial",Verdana,Geneva,Lucida,Lucida Grande,Helvetica,sans-serif' })
-  }),
-}));
-map.addControl(new CanvasScaleLine());
 
-
-var printControl = new PrintDialog({ 
-  title: 'Drucken',
-  lang: 'de',
-  //target: document.getElementById('print-container'), 
-  openWindow: true,
-  // target: document.querySelector('.info'),
-  // targetDialog: map.getTargetElement() 
-  // save: false,
-  // copy: false,
-  // pdf: false
-});
-//map.addControl(printControl);
-printControl.setSize('A4');
-printControl.setOrientation('portrait');
-
-
-
-/* On print > save image file */
-printControl.on(['print', 'error'], function(e) {
-  document.body.style.overflow = 'hidden'; 
-  document.body.style.overflow = '';
-  if (e.image) {
-    if (e.pdf) {
-      // Export pdf using the print info
-      var pdf = new jsPDF({
-        orientation: e.print.orientation,
-        unit: e.print.unit,
-        format: e.print.size
-      });
-      pdf.addImage(e.image, 'JPEG', e.print.position[0], e.print.position[1], e.print.imageWidth, e.print.imageHeight);
-      pdf.save(e.print.legend ? 'legend.pdf' : 'map.pdf');
-    } else  {
-      // Save image as file
-      if (e.canvas.toBlob) {
-        e.canvas.toBlob(function(blob) {
-          var name = (e.print.legend ? 'legend.' : 'map.') + e.imageType.replace('image/', '');
-          saveAs(blob, name);
-        }, e.imageType, e.quality);
-      } else {
-        var dataURL = e.canvas.toDataURL(e.imageType, e.quality);
-        var link = document.createElement('a');
-        link.href = dataURL;
-        link.download = (e.print.legend ? 'legend.' : 'map.') + e.imageType.replace('image/', '');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }    }
-  } else {
-    console.warn('No canvas to export');
-  }
-});
-
-
-window.onload = function() {
-  console.log("URL-Parameter beim Laden der Seite:", window.location.search);
-  const urlParams = new URLSearchParams(window.location.search);
-  console.log(urlParams);
-  const layersParam = urlParams.get('layers');
-  console.log("layersParam:", layersParam);
-  if (layersParam) {
-    const layersToShow = layersParam.split(',');
-    map.getLayers().getArray().forEach(group => {
-      if (group instanceof LayerGroup) {
-        let groupName = group.get('name');
-        group.getLayers().forEach(layer => {
-          let layerFullName = `${groupName}.${layer.get('name')}`;
-          if (layersToShow.includes(layerFullName)) {
-            layer.setVisible(true);
-            console.log("Layer sichtbar:", layerFullName);
-          } else {
-            layer.setVisible(false);
-            console.log("Layer unsichtbar:", layerFullName);
-          }
-        });
-      }
-    });
-  }
-};
 
 
 
@@ -2650,11 +2678,14 @@ var mainBar1 = new Bar({
       // Untermenü mit zwei Buttons
       bar: sub2,
       onToggle: function() { },
-    })
+    }),
+
   ]
 });
 map.addControl ( mainBar1 );
+
 mainBar1.setPosition('left');
+
 
 var mainbar2 = new Bar();
 map.addControl(mainbar2);
