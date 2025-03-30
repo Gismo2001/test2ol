@@ -340,6 +340,8 @@ html {
   background-color: #4CAF50; /* Beispielhafte Hintergrundfarbe */
   color: white; /* Beispielhafte Textfarbe */
 }
+
+
 #popup-content {
   user-select: text;
 }

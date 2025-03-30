@@ -120,6 +120,9 @@ const map = new Map({
   view: mapView,
    controls: defaultControls().extend([
     new FullScreen(),
+    new ZoomToExtent({
+      extent: [727361, 6839277, 858148, 6990951] 
+    }),
     attribution,
   ]),
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
@@ -959,7 +962,7 @@ var toggleButtonU = new Toggle({
   html: '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>',
   className: "select",
   title: "Select Info",
-  active: false, // Button wird beim Start als aktiv gesetzt
+  active: true, // Button wird beim Start als aktiv gesetzt
   interaction: selectInteraction,
   onToggle: function(active) {
     alert("Jetzt ist BW-Abfrage " + (active ? "activated" : "deactivated"));
@@ -983,8 +986,8 @@ var toggleButtonU = new Toggle({
   }
 });
 // Klasse 'active' zum Button hinzufügen, um sicherzustellen, dass er beim Start als aktiv dargestellt wird
-//toggleButtonU.element.classList.add('active');
-//toggleButtonU.element.querySelector('.icon').classList.add('active');
+toggleButtonU.element.classList.add('active');
+toggleButtonU.element.querySelector('.icon').classList.add('active');
 
 
 var selectInteraction = new Select({
@@ -2660,16 +2663,17 @@ map.addControl(mainbar2);
 mainbar2.addControl (permalinkControl);
 mainbar2.addControl (printControl);
 mainbar2.addControl(toggleButtonU);
+
 mainbar2.setPosition('bottom-right');
 mainbar2.element.style.bottom = '60px';
 
-var mainbar3 = new Bar();
-map.addControl(mainbar3);
-mainbar3.addControl(new ZoomToExtent({
-   extent: [727361, 6839277, 858148, 6990951] 
- }));
-mainbar3.setPosition('bottom-left');
-mainbar3.element.style.bottom = '120px';
+//var mainbar3 = new Bar();
+//map.addControl(mainbar3);
+//mainbar3.addControl(new ZoomToExtent({
+//   extent: [727361, 6839277, 858148, 6990951] 
+// }));
+//mainbar3.setPosition('bottom-left');
+//mainbar3.element.style.bottom = '120px';
 
 var checkExist = setInterval(() => {
   let barElement = document.querySelector('.ol-control.ol-bar.bottom-left');
