@@ -132,20 +132,21 @@ const map = new Map({
 });
 
 window.onload = function() {
-  console.log("URL-Parameter beim Laden der Seite:", window.location.search);
+  
   const urlParams = new URLSearchParams(window.location.search);
-  console.log(urlParams);
   const layersParam = urlParams.get('layers');
-  console.log("layersParam:", layersParam);
+  
   if (layersParam) {
     const layersToShow = layersParam.split(',');
     map.getLayers().getArray().forEach(group => {
       if (group instanceof LayerGroup) {
         let groupName = group.get('name');
+        
         group.getLayers().forEach(layer => {
           let layerFullName = `${groupName}.${layer.get('name')}`;
           if (layersToShow.includes(layerFullName)) {
             layer.setVisible(true);
+            //group.setVisible(true);
             console.log("Layer sichtbar:", layerFullName);
           } else {
             layer.setVisible(false);
@@ -2400,12 +2401,11 @@ function setInteraction()
       sourceName = "KML: " + zaehlerKML + " " + fileName;
     } else if (fileName === 'fot') {
       sourceName = "fot";
-    
     } else {
       //sourceName = "Unbekannt: " + " " + fileName;
     }
     // Bedingte Zuweisung des Styles
-    const layerStyle = fileName === 'fot' ? arrowStyle : geojsonStyle;
+     const layerStyle = fileName === 'fot' ? arrowStyle : geojsonStyle;
     zaehlerGeojson++;
     zaehlerKML++;
     const vectorLayer = new VectorLayer({
