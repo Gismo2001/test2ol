@@ -22,8 +22,8 @@ import TileWMS from 'ol/source/TileWMS.js';
 import TileImage from 'ol/source/TileImage.js';
 import XYZ from 'ol/source/XYZ.js';
 
-import Permalink from 'ol-ext/control/Permalink';
-import getLayerByLink from 'ol-ext/control/Permalink';
+//import Permalink from 'ol-ext/control/Permalink';
+//import getLayerByLink from 'ol-ext/control/Permalink';
 
 
 
@@ -100,9 +100,9 @@ var globalCoordAnOderAus = false;
 
 
 // Funktion zum Verschieben des DIVs
-function dragInfo() {
-  dragElement(document.getElementById("Info"));  
-}
+//function dragInfo() {
+//  dragElement(document.getElementById("Info"));  
+//}
 
 const attribution = new Attribution({
   collapsible: true,
@@ -131,17 +131,16 @@ const map = new Map({
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
 
-window.onload = function() {
-  
+/* Für das Laden eines Permalinks
+
+  window.onload = function() {
   const urlParams = new URLSearchParams(window.location.search);
   const layersParam = urlParams.get('layers');
-  
   if (layersParam) {
     const layersToShow = layersParam.split(',');
     map.getLayers().getArray().forEach(group => {
       if (group instanceof LayerGroup) {
         let groupName = group.get('name');
-        
         group.getLayers().forEach(layer => {
           let layerFullName = `${groupName}.${layer.get('name')}`;
           if (layersToShow.includes(layerFullName)) {
@@ -157,6 +156,10 @@ window.onload = function() {
     });
   }
 };
+ */
+
+
+
 
 //----------------------------------------------------------------------------------------------------------Print
 map.addControl(new CanvasAttribution());
@@ -167,7 +170,7 @@ map.addControl(new CanvasTitle({
     text: new Text({ font: 'bold 12pt "Arial",Verdana,Geneva,Lucida,Lucida Grande,Helvetica,sans-serif' })
   }),
 }));
-//map.addControl(new CanvasScaleLine());
+map.addControl(new CanvasScaleLine());
 
 
 var printControl = new PrintDialog({ 
@@ -277,6 +280,7 @@ map.addLayer(WFS_vector);
 const exp_gew_fla_vecLayer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_info_fla.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Gewässerflächen', // Titel für den Layer-Switcher
+  //permalink:"son_pun",  // Um Permalink zu setzen
   name: 'exp_gew_fla',
   style: exp_gew_fla_vecStyle,
   visible: false
@@ -321,27 +325,23 @@ const exp_gew_umn_layer = new VectorLayer({
   visible: false
 });
 const exp_gew_info_layer = new VectorLayer({
-  source: new VectorSource({
-  format: new GeoJSON(),
-  url: function (extent) {return './myLayers/exp_gew_info.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
+  source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_gew_info.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Gew, Info', 
-  //permalink:"gew_info", 
   name: 'gew_info',
   style: getStyleForArtGewInfo,
   visible: false
 });
 const gew_layer_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/gew.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
-  title: 'gew', // Titel für den Layer-Switcher
+  title: 'gew', 
   name: 'gew',
-  style: new Style({fill: new Fill({ color: 'rgba(0,28, 240, 0.4)' }),stroke: new Stroke({ color: 'blue', width: 2 })
-  })
+  style: new Style({fill: new Fill({ color: 'rgba(0,28, 240, 0.4)' }),stroke: new Stroke({ color: 'blue', width: 2 }) }),
+  visible: true
 })
 
 const exp_bw_son_pun_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_son_pun.geojson' + '?bbox=' + extent.join(','); },strategy: LoadingStrategy.bbox}),
   title: 'Sonstige, Punkte', 
-  //permalink:"son_pun", 
   name: 'son_pun', 
   style: getStyleForArtSonPun,
   visible: false
@@ -349,7 +349,6 @@ const exp_bw_son_pun_layer = new VectorLayer({
 const exp_bw_ein_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_ein.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Einläufe', 
-  //permalink:"ein", 
   name: 'ein', 
   style: getStyleForArtEin,
   visible: false
@@ -357,31 +356,27 @@ const exp_bw_ein_layer = new VectorLayer({
 const exp_bw_que_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_que.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox}),
   title: 'Querung', 
-  //permalink:"que", 
-  name: 'que', // Titel für den Layer-Switcher
+  name: 'que', 
   style: queStyle,
   visible: false
 });
 const exp_bw_due_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_due.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox }),
-  title: 'Düker', // Titel für den Layer-Switcher
-  //permalink:"due", 
-  name: 'due', // Titel für den Layer-Switcher
+  title: 'Düker', 
+  name: 'due', 
   style: dueStyle,
   visible: false
 });
 const exp_bw_weh_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url: function (extent) {return './myLayers/exp_bw_weh.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox}),
-  title: 'Wehr', // Titel für den Layer-Switcher
-  //permalink:"weh", 
-  name: 'weh', // Titel für den Layer-Switcher
+  title: 'Wehr', 
+  name: 'weh', 
   style: wehStyle,
   visible: false
 });
 const exp_bw_bru_nlwkn_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_bw_bru_nlwkn.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Brücke (NLWKN)', 
-  //permalink:"bru_nlwkn",
   name: 'bru_nlwkn', // Titel für den Layer-Switcher
   style: bru_nlwknStyle,
   visible: false
@@ -389,7 +384,6 @@ const exp_bw_bru_nlwkn_layer = new VectorLayer({
 const exp_bw_bru_andere_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url:function (extent) {return './myLayers/exp_bw_bru_andere.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'Brücke (andere)',
-  //permalink:"bru_andere", 
   name: 'bru_andere', 
   style: bruAndereStyle,
   visible: false
@@ -397,16 +391,15 @@ const exp_bw_bru_andere_layer = new VectorLayer({
 
 const exp_bw_sle_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(),url:function (extent) {return './myLayers/exp_bw_sle.geojson' + '?bbox=' + extent.join(',');},strategy: LoadingStrategy.bbox }),
-  title: 'Schleuse', // Titel für den Layer-Switcher
-  //permalink:"sle", 
-  name: 'sle', // Titel für den Layer-Switcher
+  title: 'Schleuse', 
+  name: 'sle', 
   style: sleStyle,
   visible: true, 
 });
 
 const km10scal_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_10_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
-  title: 'km10scal', // Titel für den Layer-Switcher
+  title: 'km10scal',
   name: 'km10cal',
   style: km10scalStyle,
   visible: true,
@@ -415,7 +408,7 @@ const km10scal_layer = new VectorLayer({
 });
 const km100scal_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_100_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
-  title: 'km100scal', // Titel für den Layer-Switcher
+  title: 'km100scal',
   name: 'km100cal',
   style: function(feature, resolution) {return km100scalStyle(feature, feature.get('km'), resolution);  },
   visible: true,
@@ -424,7 +417,7 @@ const km100scal_layer = new VectorLayer({
 });
 const km500scal_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_500_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
-  title: 'km500scal', // Titel für den Layer-Switcher
+  title: 'km500scal',
   name: 'km500cal',
   style: function(feature, resolution) {return km500scalStyle(feature, feature.get('km'), resolution);  },
   visible: true  
@@ -506,9 +499,6 @@ const wmsGewWmsFgLayer = new TileLayer({
   opacity: 1,
 });
 
-
-
-
 const gnAtlas2023 = new TileLayer({
   title: "2023_NI",
   name: "2023_NI",
@@ -517,7 +507,7 @@ const gnAtlas2023 = new TileLayer({
     attributions: 'Orthophotos Niedersachsen, LGLN',
     params: {"LAYERS": "ni_dop20", "TILED": "true", "VERSION": "1.3.0"},
   })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 const gnAtlas2020 = new TileLayer({
@@ -528,7 +518,7 @@ const gnAtlas2020 = new TileLayer({
     attributions: ' ',
     params: {"LAYERS": "ni_dop20h_rgb_2020", "TILED": "true", "VERSION": "1.3.0"},
   })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 const gnAtlas2017 = new TileLayer({
@@ -539,7 +529,7 @@ const gnAtlas2017 = new TileLayer({
     attributions: ' ',
     params: {"LAYERS": "ni_dop20h_rgb_2017", "TILED": "true", "VERSION": "1.3.0"},
   })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: true,
 });
 const gnAtlas2014 = new TileLayer({
@@ -550,7 +540,7 @@ const gnAtlas2014 = new TileLayer({
     attributions: ' ',
     params: {"LAYERS": "ni_dop20h_rgb_2014", "TILED": "true", "VERSION": "1.3.0"},
   })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 const gnAtlas2012 = new TileLayer({
@@ -561,7 +551,7 @@ const gnAtlas2012 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "9", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 const gnAtlas2011 = new TileLayer({
@@ -572,7 +562,7 @@ const gnAtlas2011 = new TileLayer({
     attributions: ' ',
     params: {"LAYERS": "ni_dop20h_rgb_2011", "TILED": "true", "VERSION": "1.3.0"},
   })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 const gnAtlas2010 = new TileLayer({
@@ -583,7 +573,7 @@ const gnAtlas2010 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "8", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 const gnAtlas2009 = new TileLayer({
@@ -594,7 +584,7 @@ const gnAtlas2009 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "7", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 const gnAtlas2002 = new TileLayer({
@@ -605,7 +595,7 @@ const gnAtlas2002 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "6", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 
@@ -617,7 +607,7 @@ const gnAtlas1990 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "5", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 
@@ -629,7 +619,7 @@ const gnAtlas1980 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "4", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 const gnAtlas1970 = new TileLayer({
@@ -640,7 +630,7 @@ const gnAtlas1970 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "3", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 const gnAtlas1957 = new TileLayer({
@@ -651,7 +641,7 @@ const gnAtlas1957 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "2", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 const gnAtlas1937 = new TileLayer({
@@ -662,15 +652,13 @@ const gnAtlas1937 = new TileLayer({
       attributions: ' ',
      params: {"LAYERS": "1", "TILED": "true", "VERSION": "1.3.0"},
     })),
-  opacity: 1.000000,
+  opacity: 1,
   visible: false,
 });
 
 var baseDE_layer = new TileLayer({
   title: "Base-DE",
   name: "Base-DE",
-  opacity: 1.000000,
-  visible: false,
   type: 'base',
   source: new TileWMS({
     url: "https://sgx.geodatenzentrum.de/wms_basemapde",
@@ -681,12 +669,12 @@ var baseDE_layer = new TileLayer({
       "VERSION": "1.3.0"
     },
   }),
+  opacity: 1,
+  visible: false,
 });
 var dop20ni_layer = new TileLayer({
   title: "DOP20 NI",
   name: "DOP20 NI",
-  opacity: 1.000000,
-  visible: false,
   type: 'base',
   source: new TileWMS({
     url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/dop_wms",
@@ -697,20 +685,24 @@ var dop20ni_layer = new TileLayer({
       "VERSION": "1.3.0"
     },
   }),
+  opacity: 1,
+  visible: false,  
 });
 const googleSatLayer = new TileLayer({
   title: "GoogleSat",
   name: "GoogleSat",
   type: 'base',
   baseLayer: false,
+  source: new TileImage({url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}' }),
+  opacity: 1,
   visible: false,
-  source: new TileImage({url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}' })
 });
 const googleHybLayer = new TileLayer({
   title: "GoogleHybrid",
   name: "GoogleHybrid",
   type: 'base',
   baseLayer: false,
+  opacity: 1,
   visible: false,
   source: new TileImage({url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}' })
 });
@@ -718,23 +710,23 @@ const ESRIWorldImagery = new TileLayer({
   title: 'ESRI-Sat',
   name: 'ESRI-Sat',
   type: 'base',
-  opacity: 1.000000,
-  visible: false,
   source: new XYZ({
-      attributions: 'Powered by Esri',
-      url: 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-  })
+    attributions: 'Powered by Esri',
+    url: 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+  }),
+  opacity: 1,
+  visible: false,
 });
 const ESRIWorldGrey = new TileLayer({
   title: 'ESRI-Grey',
   name: 'ESRI-Grey',
   type: 'base',
-  opacity: 1.000000,
-  visible: false,
   source: new XYZ({
       attributions: 'Powered by Esri',
       url: 'http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
-  })
+  }),
+  opacity: 1,
+  visible: false,  
 });
 
 const osmTileGr = new TileLayer({
@@ -742,30 +734,28 @@ const osmTileGr = new TileLayer({
   name: "osm-grey",
   className: 'bw',
   type: 'base',
-  visible: false,
   source: new OSM({
       url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       //attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   }),
+  opacity: 1,
+  visible: false,
 });
 const osmTileCr = new TileLayer({
   title: "osm-color",
   name: "osm-color",
-  permalink: "osm-color",
   type: 'base',
   source: new OSM({
       url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       //attributions: ['© OpenStreetMap contributors', 'Tiles courtesy of <a href="https://www.openstreetmap.org/"></a>'],
   }),
-  visible: true,
-  opacity: 0.75
+  opacity: 0.75,
+  visible: true, 
 });
 
 var Alkis_layer = new TileLayer({
   title: "ALKIS",
   name: "ALKIS",
-  opacity: 1.000000,
-  visible: false,
   type: 'base',
   source: new TileWMS({
     url: "https://opendata.lgln.niedersachsen.de/doorman/noauth/alkis_wms?",
@@ -776,6 +766,8 @@ var Alkis_layer = new TileLayer({
       "VERSION": "1.3.0"
     },
   }),
+  opacity: 1,
+  visible: false,  
 });
 
 const layerSwitcher = new LayerSwitcher({ 
@@ -789,10 +781,10 @@ const layerSwitcher = new LayerSwitcher({
 
       if (checked) {
       //    console.log('Layer wurde aktiviert:', layer.get('name'));
-          // Hier kannst du weitere Aktionen durchführen, wenn der Layer aktiviert wird
+          // Hier  weitere Aktionen
       } else {
           console.log('Layer wurde deaktiviert:', layer.get('name'));
-          // Hier kannst du weitere Aktionen durchführen, wenn der Layer deaktiviert wird
+          // Hier weitere Aktionen
       }
   }
 });
@@ -801,6 +793,7 @@ map.addControl(layerSwitcher);
 
 // Event-Listener für Sichtbarkeitsänderung
 layerSwitcher.on('layer:visible', function(event) {
+ // Hier weitere Aktionen
  console.log('Layer visibility changed event triggered:', event);
  const layer = event.layer; // Überprüfe die Struktur des Events
  console.log('Layer:', layer);
@@ -831,7 +824,7 @@ const vector = new VectorLayer({
 let sketch;
 let measureTooltipElement;
 let measureTooltip;
-//-------------------------------------------Funktionen für Messung----------------- //
+//---------------------------------------------------------------------------------------Funktionen für Messung----------------- //
 const pointerMoveHandler = function (evt) {
   if (evt.pointerType === 'touch') {
     if (evt.dragging) {
@@ -963,7 +956,6 @@ map.getViewport().addEventListener('contextmenu', function(evt) {
   }
 });
 
-
 //------------------------------------Custom Controls 1 für Linie und für Fläche ........................
 class CustomControls1 extends Control {
   constructor(options) {
@@ -993,7 +985,7 @@ map.addControl(new CustomControls1({
   target: 'custom-controls'
 }));
 
-//---------------------------------------------Layergruppen
+//----------------------------------------------------------------------------------------------------Layergruppen
 const BwGroupP = new LayerGroup({
   title: "Bauw.(P)",
   name: "BauwP",
@@ -1006,7 +998,8 @@ const BwGroupL = new LayerGroup({
   title: "Bauw.(L)",
   name: "BauwL",
   fold: true,
-  fold: 'close',  
+  fold: 'close',
+  visible: true,  
   layers: [ gehoelz_vecLayer, exp_gew_biotope_noh, exp_gew_fla_vecLayer, exp_gew_umn_layer, exp_bw_son_lin_layer, exp_gew_info_layer ]
 });
 const wmsLayerGroup = new LayerGroup({
@@ -1030,6 +1023,7 @@ const kmGroup = new LayerGroup({
   name: "Station",
   fold: true,
   fold: 'close',
+  visible: true,
   layers: [km10scal_layer, km100scal_layer, km500scal_layer]
 });
 const BaseGroup = new LayerGroup({
@@ -1037,6 +1031,7 @@ const BaseGroup = new LayerGroup({
   name: "Base",
   fold: true,
   fold: 'close',
+  visible: true,
   layers: [ESRIWorldImagery, ESRIWorldGrey, googleHybLayer, googleSatLayer, dop20ni_layer, baseDE_layer, osmTileGr, osmTileCr]
 });
 map.addLayer(BaseGroup);
@@ -1051,7 +1046,7 @@ map.addLayer(vector);
 //Ende Layer hinzufügen---------------------------------------
 
 
-//-----------------------------------------------------------------Info für WMS-Layer
+//--------------------------------------------------------------------------------------------------Info für WMS-Layer
 var toggleButtonU = new Toggle({
   html: '<i class="icon fa-fw fa fa-arrow-circle-down" aria-hidden="true"></i>',
   className: "select",
@@ -1059,7 +1054,7 @@ var toggleButtonU = new Toggle({
   active: true, // Button wird beim Start als aktiv gesetzt
   interaction: selectInteraction,
   onToggle: function(active) {
-    alert("Jetzt ist BW-Abfrage " + (active ? "activated" : "deactivated"));
+    alert("Jetzt ist BW-Abfrage " + (active ? "aktiviert" : "deaktiviert (WMS-Abfrage aktiviert)"));
     selectInteraction.setActive(active);
     
     // Auswahl löschen, wenn deaktiviert
@@ -1203,7 +1198,7 @@ function removeExistingInfoDiv() {
   if (existingInfoDiv) { existingInfoDiv.remove(); }
 }
 
-//--------------------------------------------------------------Funktionen für Popup
+//--------------------------------------------------------------------------------------------------Funktionen für Popup
 var container = document.getElementById('popup');
 var content = document.getElementById('popup-content');
 var closer = document.getElementById('popup-closer');
@@ -1647,7 +1642,7 @@ map.on('click', function (evt) {
       var att = feature.getProperties();
       coordinates = evt.coordinate; 
       popup.setPosition(coordinates);
-      //********************************************************************************************************* */
+      
       // Erstelle HTML für alle Attribute außer "geometry"
       let contentHtml = "<strong>Attributwerte:</strong><br><ul>";
       for (let key in att) {
@@ -1677,14 +1672,13 @@ map.on('click', function (evt) {
 }
 
 );
-
   } else if(globalCoordAnOderAus===true) {  
     placeMarkerAndShowCoordinates(evt);
   }
 }
 );
 
-//--------------------------------------------------Bestimmung geclickter Koordinaten
+//-------------------------------------------------------------------------------------Bestimmung geclickter Koordinaten
 const mousePositionControl = new MousePosition({
   coordinateFormat: createStringXY(6),
   projection: 'EPSG:4326', // Start-Projektion
@@ -1715,7 +1709,7 @@ projectionSelect.addEventListener('change', function (event) {
 });
 // Funktion für den Marker und die Koordinatenausgabe
 function placeMarkerAndShowCoordinates(event) {
-  const mousePositionElement = document.getElementById('mouse-position'); // Auswahl des HTML-Elements
+  const mousePositionElement = document.getElementById('mouse-position'); 
   if (toggleCheckbox.checked) {
     const marker = document.createElement('div');
     marker.className = 'marker';
@@ -1741,12 +1735,10 @@ function placeMarkerAndShowCoordinates(event) {
       const transformedCoordinate = transformCoordinateToMousePosition32632(event.coordinate);
       const swappedCoordinate = [transformedCoordinate[1], transformedCoordinate[0]]; // Swap x and y
       mousePositionElement.innerHTML = `Coordinates: ${format(swappedCoordinate)}`;
-      // const googleMapsLink = `https://maps.app.goo.gl/?q=${swappedCoordinate[0]},${swappedCoordinate[1]}`;
-      
-    }
-    
+    }   
   }
 };
+
 // Checkbox, wenn an kann der Marker gesetzt werden und die Koordinaten werden ausgegeben
 const toggleCheckbox = document.getElementById('toggle-checkbox');
 toggleCheckbox.addEventListener('change', function() {
@@ -1794,10 +1786,9 @@ function transformCoordinateToMousePosition32632(coordinate) {
   return transform(coordinate, 'EPSG:3857', 'EPSG:32632');
 }
 
-//--------------------------------------------Hyerperlink um ein neues Browserfenster zu öffnen wird dem Popup hinzugefügt
+//----------------------------------------------------------------------------Hyerperlink um ein neues Browserfenster zu öffnen wird dem Popup hinzugefügt
 document.addEventListener('DOMContentLoaded', function () {
   var popup = document.getElementById('popup');
-  
   var popupCloser = document.getElementById('popup-closer');
   var container = document.createElement('div');
   var link = document.createElement('a');
@@ -1811,8 +1802,7 @@ document.addEventListener('DOMContentLoaded', function () {
   //    '<p>Hallo neue Welt 2</p>'
   
   //});
-  
-  //***********************Alternativ einen Bericht öffnen
+    //***********************Alternativ einen Bericht öffnen
   link.addEventListener('click', function(event) {
   event.preventDefault(); // Verhindert die Standardaktion des Links
   var newWindow = window.open('https://nlwkn.hannit-share.de/index.php/apps/files/files/11334138?dir=/db/DIN/Rep&openfile=true', '_blank');
@@ -1828,7 +1818,8 @@ document.getElementById('popup-closer').onclick = function () {
   return false;
 };
 
-// Current selection
+
+//--------------------------------------------------------------------------------------------- Photon search control 
 var sLayer = new VectorLayer({
   title: "tmp_Layer2",
   name: "tmp_Layer2",
@@ -1845,13 +1836,12 @@ var sLayer = new VectorLayer({
 });
 map.addLayer(sLayer);
 
-//-------------------------------------------------------------- Set the search control 
 var search = new SearchPhoton({
   //target: $(".options").get(0),
   lang:"de",		// Force preferred language
   polygon: $("#polygon").prop("checked"),
   reverse: true,
-  position: true	// Search, with priority to geo position
+  position: true	
 });
 map.addControl (search);
 
@@ -1906,9 +1896,8 @@ function addMarker(coordinates) {
   sLayer.getSource().addFeature(marker);
 };
 
-//----------------------------------------------------------------Menü mit Submenü
+//---------------------------------------------------------------------------------------------Menü mit Submenü
 
-//-----------------------------------------Menü mit Submenü
 var userInput = ""; // Globale Variable zur Speicherung der Nutzereingabe
 var currentlyHighlightedFeature = null; // Variable zur Verfolgung des aktuell markierten Features
 
@@ -1923,7 +1912,7 @@ const highlightStyle = new Style({
  color: 'rgb(234, 255, 0)'
  })
 });
-//Suche BW
+//-------------------------------------------------------------Suche BW
 function searchFeaturesByTextBw(searchText) {  
   let layers = [exp_bw_bru_nlwkn_layer, exp_bw_due_layer, exp_bw_sle_layer, exp_bw_weh_layer, exp_bw_bru_andere_layer, exp_bw_ein_layer, exp_bw_que_layer, exp_bw_son_pun_layer ]; 
   let matchingFeatures = [];
@@ -1948,7 +1937,7 @@ function searchFeaturesByTextBw(searchText) {
     document.getElementById("search-results-container").style.display = "none";
   });
 }
-//Suche Eig
+//-----------------------------------------------------------------Suche Eig
 function searchFeaturesByTextEig(searchText) {
   let matchingFeatures = [];
   console.log('Suche gestartet Eigentümer');
@@ -1958,9 +1947,7 @@ function searchFeaturesByTextEig(searchText) {
     console.error("Fehler: Die Layer-Quelle ist nicht verfügbar.");
     return;
   }
-
   let features = source.getFeatures();
-  
   features.forEach(feature => {
     let properties = feature.getProperties();
     let name = properties.Eig1 ? properties.Eig1.toLowerCase() : '';
@@ -1974,7 +1961,6 @@ function searchFeaturesByTextEig(searchText) {
   
   // Ergebnisse anzeigen
   displaySearchResultsEig(matchingFeatures);
-
   document.getElementById("close-search-results").addEventListener("click", function() {
     document.getElementById("search-results-container").style.display = "none";
     
@@ -2040,7 +2026,7 @@ function displaySearchResultsEig(results) {
     resultContainer.appendChild(listItem);
   });
 }
-//Suche und Highlight Suche FSK
+//-------------------------------------------------------Suche und Highlight Suche FSK
 function highlightFeatureFSK(searchText) {
   const source = exp_allgm_fsk_layer.getSource();
   const features = source.getFeatures();
@@ -2065,7 +2051,7 @@ function highlightFeatureFSK(searchText) {
     alert("Kein passendes Feature gefunden!, FSK-Layer sichtbar??");
   }
 }
-//Highlight Suche Eig
+//Highlight ---------------------------------------------Suche Eig
 function highlightFeatureEig1(feature) {
   // Falls ein anderes Feature hervorgehoben ist, Stil zurücksetzen
   if (currentlyHighlightedFeature) {
@@ -2264,7 +2250,9 @@ var sub2 = new Bar({
       html: '<i class="fa fa-image"></i>',
       title: "WFS-Layer",
       onToggle: function () {
-        let inputDiv = document.getElementById("wfsInputDiv");
+        console.log ("ohne Funktion");
+        alert("ohne Funktion");
+       /*  let inputDiv = document.getElementById("wfsInputDiv");
         if (!inputDiv) {
           inputDiv = document.createElement("div");
           inputDiv.id = "wfsInputDiv";
@@ -2304,20 +2292,23 @@ var sub2 = new Bar({
           inputDiv.appendChild(button);
           inputDiv.appendChild(closeButton);
           document.body.appendChild(inputDiv);
-        }
+        } */
       },
     }),
     new Toggle({
       html:'L', 
       title: "Fehlt",
       onToggle: function(b) { 
+        console.log ("ohne Funktion");
+        alert("ohne Funktion");
        },
     }),
   ]
 });
 
 // Funktion zum Hinzufügen eines WFS-Layers mit dynamischer BBOX-Anpassung
-function addWFSLayer(wfsUrl) {
+/*
+  function addWFSLayer(wfsUrl) {
   console.log(wfsUrl);
   let wfsLayer = new VectorLayer({
     name: "GeoJson: " + wfsUrl,
@@ -2362,7 +2353,9 @@ function addWFSLayer(wfsUrl) {
   map.addLayer(wfsLayer);
 }
 
+*/
 
+//--------------------------------------------------------------------------Drag and Drop
 let dragAndDropInteraction;
 let zaehlerGeojson = 0;
 let zaehlerKML = 0;
@@ -2435,8 +2428,6 @@ function setInteraction()
   });
   map.addInteraction(dragAndDropInteraction);
 }
-
-
 /* 
 
 exp_bw_sle_layer.getSource().on('change', function() {
@@ -2444,24 +2435,17 @@ exp_bw_sle_layer.getSource().on('change', function() {
     var tmpFeatures = exp_bw_sle_layer.getSource().getFeatures().map(f => {
       var clone = f.clone();
       var props = { ...clone.getProperties() };
-
       // Unerwünschte Attribute entfernen
-      
       delete props.ID_con;
-
       console.log("Bereinigte Properties:", props); // Prüfen, ob die Attribute entfernt wurden
-
       clone.setProperties({});
       clone.setProperties(props);
       //listCtrl.setFeatures(clone );
       return clone;
     });
-
     console.log("Vorhandene Features:", tmpFeatures); // Debugging
-
     // Methode 1: Direkt als Array übergeben
     //listCtrl.setFeatures(tmpFeatures);
-
     // Methode 2: Falls nötig, als Collection
     listCtrl.setFeatures(new collection(tmpFeatures));
   }
@@ -2469,7 +2453,7 @@ exp_bw_sle_layer.getSource().on('change', function() {
 
 
 
-// Select-Interaktion
+//----------------------------------------------------------------------ListControl Select-Interaktion
 var selecti = new Select({
   hitTolerance: 5,
   condition: singleClick
@@ -2521,7 +2505,6 @@ const listColumes = ["ID_con", "name"];
 listCtrl.setColumns(listColumes)
 listCtrl.enableSort('bw_id', 'name', 'ID_con');
 
-
 listCtrl.on('select', function(e) {
   if (!e.feature) return;
   selecti.getFeatures().clear();
@@ -2540,12 +2523,16 @@ listCtrl.on(['resize', 'collapse', 'sort'], function(e) {
 });
 
  */
+
 //------------------------WMS-Control aus myFunc.js hinzufügen
 //document.addEventListener('DOMContentLoaded', function() {
 //  initializeWMS(WMSCapabilities, map ); // Aufrufen der initializeWMS-Funktion aus myFunc.js
 //});
 
-//-----------------------------------------------------------------------------------------Permalink
+//-----------------------------------------------------------------------------------------------------Permalink
+
+/* 
+
 var permalinkControl = new Permalink({    
   target: document.getElementById('permalink-container'), 
   title: "Link erzeugen",
@@ -2572,8 +2559,6 @@ var permalinkControl = new Permalink({
       }
     });
 
-    console.log("Aktive Layer:", activeLayers);
-
     // Layer-Namen zum Permalink hinzufügen
     let newUrl = new URL(url);
     if (activeLayers.length) {
@@ -2586,6 +2571,7 @@ var permalinkControl = new Permalink({
 });
 //map.addControl(permalinkControl);
 
+
 // Funktion zum Kopieren des Links in die Zwischenablage
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(() => {
@@ -2595,11 +2581,7 @@ function copyToClipboard(text) {
   });
 }
 
-
-
-
-
-
+ */
 
 /* const mySearch = document.getElementById('searchBox');
 mySearch.addEventListener('change', function(event){
@@ -2683,15 +2665,13 @@ var mainBar1 = new Bar({
   ]
 });
 map.addControl ( mainBar1 );
-
 mainBar1.setPosition('left');
-
 
 var mainbar2 = new Bar();
 map.addControl(mainbar2);
 
 //mainbar2.addControl (search);
-mainbar2.addControl (permalinkControl);
+//mainbar2.addControl (permalinkControl);
 mainbar2.addControl (printControl);
 mainbar2.addControl(toggleButtonU);
 
@@ -2727,12 +2707,11 @@ function initializeWMS(WMSCapabilities,map ) {
       popupLayer: true,
       placeholder: 'WMS link hier einfügen...',
       title: 'WMS-Dienste',
+      name: 'WMS-Dienste',
       searchLabel: 'Suche',
       optional: 'token',
       services: {
-      
-  
-  'Verwaltungsgrenzen NI ': 'https://opendata.lgln.niedersachsen.de/doorman/noauth/verwaltungsgrenzen_wms',            
+   'Verwaltungsgrenzen NI ': 'https://opendata.lgln.niedersachsen.de/doorman/noauth/verwaltungsgrenzen_wms',            
   'Hydro, Umweltkarten NI ': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Hydro_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
   'WRRL, Umweltkarten NI ': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/WRRL_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
   'Natur, Umweltkarten NI': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Natur_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
@@ -2744,9 +2723,6 @@ function initializeWMS(WMSCapabilities,map ) {
   'Boden, Umweltkarten NI': 'https://www.umweltkarten-niedersachsen.de/arcgis/services/Boden_wms/MapServer/WMSServer?VERSION=1.3.0.&SERVICE=WMS&REQUEST=GetCapabilities',
   'Inspire Hydro': 'https://sg.geodatenzentrum.de/wms_dlm250_inspire?Request=GetCapabilities&SERVICE=WMS',
   'TopPlusOpen': 'https://sgx.geodatenzentrum.de/wms_topplus_open?request=GetCapabilities&service=wms'
-
-  
-
       },
       trace: true
   });
@@ -2787,9 +2763,9 @@ function checkForLinkInTH(html) {
   return table.outerHTML;
 }
 
-
+/* 
 function dragElement(elmnt) {
-  alert("Hall");
+  alert("Hallo");
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
   if (document.getElementById(elmnt.id + "header")) {
     // if present, the header is where you move the DIV from:
@@ -2830,3 +2806,5 @@ function dragElement(elmnt) {
     document.onmousemove = null;
   }
 }
+
+ */
