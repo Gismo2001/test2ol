@@ -1108,7 +1108,7 @@ selectFeat.on('select', function (e) {
 map.addInteraction(selectFeat);
 //map.addOverlay(popup);
 
-// -------------------------------------------------------WMS
+// ---------------------------------------------------------------------------------------WMS
 function getLayersInGroup(layerGroup) {
   const layers = [];
   layerGroup.getLayers().forEach(layer => {
@@ -1805,7 +1805,8 @@ document.addEventListener('DOMContentLoaded', function () {
     //***********************Alternativ einen Bericht öffnen
   link.addEventListener('click', function(event) {
   event.preventDefault(); // Verhindert die Standardaktion des Links
-  var newWindow = window.open('https://nlwkn.hannit-share.de/index.php/apps/files/files/11334138?dir=/db/DIN/Rep&openfile=true', '_blank');
+  alert ("keine Funktion");
+  //var newWindow = window.open('https://nlwkn.hannit-share.de/index.php/apps/files/files/11334138?dir=/db/DIN/Rep&openfile=true', '_blank');
   });
 
   container.appendChild(link);
@@ -2752,9 +2753,12 @@ function checkForLinkInTH(html) {
               const aElement = document.createElement('a');
               aElement.href = link;
               aElement.target = '_blank';
-              aElement.textContent = 'Link';
               
-              // Lösche den Inhalt des td-Tags und füge das a-Element hinzu
+              const strongElement = document.createElement('strong');
+              strongElement.textContent = 'Link';
+              
+              aElement.appendChild(strongElement);
+      
               td.innerHTML = '';
               td.appendChild(aElement);
           }
