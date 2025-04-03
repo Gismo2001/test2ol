@@ -1683,7 +1683,9 @@ map.on('click', function (evt) {
       coordinates = evt.coordinate; 
       popup.setPosition(coordinates);
       // Erstelle HTML für alle Attribute außer "geometry"
-      let contentHtml = "<strong>Koordinaten:</strong><br><ul>";
+      
+      let contentHtml = "<strong>Koordinaten</strong><br><ul>"
+      
       for (let key in att) {
           if (key !== 'geometry') { // Geometrie nicht anzeigen
               contentHtml += `<li><strong>${key}:</strong> ${Number(att[key]).toFixed(3)}</li>`;
@@ -2810,7 +2812,7 @@ var contextmenuItems = [
     icon: listIcon,
     items: [
       {
-        text: 'Karte zentrieren',
+        text: 'Zentrieren',
         icon: centerIcon,
         callback: center
       },
@@ -2837,14 +2839,12 @@ map.addControl(contextmenu);
 
 var removeMarkerItem = {
   text: 'Remove this Marker',
-  classname: 'marker',
+  //classname: 'marker',
   callback: removeMarker
 };
 
 contextmenu.on('open', function (evt) {
-  
   var contextFeature =	map.forEachFeatureAtPixel(evt.pixel, ft => ft);
-  
   if (contextFeature && contextFeature.get('type') === 'removable') {
     contextmenu.clear();
     removeMarkerItem.data = { marker: contextFeature };
@@ -2857,12 +2857,9 @@ contextmenu.on('open', function (evt) {
 });
 
 map.on('pointermove', function (e) {
-  
   if (e.dragging) return;
-  
   var pixel = map.getEventPixel(e.originalEvent);
   var hit = map.hasFeatureAtPixel(pixel);
-
   map.getTargetElement().style.cursor = hit ? 'pointer' : '';
 });
 
