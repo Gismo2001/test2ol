@@ -22,11 +22,6 @@ import TileWMS from 'ol/source/TileWMS.js';
 import TileImage from 'ol/source/TileImage.js';
 import XYZ from 'ol/source/XYZ.js';
 
-//import Permalink from 'ol-ext/control/Permalink';
-//import getLayerByLink from 'ol-ext/control/Permalink';
-
-
-
 import {getArea, getLength} from 'ol/sphere.js';
 import {unByKey} from 'ol/Observable.js';
 import { FullScreen, Attribution, defaults as defaultControls, ZoomToExtent, Control } from 'ol/control.js';
@@ -54,6 +49,13 @@ import CanvasTitle from 'ol-ext/control/CanvasTitle';
 import CanvasScaleLine from 'ol-ext/control/CanvasScaleLine';
 import PrintDialog from 'ol-ext/control/PrintDialog';
 
+import { format } from 'ol/coordinate';
+import contextFeature from 'ol/Feature';
+
+import ContextMenu from 'ol-contextmenu';
+import pinIcon from './data/pin.png';
+import centerIcon from 'ol-contextmenu';
+import listIcon from 'ol-contextmenu';
 
 import FeatureList from 'ol-ext/control/FeatureList';
 
@@ -161,7 +163,7 @@ const map = new Map({
 
 
 
-//----------------------------------------------------------------------------------------------------------Print
+//----------------------------------------------------------------------------------------------------------APrint
 map.addControl(new CanvasAttribution());
 map.addControl(new CanvasTitle({ 
   title: '', 
@@ -172,19 +174,16 @@ map.addControl(new CanvasTitle({
 }));
 map.addControl(new CanvasScaleLine());
 
-
 var printControl = new PrintDialog({ 
   title: 'Drucken',
   lang: 'de',
   //target: document.getElementById('print-container'), 
   //openWindow: ,
-  
 });
 printControl.setSize('A4');
 printControl.setOrientation('portrait');
 //map.addControl(printControl);
-
-
+//printControl.element.style.zIndex = '10009';
 
 /* On print > save image file */
 printControl.on(['print', 'error'], function(e) {
@@ -805,7 +804,8 @@ layerSwitcher.on('layer:visible', function(event) {
 });
  */
 
-//------------------------------------ Layer für Messung
+
+//---------------------------------------------------------------------------------------AMessung----------------- //
 const source = new VectorSource();
 const vector = new VectorLayer({
   displayInLayerSwitcher: false,
@@ -824,7 +824,7 @@ const vector = new VectorLayer({
 let sketch;
 let measureTooltipElement;
 let measureTooltip;
-//---------------------------------------------------------------------------------------Funktionen für Messung----------------- //
+
 const pointerMoveHandler = function (evt) {
   if (evt.pointerType === 'touch') {
     if (evt.dragging) {
@@ -1045,6 +1045,14 @@ map.addLayer(BwGroupP);
 map.addLayer(vector); 
 //Ende Layer hinzufügen---------------------------------------
 
+
+const vectorLayerMark = new VectorLayer({
+  source: new VectorSource({  }),
+  title: "rechtsClick",
+  name: "rechtsClick",
+  
+});
+map.addLayer(vectorLayerMark);
 
 //--------------------------------------------------------------------------------------------------Info für WMS-Layer
 var toggleButtonU = new Toggle({
@@ -1502,6 +1510,7 @@ map.on('click', function (evt) {
         var rwert = feature.get('rwert');
         var hwert = feature.get('hwert');
         let result = UTMToLatLon_Fix(rwert, hwert, 32, true);
+        
         content.innerHTML =
           '<div style="max-height: 200px; overflow-y: auto;">' +
           '<p style="font-weight: bold; text-decoration: underline;">' + feature.get('name') + '</p>' +
@@ -1658,7 +1667,6 @@ map.on('click', function (evt) {
       var att = feature.getProperties();
       coordinates = evt.coordinate; 
       popup.setPosition(coordinates);
-      
       // Erstelle HTML für alle Attribute außer "geometry"
       let contentHtml = "<strong>Attributwerte:</strong><br><ul>";
       for (let key in att) {
@@ -1669,6 +1677,26 @@ map.on('click', function (evt) {
       contentHtml += "</ul>";
       content.innerHTML = contentHtml;
     }
+    // Führen Sie Aktionen für den Layernamen "rechtsClick" durch
+    if (layname.toLowerCase().startsWith('rechtsclick')) {
+      var att = feature.getProperties();
+      coordinates = evt.coordinate; 
+      popup.setPosition(coordinates);
+      // Erstelle HTML für alle Attribute außer "geometry"
+      let contentHtml = "<strong>Koordinaten:</strong><br><ul>";
+      for (let key in att) {
+          if (key !== 'geometry') { // Geometrie nicht anzeigen
+              contentHtml += `<li><strong>${key}:</strong> ${Number(att[key]).toFixed(3)}</li>`;
+          }
+      }
+      feature.set('type', 'removable');
+      contentHtml += "</ul>";
+      
+      let result = UTMToLatLon_Fix(feature.get('x_32632'), feature.get('y_32632'), 32, true);
+      contentHtml += `<p><a href="https://www.google.com/maps?q=${result}" target="_blank" rel="noopener noreferrer">Google Maps link</a></p>`;
+      content.innerHTML = contentHtml;
+    }
+  
 }
 
 );
@@ -1766,12 +1794,12 @@ document.getElementById('hide-button').addEventListener('click', function() {
     // Überprüfen und Entfernen aller Marker, die durch markerCoordOverlay dargestellt werden
     //map.removeOverlay(marker);
     document.getElementById('toggle-checkbox').checked = false;
-    customControls.buttonLength.disabled = true;
+    //customControls.buttonLength.disabled = true;
     // Wenn das Control sichtbar ist
   } else {
     // Muss eigentlich true sein
     map.addControl(mousePositionControl);
-    customControls.buttonLength.disabled = false;
+    //customControls.buttonLength.disabled = false;
   }
 });
 
@@ -2765,6 +2793,131 @@ function checkForLinkInTH(html) {
       }
   }
   return table.outerHTML;
+}
+
+
+
+
+var contextmenuItems = [
+  {
+    text: 'Karte zentrieren',
+    classname: 'bold',
+    icon: centerIcon,
+    callback: center
+  },
+  {
+    text: 'Sonstiges',
+    icon: listIcon,
+    items: [
+      {
+        text: 'Karte zentrieren',
+        icon: centerIcon,
+        callback: center
+      },
+      {
+        text: 'Marker',
+        icon: pinIcon,
+        callback: marker
+      }
+    ]
+  },
+  {
+    text: 'Marker',
+    icon: pinIcon,
+    callback: marker
+  },
+  '-' // this is a separator
+];
+
+var contextmenu = new ContextMenu({
+  width: 180,
+  items: contextmenuItems
+});
+map.addControl(contextmenu);
+
+var removeMarkerItem = {
+  text: 'Remove this Marker',
+  classname: 'marker',
+  callback: removeMarker
+};
+
+contextmenu.on('open', function (evt) {
+  
+  var contextFeature =	map.forEachFeatureAtPixel(evt.pixel, ft => ft);
+  
+  if (contextFeature && contextFeature.get('type') === 'removable') {
+    contextmenu.clear();
+    removeMarkerItem.data = { marker: contextFeature };
+    contextmenu.push(removeMarkerItem);
+  } else {
+    contextmenu.clear();
+    contextmenu.extend(contextmenuItems);
+    contextmenu.extend(contextmenu.getDefaultItems());
+  }
+});
+
+map.on('pointermove', function (e) {
+  
+  if (e.dragging) return;
+  
+  var pixel = map.getEventPixel(e.originalEvent);
+  var hit = map.hasFeatureAtPixel(pixel);
+
+  map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+});
+
+// from https://github.com/DmitryBaranovskiy/raphael
+function elastic(t) {
+  return Math.pow(2, -10 * t) * Math.sin((t - 0.075) * (2 * Math.PI) / 0.3) + 1;
+}
+
+function center(obj) {
+  mapView.animate({
+    duration: 700,
+    easing: elastic,
+    center: obj.coordinate
+  });
+}
+
+function removeMarker(obj) {
+  vectorLayerMark.getSource().removeFeature(obj.data.marker);
+}
+
+function marker(obj) {
+  var coord4326 = transform(obj.coordinate, 'EPSG:3857', 'EPSG:4326'),
+      coord3857 = obj.coordinate, // Original-Koordinaten in EPSG:3857
+      coord32632 = transform(obj.coordinate, 'EPSG:3857', 'EPSG:32632'),
+
+      template1 = 'Koordinate (3857): {x}, {y}',
+      template2 = 'Koordinate (4326): {x}, {y}',
+      template3 = 'Koordinate (32632): {x}, {y}',
+
+      iconStyle = new Style({
+        image: new Icon({ scale: .5, src: pinIcon }),
+        text: new Text({
+          offsetY: 40, // Etwas mehr Abstand für zwei Zeilen
+          //text: format(coord3857, template1, 2) + '\n' + format(coord4326, template2, 6) + '\n' + format(coord32632, template3, 6),
+          //font: 'bold 15px Arial, sans-serif',
+          //textAlign: 'center',
+          //justify: 'center',
+          //fill: new Fill({ color: '#111' }),
+          //stroke: new Stroke({ color: '#eee', width: 2 })
+        })
+      }),
+      feature = new contextFeature({
+        type: 'removable',
+        geometry: new Point(obj.coordinate),
+        x_3857: coord3857[0].toFixed(3),
+        y_3857: coord3857[1].toFixed(3), // X,Y Koordinaten in EPSG:3857
+        x_4326: coord4326[0].toFixed(3), // X Koordinate in EPSG:4326
+        y_4326: coord4326[1].toFixed(3),  // Y Koordinate in EPSG:4326
+        x_32632: coord32632[0].toFixed(3), // X Koordinate in EPSG:32632
+        y_32632: coord32632[1].toFixed(3),  // Y Koordinate in EPSG:32632
+
+      });
+
+  feature.setStyle(iconStyle);
+  vectorLayerMark.getSource().addFeature(feature);
 }
 
 /* 

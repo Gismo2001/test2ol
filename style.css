@@ -354,7 +354,7 @@ html {
   background: white;
   border: 1px solid black;
   padding: 10px;
-  z-index: 10000; /* Stellt sicher, dass es über anderen Elementen liegt */
+  z-index: 1009; /* Stellt sicher, dass es über anderen Elementen liegt */
   display: none; /* Startet unsichtbar */
   max-height: 300px; /* Begrenzte Höhe, damit die Scrollbar erscheint */
   overflow-y: auto; /* Scrollbar hinzufügen, wenn nötig */
@@ -389,5 +389,9 @@ html {
 
 .ID_con {
   display: none;
+}
+
+.ol-control button { 
+  background-color: white !important;
 }
 
