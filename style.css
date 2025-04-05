@@ -181,9 +181,9 @@ html {
 .popup-text {
   margin-right: 10px; /* Ändere den Abstand zum "X" nach Bedarf */
 }
-.ol-button:hover {
+/* .ol-button:hover {
   background-color: #005a9e;
-}
+} */
 .custom-controls1 {
   top: 150px;
   left: 7px;

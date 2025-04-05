@@ -819,6 +819,7 @@ const vector = new VectorLayer({
     'circle-radius': 7,
     'circle-fill-color': '#ffcc33',
   }, 
+  displayInLayerSwitcher : false,
 });
 
 let sketch;
@@ -1050,6 +1051,7 @@ const vectorLayerMark = new VectorLayer({
   source: new VectorSource({  }),
   title: "rechtsClick",
   name: "rechtsClick",
+  displayInLayerSwitcher : false,
   
 });
 map.addLayer(vectorLayerMark);
@@ -1863,7 +1865,8 @@ var sLayer = new VectorLayer({
       fill: new Fill({
           color: 'rgba(255,165,0,.3)'
       })
-  })
+  }),
+  displayInLayerSwitcher : false,
 });
 map.addLayer(sLayer);
 
@@ -2274,66 +2277,81 @@ var sub1 = new Bar({
     }),
   ]
 });
+// Input-Feld (versteckt im HTML, z. B. im Body)
+const geojsonInput = document.createElement('input');
+geojsonInput.type = 'file';
+geojsonInput.accept = '.geojson,.json';
+geojsonInput.style.display = 'none';
+document.body.appendChild(geojsonInput);
+
+// EINMALIG: Event-Handler für Datei-Upload
+geojsonInput.addEventListener('change', function (event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    const geojsonText = e.target.result;
+    const geojsonFormat = new GeoJSON();
+
+    try {
+      const features = geojsonFormat.readFeatures(geojsonText, {
+        featureProjection: 'EPSG:3857'
+      });
+
+      const vectorSource = new VectorSource({
+        features: features
+      });
+
+      const vectorLayer = new VectorLayer({
+        source: vectorSource,
+        title: 'GeoJSON: Lokal',
+        name: 'GeoJSON: Lokal',
+        displayInLayerSwitcher: true,
+        style: new Style({
+          stroke: new Stroke({
+            color: 'red',
+            width: 2
+          }),
+          fill: new Fill({
+            color: 'rgba(0, 0, 255, 0.1)'
+          })
+        })
+      });
+
+      map.addLayer(vectorLayer);
+
+      map.getView().fit(vectorSource.getExtent(), {
+        padding: [20, 20, 20, 20],
+        maxZoom: 16
+      });
+
+    } catch (err) {
+      alert("Fehler beim Laden der GeoJSON-Datei: " + err.message);
+    }
+  };
+
+  reader.readAsText(file);
+});
+
 var sub2 = new Bar({
   toggleOne: true,
-  controls:[
+  controls: [
     new Toggle({
       html: '<i class="fa fa-image"></i>',
-      title: "WFS-Layer",
+      title: "Geojson-Datei laden",
       onToggle: function () {
-        console.log ("ohne Funktion");
-        alert("ohne Funktion");
-       /*  let inputDiv = document.getElementById("wfsInputDiv");
-        if (!inputDiv) {
-          inputDiv = document.createElement("div");
-          inputDiv.id = "wfsInputDiv";
-          inputDiv.style.position = "absolute";
-          inputDiv.style.top = "50px";
-          inputDiv.style.left = "50px";
-          inputDiv.style.padding = "10px";
-          inputDiv.style.background = "white";
-          inputDiv.style.border = "1px solid black";
-          inputDiv.style.zIndex = "10000";
-      
-          let input = document.createElement("input");
-          input.type = "text";
-          input.id = "wfsUrlInput";
-          input.placeholder = "WFS-Layer URL eingeben";
-          input.style.width = "250px";
-      
-          let button = document.createElement("button");
-          button.innerText = "Hinzufügen";
-          button.onclick = function () {
-            let wfsUrl = document.getElementById("wfsUrlInput").value;
-            
-            if (wfsUrl) {
-              addWFSLayer(wfsUrl);
-              document.body.removeChild(inputDiv);
-            }
-          };
-      
-          let closeButton = document.createElement("button");
-          closeButton.innerText = "X";
-          closeButton.style.marginLeft = "10px";
-          closeButton.onclick = function () {
-            document.body.removeChild(inputDiv);
-          };
-      
-          inputDiv.appendChild(input);
-          inputDiv.appendChild(button);
-          inputDiv.appendChild(closeButton);
-          document.body.appendChild(inputDiv);
-        } */
-      },
+        geojsonInput.click(); // Öffnet den Dateiauswahldialog
+      }
     }),
     new Toggle({
-      html:'L', 
+      html: 'L',
       title: "Fehlt",
-      onToggle: function(b) { 
-        console.log ("ohne Funktion");
+      onToggle: function (b) {
         alert("ohne Funktion");
-       },
-    }),
+      }
+    })
   ]
 });
 
