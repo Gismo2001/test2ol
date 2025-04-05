@@ -304,7 +304,8 @@ const exp_allgm_fsk_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/exp_allgm_fsk.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'fsk',
   name: 'fsk', 
-  style: getStyleForArtFSK,
+  style: function(feature, resolution) {return getStyleForArtFSK(feature, resolution);  },
+  //style: getStyleForArtFSK,
   visible: false,
   minResolution: 0,
   maxResolution: 4
@@ -400,7 +401,8 @@ const km10scal_layer = new VectorLayer({
   source: new VectorSource({format: new GeoJSON(), url: function (extent) {return './myLayers/km_10_scal.geojson' + '?bbox=' + extent.join(','); }, strategy: LoadingStrategy.bbox }),
   title: 'km10scal',
   name: 'km10cal',
-  style: km10scalStyle,
+  style: function(feature, resolution) {return km10scalStyle(feature, feature.get('km'), resolution);  },
+  //style: km10scalStyle,
   visible: true,
   minResolution: 0,
   maxResolution: 1

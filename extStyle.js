@@ -326,8 +326,66 @@ function getStyleForArtSonPun(feature) {
 function machWasMitFSK(feature){
     console.log (feature.get('Art'));
 };
-function getStyleForArtFSK(feature) {
-    const artValue = feature.get('Art');
+
+
+
+function getStyleForArtFSK(feature, resolution) {
+    var textMinResolution = 0.2; // Beschriftung erst bei starker Vergrößerung
+    var strokeMaxResolution = 5; // Linie sichtbar bis Zoomlevel 5
+    var artValue = feature.get('Art');
+    var beschrTxt = feature.get('Suche');
+
+    let fillColor, strokeColor;
+
+    switch (artValue) {
+        case 'p':
+            fillColor = 'rgba(200, 200, 200, .6)';
+            strokeColor = 'black';
+            break;
+        case 'o':
+            fillColor = 'rgba(255, 220, 220, .6)';
+            strokeColor = 'black';
+            break;
+        case 'l':
+            fillColor = 'rgba(255, 190, 150, .6)';
+            strokeColor = 'black';
+            break;
+        default:
+            fillColor = 'rgba(255, 255, 255, 1)';
+            strokeColor = 'grey';
+    }
+
+    if (resolution < strokeMaxResolution) {
+        return new Style({
+            text: resolution < textMinResolution ? new Text({
+                text: beschrTxt,
+                font: 'normal 18px "Arial Light", "Helvetica Neue Light", Arial, sans-serif',
+                offsetX: -20,
+                offsetY: 10,
+                fill: new Fill({
+                    color: '#000'
+                }),
+            }) : null,
+            stroke: new Stroke({
+                color: strokeColor,
+                width: 0.5
+            }),
+            fill: new Fill({
+                color: fillColor
+            })
+        });
+    } else {
+        return null;
+    }
+}
+
+
+/* 
+function getStyleForArtFSK(feature, resolution) {
+    var minResolution = 0;
+    var maxResolution = 5; 
+    var artValue = feature.get('Art');
+    var beschrTxt = feature.get('Suche');
     let fillColor, strokeColor;
     switch (artValue) {
     case 'p':
@@ -354,15 +412,37 @@ function getStyleForArtFSK(feature) {
             color: strokeColor,
             width: 0.5
         })
-       
     });
+  
 };
-const km10scalStyle = new Style({
-    stroke: new Stroke({
-        color: 'grey',
-        width: .5
-    })
-});
+ */
+
+const km10scalStyle = function(feature, km, resolution) {
+    var textMinResolution = .2; // Beschriftung erst bei hoher Vergrößerung
+    var strokeMaxResolution = 4; // Linie sichtbar bis Zoomlevel 14
+    var kmInKilometer = km / 1000;
+    var kmFormatted = kmInKilometer.toFixed(2);
+
+    if (resolution < strokeMaxResolution) {
+        return new Style({
+            text: resolution < textMinResolution ? new Text({
+                text: kmFormatted.toString(),
+                font: 'normal 18px "Arial Light", "Helvetica Neue Light", Arial, sans-serif',
+                offsetX: -20,
+                offsetY: 10,      
+               
+            }) : null,
+            stroke: new Stroke({
+                color: 'black',
+                width: 1
+            })
+        });
+    } else {
+        return null;
+    }
+};
+
+
 const km100scalStyle = function(feature, km, resolution) {
     var minResolution = 0;
     var maxResolution = 5; 
@@ -386,6 +466,7 @@ const km100scalStyle = function(feature, km, resolution) {
         return null;
     }
 };
+
 const km500scalStyle = function(feature, km, resolution) {
     var minResolution = 0;
     var maxResolution = 14; 
