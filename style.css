@@ -181,9 +181,9 @@ html {
 .popup-text {
   margin-right: 10px; /* Ändere den Abstand zum "X" nach Bedarf */
 }
-/* .ol-button:hover {
+ .ol-button:hover {
   background-color: #005a9e;
-} */
+} 
 .custom-controls1 {
   top: 150px;
   left: 7px;
@@ -340,8 +340,6 @@ html {
   background-color: #4CAF50; /* Beispielhafte Hintergrundfarbe */
   color: white; /* Beispielhafte Textfarbe */
 }
-
-
 #popup-content {
   user-select: text;
 }
@@ -391,7 +389,4 @@ html {
   display: none;
 }
 
-.ol-control button { 
-  background-color: white !important;
-}
 

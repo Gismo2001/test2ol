@@ -133,6 +133,9 @@ const map = new Map({
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
 
+
+
+
 /* Für das Laden eines Permalinks
 
   window.onload = function() {
@@ -2277,69 +2280,91 @@ var sub1 = new Bar({
     }),
   ]
 });
+
 // Input-Feld (versteckt im HTML, z. B. im Body)
-const geojsonInput = document.createElement('input');
-geojsonInput.type = 'file';
-geojsonInput.accept = '.geojson,.json';
-geojsonInput.style.display = 'none';
-document.body.appendChild(geojsonInput);
+//const geojsonInput = document.createElement('input');
+//geojsonInput.type = 'file';
+//geojsonInput.accept = '.geojson,.json';
+//geojsonInput.style.display = 'none';
+//document.body.appendChild(geojsonInput);
 
-// EINMALIG: Event-Handler für Datei-Upload
+// Zähler für die geladenen GeoJSON-Dateien
+let geojsonCounter = 0;
+
+//Event-Handler für Datei-Upload
 geojsonInput.addEventListener('change', function (event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const files = event.target.files; // Alle ausgewählten Dateien
+  if (!files.length) return;
 
-  const reader = new FileReader();
+  // Iteriere über alle ausgewählten Dateien
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
 
-  reader.onload = function (e) {
-    const geojsonText = e.target.result;
-    const geojsonFormat = new GeoJSON();
+    reader.onload = function (e) {
+      const geojsonText = e.target.result;
+      const geojsonFormat = new GeoJSON();
 
-    try {
-      const features = geojsonFormat.readFeatures(geojsonText, {
-        featureProjection: 'EPSG:3857'
-      });
+      try {
+        const features = geojsonFormat.readFeatures(geojsonText, {
+          featureProjection: 'EPSG:3857'
+        });
 
-      const vectorSource = new VectorSource({
-        features: features
-      });
+        const vectorSource = new VectorSource({
+          features: features
+        });
 
-      const vectorLayer = new VectorLayer({
-        source: vectorSource,
-        title: 'GeoJSON: Lokal',
-        name: 'GeoJSON: Lokal',
-        displayInLayerSwitcher: true,
-        style: new Style({
-          stroke: new Stroke({
-            color: 'red',
-            width: 2
-          }),
-          fill: new Fill({
-            color: 'rgba(0, 0, 255, 0.1)'
+        // Dateiname ohne Erweiterung (optional)
+        const fileName = file.name.replace(/\.[^/.]+$/, "");
+
+        // Dynamischer Name und Titel mit Dateinamen
+        const layerTitle = `GeoJSON: Lokal-${geojsonCounter} (${fileName})`;
+        const layerName = `GeoJSON_Lokal_${geojsonCounter}_${fileName}`;
+
+        const vectorLayer = new VectorLayer({
+          source: vectorSource,
+          title: layerTitle,  // Titel anpassen
+          name: layerName,    // Name anpassen
+          displayInLayerSwitcher: true,
+          style: new Style({
+            stroke: new Stroke({
+              color: 'red',
+              width: 2
+            }),
+            fill: new Fill({
+              color: 'rgba(0, 0, 255, 0.1)'
+            })
           })
-        })
-      });
+        });
 
-      map.addLayer(vectorLayer);
+        map.addLayer(vectorLayer);
 
-      map.getView().fit(vectorSource.getExtent(), {
-        padding: [20, 20, 20, 20],
-        maxZoom: 16
-      });
+        // Zoom zur geladenen GeoJSON
+        map.getView().fit(vectorSource.getExtent(), {
+          padding: [20, 20, 20, 20],
+          maxZoom: 16
+        });
 
-    } catch (err) {
-      alert("Fehler beim Laden der GeoJSON-Datei: " + err.message);
-    }
-  };
+        // Zähler erhöhen für die nächste Datei
+        geojsonCounter++;
 
-  reader.readAsText(file);
+      } catch (err) {
+        alert("Fehler beim Laden der GeoJSON-Datei: " + err.message);
+      }
+    };
+
+    reader.readAsText(file); // Datei einlesen
+  });
 });
 
-var sub2 = new Bar({
+
+
+
+ var sub2 = new Bar({
   toggleOne: true,
   controls: [
     new Toggle({
-      html: '<i class="fa fa-image"></i>',
+      //<i class="fa fa-envelope-open" aria-hidden="true"></i>
+      html: '<i class="fa fa-envelope-open" aria-hidden="true"></i>',
       title: "Geojson-Datei laden",
       onToggle: function () {
         geojsonInput.click(); // Öffnet den Dateiauswahldialog
