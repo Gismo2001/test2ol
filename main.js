@@ -1951,7 +1951,7 @@ const highlightStyle = new Style({
 });
 //-------------------------------------------------------------Suche BW
 function searchFeaturesByTextBw(searchText) {  
-  let layers = [exp_bw_bru_nlwkn_layer, exp_bw_due_layer, exp_bw_sle_layer, exp_bw_weh_layer, exp_bw_bru_andere_layer, exp_bw_ein_layer, exp_bw_que_layer, exp_bw_son_pun_layer ]; 
+  let layers = [exp_bw_bru_nlwkn_layer, exp_bw_due_layer, exp_bw_sle_layer, exp_bw_weh_layer, exp_bw_bru_andere_layer, exp_bw_ein_layer, exp_bw_que_layer, exp_bw_son_pun_layer, exp_bw_son_lin_layer ]; 
   let matchingFeatures = [];
   layers.forEach(layer => {
       if (!layer) return;
@@ -1972,6 +1972,7 @@ function searchFeaturesByTextBw(searchText) {
   displaySearchResultsBw(matchingFeatures);
   document.getElementById("close-search-results").addEventListener("click", function() {
     document.getElementById("search-results-container").style.display = "none";
+    
   });
 }
 //-----------------------------------------------------------------Suche Eig
@@ -2013,7 +2014,8 @@ function displaySearchResultsBw(results) {
   let resultContainer = document.getElementById('search-results');
   resultContainer.innerHTML = ''; // Alte Ergebnisse löschen
   if (results.length === 0) {
-      resultContainer.innerHTML = '<li>Keine Treffer</li>';
+      resultContainer.innerHTML = '<li>Layer eingeschaltet??? Keine Treffer</li>';
+      
       return;
   }
   // 🔹 Alphanumerische Sortierung nach bw_id
@@ -2039,7 +2041,7 @@ function displaySearchResultsEig(results) {
   resultContainer.innerHTML = ''; // Alte Ergebnisse löschen
 
   if (results.length === 0) {
-    resultContainer.innerHTML = '<li>Keine Treffer</li>';
+    resultContainer.innerHTML = '<li>FSK-Layer sichtbar?? Keine Treffer</li>';
     return;
   }
 
@@ -2146,7 +2148,8 @@ var sub2 = new Bar({
   }),
   // Suche nach Bauwerk
   new TextButton({
-   html: '<i class="fa fa-caret-up"></i>',
+   html: '<i class="fa fa-snowflake-o" aria-hidden=true></i>',
+  
    title: "Suche bw",
    handleClick: function () {
      let searchText = prompt("Geben Sie den Suchtext ein:");
@@ -2154,7 +2157,7 @@ var sub2 = new Bar({
        let results = searchFeaturesByTextBw(searchText);
        document.getElementById("search-results-container").style.display = "block"; // Zeige das div an
      } else {
-       alert("Bitte geben Sie einen gültigen Suchtext ein.");
+       alert("Bitte geben Sie einen gültigen Suchtext ein. Layer sichtbar??");  
      }
    }
   }),
@@ -2168,7 +2171,7 @@ var sub2 = new Bar({
        let results = searchFeaturesByTextEig(searchText);
        document.getElementById("search-results-container").style.display = "block"; // Zeige das div an
      } else {
-       alert("Bitte geben Sie einen gültigen Suchtext ein.");
+       alert("Bitte geben Sie einen gültigen Suchtext ein. FSK-Layer sichtbar??");  
      }
    }
   })
