@@ -53,25 +53,25 @@ a:active {
     <script type="module" src="main.js"></script>
 </head>
 <body>
- 
-  <div id="map" class="map">
+  <button id="cancelDrawingBtn" style="display: none; position: absolute; top: 10px; right: 10px; z-index: 1020;">
+    Abbrechen
+  </button>
+  <div id="map" class="map"></div> 
+
   <div id="popup" class="ol-popup">
         <a href="#" id="popup-closer" class="ol-popup-closer"></a>
         <div id="popup-content"></div>
   </div>
+
   <input type="file" id="geojsonInput" accept=".geojson,.json" style="display: none;" multiple>
-  
-
-
 
   <div id="custom-controls" class="custom-controls">
   </div>
+
   <div class="button-container">
     <button id="hide-button"><b>C</b></button>
-    <!--<button id="printControl"><b>P</b></button>-->
-    <!--<button id="permaControl"><b>L</b></button> -->
   </div>
-  
+
   <div id="notification">
     <p>Es gab einen Fehler bei der Standortbestimmung.</p>
     <p>Möchten Sie es erneut versuchen? <span id="retryButton">Erneut versuchen</span></p>
@@ -93,8 +93,8 @@ a:active {
     <h3>Suchergebnisse</h3>
     <ul id="search-results"></ul>
   </div>  
- </div> 
- 
 
+ 
+ 
 </body>
 </html>

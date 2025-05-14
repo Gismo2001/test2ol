@@ -30,7 +30,6 @@ import { DragAndDrop } from 'ol/interaction.js';
 import { defaults as defaultInteractions } from 'ol/interaction.js';
 import { singleClick } from 'ol/events/condition';
 
-
 import MousePosition from 'ol/control/MousePosition.js';
 import { transform } from 'ol/proj';
 import {createStringXY} from 'ol/coordinate.js';
@@ -52,10 +51,6 @@ import PrintDialog from 'ol-ext/control/PrintDialog';
 import { format } from 'ol/coordinate';
 import contextFeature from 'ol/Feature';
 
-import ContextMenu from 'ol-contextmenu';
-import pinIcon from './data/pin.png';
-import centerIcon from 'ol-contextmenu';
-import listIcon from 'ol-contextmenu';
 
 import FeatureList from 'ol-ext/control/FeatureList';
 
@@ -65,6 +60,11 @@ import Bar from 'ol-ext/control/Bar';
 import Toggle from 'ol-ext/control/Toggle'; // Importieren Sie Toggle
 import { Modify, Select } from 'ol/interaction'; // Importieren Sie Draw
 import TextButton from 'ol-ext/control/TextButton';
+import EditBar from 'ol-ext/control/EditBar';
+import Tooltip from 'ol-ext/overlay/Tooltip';
+import Notification from 'ol-ext/control/Notification';
+
+import Button from 'ol-ext/control/Button';
 
 import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
 import LayerGroup from 'ol/layer/Group';
@@ -133,6 +133,20 @@ const map = new Map({
   interactions: defaultInteractions().extend([new DragRotateAndZoom()])
 });
 
+
+
+
+var note = new Notification(
+  {
+    className: 'ol-notification',
+    //autoClose: false,
+    closeBox: true,
+    closeBoxTitle: 'close',
+    //closeBoxCallback: function() {console.log('closeBoxCallback');},
+    
+  }
+);
+map.addControl(note)
 
 
 
@@ -779,13 +793,13 @@ const layerSwitcher = new LayerSwitcher({
   tipLabel: 'Legende',
   onchangeCheck: function(layer, checked) {
      // console.log('Layer:', layer);  // Das gesamte Layer-Objekt
-      console.log('Layer Name:', layer.get('name')); // Den Namen des Layers abrufen
+      //console.log('Layer Name:', layer.get('name')); // Den Namen des Layers abrufen
 
       if (checked) {
       //    console.log('Layer wurde aktiviert:', layer.get('name'));
           // Hier  weitere Aktionen
       } else {
-          console.log('Layer wurde deaktiviert:', layer.get('name'));
+         // console.log('Layer wurde deaktiviert:', layer.get('name'));
           // Hier weitere Aktionen
       }
   }
@@ -796,9 +810,9 @@ map.addControl(layerSwitcher);
 // Event-Listener für Sichtbarkeitsänderung
 layerSwitcher.on('layer:visible', function(event) {
  // Hier weitere Aktionen
- console.log('Layer visibility changed event triggered:', event);
+ //console.log('Layer visibility changed event triggered:', event);
  const layer = event.layer; // Überprüfe die Struktur des Events
- console.log('Layer:', layer);
+ //console.log('Layer:', layer);
 });
 
 // Beispiel: Button, um einen Layer auszuwählen
@@ -811,9 +825,9 @@ layerSwitcher.on('layer:visible', function(event) {
 //---------------------------------------------------------------------------------------AMessung----------------- //
 const source = new VectorSource();
 const vector = new VectorLayer({
-  displayInLayerSwitcher: false,
-  title: "tmp_layer1",
-  name: "tmp_layer1",
+  displayInLayerSwitcher: true,
+  title: "Messung",
+  name: "Messung",
   source: source,
   style: {
     'fill-color': 'rgba(136, 136, 136, 0.526)',
@@ -822,12 +836,13 @@ const vector = new VectorLayer({
     'circle-radius': 7,
     'circle-fill-color': '#ffcc33',
   }, 
-  displayInLayerSwitcher : false,
+ 
 });
 
 let sketch;
 let measureTooltipElement;
 let measureTooltip;
+let helpTooltipElement;
 
 const pointerMoveHandler = function (evt) {
   if (evt.pointerType === 'touch') {
@@ -900,6 +915,7 @@ function addInteraction(type) {
   createMeasureTooltip();
    
   let listener;
+
   draw.on('drawstart', function (evt) {
     sketch = evt.feature;
     let tooltipCoord = evt.coordinate;
@@ -916,7 +932,11 @@ function addInteraction(type) {
       measureTooltipElement.innerHTML = output;
       measureTooltip.setPosition(tooltipCoord);
     });
+  
+    // Zeige Abbrechen-Button auf Mobilgeräten
+    document.getElementById('cancelDrawingBtn').style.display = 'block';
   });
+  
   draw.on('drawend', function () {
     measureTooltipElement.className = 'ol-tooltip ol-tooltip-static';
     measureTooltip.setOffset([0, -7]);
@@ -924,8 +944,10 @@ function addInteraction(type) {
     measureTooltipElement = null;
     createMeasureTooltip();
     unByKey(listener);
+    document.getElementById('cancelDrawingBtn').style.display = 'none';
   });
 }
+
 function createMeasureTooltip() {
   if (measureTooltipElement) {
     measureTooltipElement.parentNode.removeChild(measureTooltipElement);
@@ -940,6 +962,39 @@ function createMeasureTooltip() {
     insertFirst: false,
   });
   map.addOverlay(measureTooltip);
+}
+
+// ESC-Taste für Desktop
+document.addEventListener('keydown', function (evt) {
+  if (evt.key === 'Escape' || evt.key === 'Esc') {
+    cancelDrawing();
+  }
+});
+
+// Abbrechen-Button für Mobilgeräte
+document.getElementById('cancelDrawingBtn').addEventListener('click', cancelDrawing);
+
+// Zentrale Abbruchfunktion
+function cancelDrawing() {
+  if (draw) {
+    source.clear();
+    draw.finishDrawing();
+    map.removeInteraction(draw);
+    map.un('pointermove', pointerMoveHandler);
+    map.getOverlays().clear();
+    measureTooltip = null;
+    helpTooltipElement = null;
+    measureTooltipElement = null;
+    removeAllOverlays();
+    if (listener) {
+      unByKey(listener);
+    }
+    sketch = null;
+
+    // Verstecke Abbrechen-Button
+    const btn = document.getElementById('cancelDrawingBtn');
+    if (btn) btn.style.display = 'none';
+  }
 }
 
 //Mit Kontextmenü werden die Overlays fü Messungen wieder gelöscht
@@ -1106,6 +1161,7 @@ var selectFeat = new Select({
 let layer_selected = null; 
 
 selectFeat.on('select', function (e) {
+
   e.selected.forEach(function (featureSelected) {
       const layerName = selectFeat.getLayer(featureSelected).get('name');
       if (layerName !== 'gew') {
@@ -1116,7 +1172,9 @@ selectFeat.on('select', function (e) {
           selectFeat.getFeatures().clear(); // Hebt die Selektion auf
           layer_selected = null; 
       }
-  });
+  }
+  
+);
 });
 map.addInteraction(selectFeat);
 //map.addOverlay(popup);
@@ -1165,7 +1223,7 @@ function singleClickHandler(evt) {
           fetch(url)
           .then((response) => response.text())
           .then((html) => {
-            console.log(html)
+            //console.log(html)
             if (html.trim() !== '') {
              //removeExistingInfoDiv();
               var bodyIsEmpty = /<body[^>]*>\s*<\/body>/i.test(html);
@@ -1226,7 +1284,6 @@ var popup = new Overlay({
 content.addEventListener('contextmenu', function (event) {
   event.stopPropagation();
 });
-
 map.addOverlay(popup);
 
 closer.onclick = function()
@@ -1240,6 +1297,8 @@ var closer = document.getElementById('popup-closer');
 //-------------------------------------------------------Funktionen für Text im Popup
 map.on('click', function (evt) {
   console.log(globalCoordAnOderAus);
+  console.log('Aufgerufen');
+
   if (globalCoordAnOderAus===false ){
     var coordinates = evt.coordinate;
     var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) 
@@ -1650,8 +1709,7 @@ map.on('click', function (evt) {
           '</div>';
       }
     }
-    
-    // Führen Sie Aktionen für den Layernamen 'geojson' durch
+        // Führen Sie Aktionen für den Layernamen 'geojson' durch
     if (layname.toLowerCase().startsWith('geojson')) {
       var att = feature.getProperties();
       coordinates = evt.coordinate; 
@@ -1703,15 +1761,12 @@ map.on('click', function (evt) {
       contentHtml += `<p><a href="https://www.google.com/maps?q=${result}" target="_blank" rel="noopener noreferrer">Google Maps link</a></p>`;
       content.innerHTML = contentHtml;
     }
-  
-}
-
-);
+    }
+  );
   } else if(globalCoordAnOderAus===true) {  
     placeMarkerAndShowCoordinates(evt);
   }
-}
-);
+});
 
 //-------------------------------------------------------------------------------------Bestimmung geclickter Koordinaten
 const mousePositionControl = new MousePosition({
@@ -1869,7 +1924,7 @@ var sLayer = new VectorLayer({
           color: 'rgba(255,165,0,.3)'
       })
   }),
-  displayInLayerSwitcher : false,
+  displayInLayerSwitcher : true,
 });
 map.addLayer(sLayer);
 
@@ -1881,7 +1936,6 @@ var search = new SearchPhoton({
   position: true	
 });
 map.addControl (search);
-
 
 // Select feature when click on the reference index
 search.on('select', function(e){
@@ -1933,11 +1987,10 @@ function addMarker(coordinates) {
   sLayer.getSource().addFeature(marker);
 };
 
-//---------------------------------------------------------------------------------------------Menü mit Submenü
 
+//---------------------------------------------------------------------------------------------Menü mit Submenü
 var userInput = ""; // Globale Variable zur Speicherung der Nutzereingabe
 var currentlyHighlightedFeature = null; // Variable zur Verfolgung des aktuell markierten Features
-
 
 // Markierungsstil für das gefundene Feature
 const highlightStyle = new Style({
@@ -2065,7 +2118,7 @@ function displaySearchResultsEig(results) {
     resultContainer.appendChild(listItem);
   });
 }
-//-------------------------------------------------------Suche und Highlight Suche FSK
+//-------------------------------------------------------Hervorhebung Suche FSK
 function highlightFeatureFSK(searchText) {
   const source = exp_allgm_fsk_layer.getSource();
   const features = source.getFeatures();
@@ -2090,7 +2143,7 @@ function highlightFeatureFSK(searchText) {
     alert("Kein passendes Feature gefunden!, FSK-Layer sichtbar??");
   }
 }
-//Highlight ---------------------------------------------Suche Eig
+//Highlight ---------------------------------------------Hervorhebung Suche Eig
 function highlightFeatureEig1(feature) {
   // Falls ein anderes Feature hervorgehoben ist, Stil zurücksetzen
   if (currentlyHighlightedFeature) {
@@ -2122,6 +2175,7 @@ function zoomToFeature(feature) {
 window.closeSearchResults = function () {
   document.getElementById("search-results-container").style.display = "none";
 };
+
 let jsonButtonState = false; // Initialer Zustand
 
 /* Nested subbar */
@@ -2213,7 +2267,7 @@ var sub1 = new Bar({
               // Füge den Layer hinzu, um die Position anzuzeigen
               if (!layerP) {
                 layerP = new VectorLayer({
-                  displayInLayerSwitcher: false,
+                  displayInLayerSwitcher: true,
                   style: new Style({
                     image: new CircleStyle({
                       radius: 8,
@@ -2358,8 +2412,6 @@ geojsonInput.addEventListener('change', function (event) {
     reader.readAsText(file); // Datei einlesen
   });
 });
-
-
 
 
  var sub2 = new Bar({
@@ -2774,8 +2826,10 @@ var checkExist = setInterval(() => {
 document.addEventListener('DOMContentLoaded', function() {
   initializeWMS(WMSCapabilities, map ); // Aufrufen der initializeWMS-Funktion aus myFunc.js
 });
- 
-// Inhalt von myFunc.js
+
+
+//-----------------------------------------------------------------------------------------------------WMS-Control
+
 function initializeWMS(WMSCapabilities,map ) {
   var cap = new WMSCapabilities({
       target: document.body,
@@ -2843,9 +2897,7 @@ function checkForLinkInTH(html) {
   return table.outerHTML;
 }
 
-
-
-
+//--------------------------------------------------------------------------------------------------------------------ContextMenu
 var contextmenuItems = [
   {
     text: 'Karte zentrieren',
@@ -2909,7 +2961,6 @@ map.on('pointermove', function (e) {
   map.getTargetElement().style.cursor = hit ? 'pointer' : '';
 });
 
-// from https://github.com/DmitryBaranovskiy/raphael
 function elastic(t) {
   return Math.pow(2, -10 * t) * Math.sin((t - 0.075) * (2 * Math.PI) / 0.3) + 1;
 }
@@ -3008,3 +3059,176 @@ function dragElement(elmnt) {
 }
 
  */
+
+//-----------------------------------------------------------------------------------------------------------------------EditBar
+
+const sourceEdit = new VectorSource();
+const vectorEdit = new VectorLayer({
+  displayInLayerSwitcher: true,
+  title: "EditBar",
+  name: "EditBar",
+  source: sourceEdit,
+  style: {
+    'fill-color': 'rgba(136, 136, 136, 0.526)',
+    'stroke-color': 'blue',
+    'stroke-width': 2,
+    'circle-radius': 7,
+    'circle-fill-color': '#ffcc33',
+  }, 
+});
+map.addLayer(vectorEdit);
+
+
+var select = new Select({ title: 'Auswahl'});
+select.set('title', 'Auswahl');
+var edit = new EditBar({
+  interactions: { 
+    Select: select,
+    DrawLine: 'Polylinie',
+    DrawPolygon: 'Polygon',
+    DrawHole: 'Loch',
+    DrawPoint: 'Punkt',
+    DrawRegular: false,
+    ModifySelect: false,
+    DragRotateAndZoom: false,
+    DragAndDrop: false,   
+    Split: false,
+    Transform: false,
+    Offset: false,
+    Resize: false,
+  },
+  source: vectorEdit.getSource() 
+  
+});
+map.addControl(edit);
+
+// Add a tooltip
+var tooltip = new Tooltip();
+map.addOverlay(tooltip);
+
+edit.getInteraction('Select').on('select', function(e){
+ if (this.getFeatures().getLength()) {
+    tooltip.setInfo('Punkte ziehen');
+  }
+  else tooltip.setInfo();
+});
+edit.getInteraction('Select').on('change:active', function(e){
+  tooltip.setInfo('');
+});
+ edit.getInteraction('ModifySelect').on('modifystart', function(e){
+  if (e.features.length===1) tooltip.setFeature(e.features[0]);
+});
+edit.getInteraction('ModifySelect').on('modifyend', function(e){
+  tooltip.setFeature();
+}); 
+edit.getInteraction('DrawPoint').on('change:active', function(e){
+  tooltip.setInfo(e.oldValue ? '' : 'Click map to place a point...');
+});
+edit.getInteraction('DrawLine').on(['change:active','drawend'], function(e){
+  tooltip.setFeature();
+  tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing line...');
+});
+edit.getInteraction('DrawLine').on('drawstart', function(e){
+  tooltip.setFeature(e.feature);
+  tooltip.setInfo('Click to continue drawing line...');
+});
+edit.getInteraction('DrawPolygon').on('drawstart', function(e){
+  tooltip.setFeature(e.feature);
+  tooltip.setInfo('Click to continue drawing shape...');
+});
+edit.getInteraction('DrawPolygon').on(['change:active','drawend'], function(e){
+  tooltip.setFeature();
+  tooltip.setInfo(e.oldValue ? '' : 'Click map to start drawing shape...');
+});
+edit.getInteraction('DrawHole').on('drawstart', function(e){
+  tooltip.setFeature(e.feature);
+  tooltip.setInfo('Click to continue drawing hole...');
+});
+edit.getInteraction('DrawHole').on(['change:active','drawend'], function(e){
+  tooltip.setFeature();
+  tooltip.setInfo(e.oldValue ? '' : 'Click polygon to start drawing hole...');
+});
+
+//import { getArea, getLength } from 'ol/sphere';
+
+
+edit.on('info', function(e) {
+  const features = e.features;
+  let message = '<i class="fa fa-info-circle"></i> ' + features.getLength() + ' feature(s) selected';
+  
+  if (features.getLength() === 1) {
+    const feature = features.item(0);
+    console.log(feature);
+    const geometry = feature.getGeometry();
+    const type = geometry.getType();
+
+    if (type === 'Point') {
+      const coord3857 = geometry.getCoordinates(); // Originale Koordinate (vermutlich in EPSG:3857)
+      const coord4326 = toLonLat(coord3857); // Umwandlung in EPSG:4326
+
+      message += ` – Koordinaten:<br>
+        <b>EPSG:4326</b>: ${coord4326[1].toFixed(6)}, ${coord4326[0].toFixed(6)}<br>
+        <b>EPSG:3857</b>: ${coord3857[1].toFixed(2)}, ${coord3857[0].toFixed(2)}`;
+
+    } else if (type === 'LineString') {
+      const length = getLength(geometry);
+      const lengthStr = (length > 1000)
+        ? (length / 1000).toFixed(2) + ' km'
+        : length.toFixed(2) + ' m';
+      message += ' – Länge: ' + lengthStr;
+
+    } else if (type === 'Polygon' || type === 'MultiPolygon') {
+      const area = getArea(geometry);
+      const areaStr = (area > 1e6)
+        ? (area / 1e6).toFixed(2) + ' km²'
+        : area.toFixed(2) + ' m²';
+      message += ' – Fläche: ' + areaStr;
+    }
+  }
+
+  note.show(message, { 
+    duration: -1,
+    //className: 'ol-notification'
+  });
+  
+});
+
+// Zuerst die EditBar unsichtbar machen, bevor sie sichtbar wird
+const editBarElement = edit.element;
+editBarElement.style.display = 'none'; 
+
+
+var toggleEditBarButton = new Button({
+  title: 'Toggle EditBar',
+  handleClick: function() {
+    const currentEditionState = edit.get('edition');
+    console.log('edit::' + edit.get('edition'));
+    
+    if (currentEditionState === undefined || currentEditionState === false) {
+      globalCoordAnOderAus = true; // Setze die globale Variable auf true
+      console.log('Global auf true')
+      edit.set('edition', true);
+      editBarElement.style.display = ''; // Zeige die EditBar
+      /*const mapInteractions = map.getInteractions();
+       mapInteractions.forEach(function(interaction) {
+        if (interaction instanceof Select || interaction instanceof Modify) {
+          interaction.setActive(true); // Aktiviert die Interaktionen
+        }
+      }); */
+    } else {
+      globalCoordAnOderAus = false;
+      console.log('Global auf false')
+      edit.set('edition', false);
+      editBarElement.style.display = 'none';
+      edit.deactivateControls(); 
+      const mapInteractions = map.getInteractions();
+      /* mapInteractions.forEach(function(interaction) {
+        if (interaction instanceof Select || interaction instanceof Modify) {
+          interaction.setActive(false); // Deaktiviert die Interaktionen
+        }
+      }); */
+    }
+  }
+});
+map.addControl(toggleEditBarButton);
+
