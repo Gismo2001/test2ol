@@ -135,7 +135,6 @@ const map = new Map({
 
 
 
-
 var note = new Notification(
   {
     className: 'ol-notification',
